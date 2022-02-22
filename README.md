@@ -1,10 +1,9 @@
-# 👩🏻‍💻 Hackaton 4
+# 👩🏻‍💻 Hackaton 4 - Proof of concept using [BOAVIZTAPI](https://github.com/Boavizta/Tools-API).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-Proof of concept using [BOAVIZTAPI](https://github.com/Boavizta/Tools-API).
 
 ## :fast_forward: Request BOAVIZTAPI
 
