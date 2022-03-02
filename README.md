@@ -1,8 +1,16 @@
-# 👩🏻‍💻 Hackaton 4 - Proof of concept using [BOAVIZTAPI](https://github.com/Boavizta/Tools-API).
+# 👩🏻‍💻 Hackaton 4 - Proof of concept using BOAVIZTAPI
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
+
+## :dart: Objective
+
+As part of Boavizta's desire to improve the quality of the measurement of the environmental impacts of ICTs in organizations, boaviztapi project aims at giving access to the group's work to as many people as possible in an automated and industrialized way.  
+
+The various data and methodologies integrated by Boavizta are aggregated and made available via an API.
+
+The objectif of the hackaton is to implement proof of concept of [use cases](https://github.com/Boavizta/Hackaton_4/issues) calling the boaviztapi.
 
 
 ## :fast_forward: Request BOAVIZTAPI
@@ -13,53 +21,6 @@
 
 * Access the demo API: <http://api.boavizta.org:5000>
 
-## :fast_forward: Run BOAVIZTAPI
-
-### :whale: Run API using docker
-
-```bash
-$ docker run ghcr.io/boavizta/boaviztapi:latest
-```
-
-### 📦 Install using pip package
-
-```bash
-$ pip3 install boaviztapi
-```
-
-
-## :fast_forward: Dev BOAVIZTAPI
-
-### Prerequisite
-
-Python 3, pipenv recommended
-
-### Setup pipenv
-
-Install pipenv globally
-
-```bash
-$ sudo pip3 install pipenv
-```
-
-Install dependencies and create a python virtual environment.
-
-```bash
-$ pipenv install -d 
-$ pipenv shell
-```
-
-### Launch a development server
-
-**Once in the pipenv environment**
-
-Development server uses [uvicorn](https://www.uvicorn.org/) and [fastapi](https://fastapi.tiangolo.com/), you can launch development server with the `uvicorn` CLI.
-
-```bash
-$ uvicorn boaviztapi.main:app --host=localhost --port 5000
-```
-
-You can run the tests with `pytest`.
 
 ## :scroll: License
 
