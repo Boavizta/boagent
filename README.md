@@ -15,11 +15,11 @@ The objectif of the hackaton is to implement proof of concept of [use cases](htt
 
 ## :fast_forward: Request BOAVIZTAPI
 
-* See the OpenAPI specification: <http://api.boavizta.org:5000/docs>
+* See the OpenAPI specification: <http://hackaton.boavizta.org:5000/docs>
 
-* [Documentation](http://api.boavizta.org/)
+* [Documentation](http://hackaton.boavizta.org/)
 
-* Access the demo API: <http://api.boavizta.org:5000>
+* Access the demo API: <http://hackaton.boavizta.org:5000>
 
 
 ## :scroll: License
