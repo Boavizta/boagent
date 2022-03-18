@@ -2,6 +2,7 @@ import json
 import subprocess
 
 import xml.etree.ElementTree as et
+from xml.etree.ElementTree import ParseError
 
 from typing import List
 
@@ -16,7 +17,7 @@ def get_ram_info():
     except json.JSONDecodeError:
         print('failled parsing json file from lshw, trying with xml output')
         return get_ram_info_with_lshw_xml()
-    except Exception:
+    except ParseError:
         print('cannot access lshw without super-user using meminfo as fallback method')
         return get_ram_info_with_meminfo()
 
