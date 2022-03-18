@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from os import stat, major as _major
 
-MOUNT_POINTS = ['/boot', '/boot/efi']
 
 class DiskException(Exception):
     pass
@@ -58,8 +57,9 @@ class Disk:
 
         try:
             device = stat(self._mount_point).st_dev
-        except FileNotFoundError:
-            raise DiskException(f'Cannot find mount point {self._mount_point}.')
+        except FileNotFoundError as ex:
+            raise DiskException('Cannot find mount point '
+                                f'{self._mount_point}.') from ex
 
         # Get Major
         major = _major(device)
@@ -68,8 +68,8 @@ class Disk:
             lines = fs.readlines()
 
             # Skip two first lines
-            lines.pop(0) # major minor  #blocks  name
-            lines.pop(0) # Empty line
+            lines.pop(0)  # major minor  #blocks  name
+            lines.pop(0)  # Empty line
 
             for line in lines:
                 part = Partition.from_proc(line)
@@ -78,8 +78,11 @@ class Disk:
 
         # Extract device information
         device_path = f'/sys/dev/block/{major}:0/device'
-        with open(f'{device_path}/model', 'r') as fs:
-            self._model = fs.readline()
+        try:
+            with open(f'{device_path}/model', 'r') as fs:
+                self._model = fs.readline()
+        except FileNotFoundError:
+            self._model = 'Unknown model'
 
         # Get total size
         for part in self._partitions:
@@ -102,6 +105,7 @@ class Disk:
         ret += f'\tBlocks: {main_dev.blocks}\n'
         ret += f'\tSize: {self.size}Gb\n'
         ret += f'\tModel: {self.model}\n'
+        ret += '\n'
 
         ret += f'Disk has {len(self._partitions) - 1} partition(s): \n'
         for part in self._partitions:
@@ -109,5 +113,6 @@ class Disk:
                 ret += f'\tBlocks: {part.blocks}\n'
                 ret += f'\tSize: {part.blocks // (1024 * 1024)}Gb\n'
                 ret += f'\tName: {part.name}\n'
+                ret += '\n'
 
         return ret
