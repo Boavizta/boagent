@@ -80,14 +80,15 @@ class Disk:
         device_path = f'/sys/dev/block/{major}:0/device'
         try:
             with open(f'{device_path}/model', 'r') as fs:
-                self._model = fs.readline()
+                self._model = fs.readline().strip()
         except FileNotFoundError:
             self._model = 'Unknown model'
 
-        # Get total size
+        # Get total size and type
         for part in self._partitions:
             if part.minor == 0:
                 self._size = part.blocks // (1024 * 1024)
+                self._type = part.name.split('0')[0]
 
         self._looked_up = True
 
@@ -105,6 +106,7 @@ class Disk:
         ret += f'\tBlocks: {main_dev.blocks}\n'
         ret += f'\tSize: {self.size}Gb\n'
         ret += f'\tModel: {self.model}\n'
+        ret += f'\tType: {self.type}\n'
         ret += '\n'
 
         ret += f'Disk has {len(self._partitions) - 1} partition(s): \n'
