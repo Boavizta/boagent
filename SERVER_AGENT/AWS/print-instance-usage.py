@@ -6,7 +6,49 @@ client = boto3.client('cloudwatch')
 
 ec2 = boto3.resource('ec2')
 
-print("All instances of the account")
+
+
+
+
+
+def get_instance_cpu_metrics(instance):
+  metrics = client.get_metric_statistics(
+    Namespace='AWS/EC2',
+    MetricName='CPUUtilization',
+    Dimensions=[
+      {
+      'Name': 'InstanceId',
+      'Value': instance.id
+      },
+    ],
+    StartTime=datetime(2022, 3, 15) - timedelta(seconds=600),
+    EndTime=datetime(2022, 3, 18),
+    Period=86400,
+    Statistics=[
+      'Average',
+    ],
+    Unit='Percent'
+  )
+  return metrics
+
+
+
+
+def print_instance_detail(instance):
+  metrics = get_instance_cpu_metrics(instance)
+  print(
+    "\nId: {0}\nType: {1}".format(
+      instance.id, instance.instance_type
+      )
+  )
+  print("CPU usage:")
+  for cpu in metrics['Datapoints']:
+    if 'Average' in cpu:
+      print(cpu['Timestamp'], cpu['Average'])
+
+
+
+print("List instances of the account")
 print("----------------------------")
 for instance in ec2.instances.all():
   print(
@@ -15,30 +57,10 @@ for instance in ec2.instances.all():
   )
 )
 
-
-
-
-
-print("Example CPU usage query")
+print("List instances of with CPU usage of the account")
 print("----------------------------")
-metrics = client.get_metric_statistics(
-  Namespace='AWS/EC2',
-  MetricName='CPUUtilization',
-  Dimensions=[
-    {
-    'Name': 'InstanceId',
-    'Value': 'i-1234abcd'
-    },
-  ],
-  StartTime=datetime(2018, 4, 23) - timedelta(seconds=600),
-  EndTime=datetime(2018, 4, 24),
-  Period=86400,
-  Statistics=[
-    'Average',
-  ],
-  Unit='Percent'
-)
-print(metrics)  
-  # for cpu in response['Datapoints']:
-  #   if 'Average' in cpu:
-  #   print(cpu['Average'])
+for instance in ec2.instances.all():
+  print_instance_detail(instance)
+
+
+
