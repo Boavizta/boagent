@@ -80,7 +80,7 @@ class Disk:
         device_path = f'/sys/dev/block/{major}:0/device'
         try:
             with open(f'{device_path}/model', 'r') as fs:
-                self._model = fs.readline()
+                self._model = fs.readline().strip()
         except FileNotFoundError:
             self._model = 'Unknown model'
 
