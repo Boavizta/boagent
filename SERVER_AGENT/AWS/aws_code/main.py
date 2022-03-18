@@ -32,6 +32,8 @@ def get_cpu_utilisation(cw_cli, ec2_id):
     # print("k : ", k)   
 
 
+
+
 def get_ec2_instance_ids(ec2_cli):
     # list de dict :  InstanceId, InstanceType
     instance_ids_types = []
@@ -93,16 +95,20 @@ if __name__ == "__main__":
     
     for ec2 in instances:
         if is_supported_instance(ec2.instance_type, supported_instances):
-            print(f'Skipping instance {ec2.id} because {ec2.instance_type} is not in the Boavizta dataset')
-        else:
             print(f'Default impacts of {ec2.id} with type {ec2.instance_type}')
             print(get_boavizta_default_data(ec2.instance_type))
+        else:
+            print(f'⚠ Skipping instance {ec2.id} because {ec2.instance_type} is not (yet) in the Boavizta dataset')
 
     print("⚠ Is m1.small supported ?")
     print( is_supported_instance('m1.small', supported_instances))
 
+    print("⚠ Is t2.xlarge supported ?")
+    print( is_supported_instance('t2.xlarge', supported_instances))
+
     print("Is 'a1.4xlarge' supported ?")
     print(is_supported_instance('a1.4xlarge', supported_instances))
+    print("Getting default impacts of a supported instance:")
     print(get_boavizta_default_data('a1.4xlarge'))
 
     get_boavizta_default_data('a1.4xlarge')
