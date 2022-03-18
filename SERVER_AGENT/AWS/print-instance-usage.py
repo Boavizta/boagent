@@ -21,8 +21,10 @@ def get_instance_cpu_metrics(instance):
       'Value': instance.id
       },
     ],
-    StartTime=datetime(2022, 3, 15) - timedelta(seconds=600),
-    EndTime=datetime(2022, 3, 18),
+    # at 10 am 
+    StartTime=datetime(2022, 3, 15) + timedelta(hours=10),
+    EndTime=datetime(2022, 3, 18) + timedelta(hours=10),
+    # 20 hours period
     Period=86400,
     Statistics=[
       'Average',
