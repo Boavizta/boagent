@@ -9,11 +9,21 @@ import pandas as pd
 from libs.api import get_aws_instance_gwp
 from libs.parser import get_usage_by_instance_type
 
+from argparse import ArgumentParser
+
+parser = ArgumentParser(description="Program that retrives GWP of an instance from its usage")
+
+parser.add_argument("-i", "--input_file", help="Path to the csv file.", type=str, required=True)
+
+args = parser.parse_args()
+
+input_file = args.input_file
+
+
 
 #%%
 # read input file
-INPUT_FILE = "Exemple.Cost.Explorer.-.Usage.Type.Group.EC2.Running.Hours.-.Group.By.Instance.Type.csv"
-bill = pd.read_csv(INPUT_FILE, header=None)
+bill = pd.read_csv(input_file, header=None)
 
 # extract usage info
 usage_by_type = get_usage_by_instance_type(bill)
