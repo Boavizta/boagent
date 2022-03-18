@@ -36,6 +36,14 @@ def put_metrics_data(client, ec2_id):
 
 
 if __name__ == "__main__":
+    # Check if instances are supported
+    supported_instances = main.get_boavizta_supported_instances()
+    print("⚠ Is m1.small supported ?")
+    print( main.is_supported_instance('m1.small', supported_instances))
+
+    print("Is 'a1.4xlarge' supported ?")
+    print( main.is_supported_instance('a1.4xlarge', supported_instances))
+
     # Set up mock "AWS Account"
     ec2_cli = boto3.client("ec2", region_name="eu-west-3")
     cw_cli = boto3.client("cloudwatch", region_name="eu-west-3")
