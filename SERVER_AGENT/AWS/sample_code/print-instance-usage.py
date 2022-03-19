@@ -24,7 +24,7 @@ def get_instance_cpu_metrics(instance):
     # at 10 am 
     StartTime=datetime(2022, 3, 15) + timedelta(hours=10),
     EndTime=datetime(2022, 3, 18) + timedelta(hours=10),
-    # 20 hours period
+    # 24 hours period
     Period=86400,
     Statistics=[
       'Average',
