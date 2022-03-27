@@ -1,3 +1,5 @@
+import re
+
 from typing import List
 
 from .model import MemoryDevice
@@ -24,7 +26,7 @@ def get_total_memory_in_kb() -> int:
             if 'MemTotal' in line:
                 mem_total_line = line.strip()
                 break
-    total_size_kb = int(mem_total_line.split()[0])
+    total_size_kb = int(re.search(r'[0-9]+', mem_total_line)[0])
     return total_size_kb
 
 
