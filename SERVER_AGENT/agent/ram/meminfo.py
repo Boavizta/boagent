@@ -1,6 +1,6 @@
 from typing import List
 
-from ram.ram import MemoryDevice
+from .model import MemoryDevice
 
 CONVERT_KB_IN_GB = 9.536e-7
 

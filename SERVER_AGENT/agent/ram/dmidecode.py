@@ -3,7 +3,7 @@ import subprocess
 
 from typing import Optional, Mapping, List
 
-from ram.ram import MemoryDevice
+from .model import MemoryDevice
 
 
 class DMIDecodeError(Exception):
