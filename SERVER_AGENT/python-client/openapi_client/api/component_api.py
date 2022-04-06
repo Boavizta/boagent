@@ -21,14 +21,13 @@ from openapi_client.model_utils import (  # noqa: F401
     none_type,
     validate_and_convert_types
 )
-from openapi_client.model.component_cpu import ComponentCPU
-from openapi_client.model.component_case import ComponentCase
-from openapi_client.model.component_hdd import ComponentHDD
-from openapi_client.model.component_mother_board import ComponentMotherBoard
-from openapi_client.model.component_power_supply import ComponentPowerSupply
-from openapi_client.model.component_ram import ComponentRAM
-from openapi_client.model.component_ssd import ComponentSSD
+from openapi_client.model.case import Case
+from openapi_client.model.cpu import Cpu
+from openapi_client.model.disk import Disk
 from openapi_client.model.http_validation_error import HTTPValidationError
+from openapi_client.model.mother_board import MotherBoard
+from openapi_client.model.power_supply import PowerSupply
+from openapi_client.model.ram import Ram
 
 
 class ComponentApi(object):
@@ -54,7 +53,7 @@ class ComponentApi(object):
             params_map={
                 'all': [
                     'verbose',
-                    'component_case',
+                    'case',
                 ],
                 'required': [],
                 'nullable': [
@@ -72,15 +71,15 @@ class ComponentApi(object):
                 'openapi_types': {
                     'verbose':
                         (bool,),
-                    'component_case':
-                        (ComponentCase,),
+                    'case':
+                        (Case,),
                 },
                 'attribute_map': {
                     'verbose': 'verbose',
                 },
                 'location_map': {
                     'verbose': 'query',
-                    'component_case': 'body',
+                    'case': 'body',
                 },
                 'collection_format_map': {
                 }
@@ -107,7 +106,7 @@ class ComponentApi(object):
             params_map={
                 'all': [
                     'verbose',
-                    'component_cpu',
+                    'cpu',
                 ],
                 'required': [],
                 'nullable': [
@@ -125,15 +124,15 @@ class ComponentApi(object):
                 'openapi_types': {
                     'verbose':
                         (bool,),
-                    'component_cpu':
-                        (ComponentCPU,),
+                    'cpu':
+                        (Cpu,),
                 },
                 'attribute_map': {
                     'verbose': 'verbose',
                 },
                 'location_map': {
                     'verbose': 'query',
-                    'component_cpu': 'body',
+                    'cpu': 'body',
                 },
                 'collection_format_map': {
                 }
@@ -148,19 +147,19 @@ class ComponentApi(object):
             },
             api_client=api_client
         )
-        self.hdd_impact_bottom_up_v1_component_hdd_post_endpoint = _Endpoint(
+        self.disk_impact_bottom_up_v1_component_hdd_post_endpoint = _Endpoint(
             settings={
                 'response_type': (bool, date, datetime, dict, float, int, list, str, none_type,),
                 'auth': [],
                 'endpoint_path': '/v1/component/hdd',
-                'operation_id': 'hdd_impact_bottom_up_v1_component_hdd_post',
+                'operation_id': 'disk_impact_bottom_up_v1_component_hdd_post',
                 'http_method': 'POST',
                 'servers': None,
             },
             params_map={
                 'all': [
                     'verbose',
-                    'component_hdd',
+                    'disk',
                 ],
                 'required': [],
                 'nullable': [
@@ -178,15 +177,68 @@ class ComponentApi(object):
                 'openapi_types': {
                     'verbose':
                         (bool,),
-                    'component_hdd':
-                        (ComponentHDD,),
+                    'disk':
+                        (Disk,),
                 },
                 'attribute_map': {
                     'verbose': 'verbose',
                 },
                 'location_map': {
                     'verbose': 'query',
-                    'component_hdd': 'body',
+                    'disk': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client
+        )
+        self.disk_impact_bottom_up_v1_component_ssd_post_endpoint = _Endpoint(
+            settings={
+                'response_type': (bool, date, datetime, dict, float, int, list, str, none_type,),
+                'auth': [],
+                'endpoint_path': '/v1/component/ssd',
+                'operation_id': 'disk_impact_bottom_up_v1_component_ssd_post',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'verbose',
+                    'disk',
+                ],
+                'required': [],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'verbose':
+                        (bool,),
+                    'disk':
+                        (Disk,),
+                },
+                'attribute_map': {
+                    'verbose': 'verbose',
+                },
+                'location_map': {
+                    'verbose': 'query',
+                    'disk': 'body',
                 },
                 'collection_format_map': {
                 }
@@ -213,7 +265,7 @@ class ComponentApi(object):
             params_map={
                 'all': [
                     'verbose',
-                    'component_mother_board',
+                    'mother_board',
                 ],
                 'required': [],
                 'nullable': [
@@ -231,15 +283,15 @@ class ComponentApi(object):
                 'openapi_types': {
                     'verbose':
                         (bool,),
-                    'component_mother_board':
-                        (ComponentMotherBoard,),
+                    'mother_board':
+                        (MotherBoard,),
                 },
                 'attribute_map': {
                     'verbose': 'verbose',
                 },
                 'location_map': {
                     'verbose': 'query',
-                    'component_mother_board': 'body',
+                    'mother_board': 'body',
                 },
                 'collection_format_map': {
                 }
@@ -266,7 +318,7 @@ class ComponentApi(object):
             params_map={
                 'all': [
                     'verbose',
-                    'component_power_supply',
+                    'power_supply',
                 ],
                 'required': [],
                 'nullable': [
@@ -284,15 +336,15 @@ class ComponentApi(object):
                 'openapi_types': {
                     'verbose':
                         (bool,),
-                    'component_power_supply':
-                        (ComponentPowerSupply,),
+                    'power_supply':
+                        (PowerSupply,),
                 },
                 'attribute_map': {
                     'verbose': 'verbose',
                 },
                 'location_map': {
                     'verbose': 'query',
-                    'component_power_supply': 'body',
+                    'power_supply': 'body',
                 },
                 'collection_format_map': {
                 }
@@ -319,7 +371,7 @@ class ComponentApi(object):
             params_map={
                 'all': [
                     'verbose',
-                    'component_ram',
+                    'ram',
                 ],
                 'required': [],
                 'nullable': [
@@ -337,68 +389,15 @@ class ComponentApi(object):
                 'openapi_types': {
                     'verbose':
                         (bool,),
-                    'component_ram':
-                        (ComponentRAM,),
+                    'ram':
+                        (Ram,),
                 },
                 'attribute_map': {
                     'verbose': 'verbose',
                 },
                 'location_map': {
                     'verbose': 'query',
-                    'component_ram': 'body',
-                },
-                'collection_format_map': {
-                }
-            },
-            headers_map={
-                'accept': [
-                    'application/json'
-                ],
-                'content_type': [
-                    'application/json'
-                ]
-            },
-            api_client=api_client
-        )
-        self.ssd_impact_bottom_up_v1_component_ssd_post_endpoint = _Endpoint(
-            settings={
-                'response_type': (bool, date, datetime, dict, float, int, list, str, none_type,),
-                'auth': [],
-                'endpoint_path': '/v1/component/ssd',
-                'operation_id': 'ssd_impact_bottom_up_v1_component_ssd_post',
-                'http_method': 'POST',
-                'servers': None,
-            },
-            params_map={
-                'all': [
-                    'verbose',
-                    'component_ssd',
-                ],
-                'required': [],
-                'nullable': [
-                ],
-                'enum': [
-                ],
-                'validation': [
-                ]
-            },
-            root_map={
-                'validations': {
-                },
-                'allowed_values': {
-                },
-                'openapi_types': {
-                    'verbose':
-                        (bool,),
-                    'component_ssd':
-                        (ComponentSSD,),
-                },
-                'attribute_map': {
-                    'verbose': 'verbose',
-                },
-                'location_map': {
-                    'verbose': 'query',
-                    'component_ssd': 'body',
+                    'ram': 'body',
                 },
                 'collection_format_map': {
                 }
@@ -430,7 +429,7 @@ class ComponentApi(object):
 
         Keyword Args:
             verbose (bool): [optional] if omitted the server will use the default value of True
-            component_case (ComponentCase): [optional]
+            case (Case): [optional]
             _return_http_data_only (bool): response data without head status
                 code and headers. Default is True.
             _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -505,7 +504,7 @@ class ComponentApi(object):
 
         Keyword Args:
             verbose (bool): [optional] if omitted the server will use the default value of True
-            component_cpu (ComponentCPU): [optional]
+            cpu (Cpu): [optional]
             _return_http_data_only (bool): response data without head status
                 code and headers. Default is True.
             _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -564,23 +563,23 @@ class ComponentApi(object):
         kwargs['_host_index'] = kwargs.get('_host_index')
         return self.cpu_impact_bottom_up_v1_component_cpu_post_endpoint.call_with_http_info(**kwargs)
 
-    def hdd_impact_bottom_up_v1_component_hdd_post(
+    def disk_impact_bottom_up_v1_component_hdd_post(
         self,
         **kwargs
     ):
-        """Hdd Impact Bottom Up  # noqa: E501
+        """Disk Impact Bottom Up  # noqa: E501
 
         # ✔️HDD impacts from configuration ### 💡 Smart complete All missing data are retrieve with the closest available values. If no data are available default maximizing data are used  ### 👄 Verbose If set at true, shows the the values used for each attribute*Components have no units since they represent a single instance of a component.* ### 🧮 Measure The impacts values are set by default  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
 
-        >>> thread = api.hdd_impact_bottom_up_v1_component_hdd_post(async_req=True)
+        >>> thread = api.disk_impact_bottom_up_v1_component_hdd_post(async_req=True)
         >>> result = thread.get()
 
 
         Keyword Args:
             verbose (bool): [optional] if omitted the server will use the default value of True
-            component_hdd (ComponentHDD): [optional]
+            disk (Disk): [optional]
             _return_http_data_only (bool): response data without head status
                 code and headers. Default is True.
             _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -637,7 +636,82 @@ class ComponentApi(object):
         kwargs['_content_type'] = kwargs.get(
             '_content_type')
         kwargs['_host_index'] = kwargs.get('_host_index')
-        return self.hdd_impact_bottom_up_v1_component_hdd_post_endpoint.call_with_http_info(**kwargs)
+        return self.disk_impact_bottom_up_v1_component_hdd_post_endpoint.call_with_http_info(**kwargs)
+
+    def disk_impact_bottom_up_v1_component_ssd_post(
+        self,
+        **kwargs
+    ):
+        """Disk Impact Bottom Up  # noqa: E501
+
+        # ✔️SSD impacts from configuration ### 💡 Smart complete All missing data are retrieve with the closest available values. If no data are available default maximizing data are used  ### 👄 Verbose If set at true, shows the the values used for each attribute*Components have no units since they represent a single instance of a component.* ### 🧮 Measure <h3>ssd<sub>manuf<sub><em>criteria</em></sub></sub> =  ( ssd<sub>size</sub> ssd<sub>density</sub> ) x ssd<sub>manuf_die<sub><em>criteria</em></sub></sub> + ssd<sub>manuf_base<sub><em>criteria</em></sub></sub></h3>   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.disk_impact_bottom_up_v1_component_ssd_post(async_req=True)
+        >>> result = thread.get()
+
+
+        Keyword Args:
+            verbose (bool): [optional] if omitted the server will use the default value of True
+            disk (Disk): [optional]
+            _return_http_data_only (bool): response data without head status
+                code and headers. Default is True.
+            _preload_content (bool): if False, the urllib3.HTTPResponse object
+                will be returned without reading/decoding response data.
+                Default is True.
+            _request_timeout (int/float/tuple): timeout setting for this request. If
+                one number provided, it will be total request timeout. It can also
+                be a pair (tuple) of (connection, read) timeouts.
+                Default is None.
+            _check_input_type (bool): specifies if type checking
+                should be done one the data sent to the server.
+                Default is True.
+            _check_return_type (bool): specifies if type checking
+                should be done one the data received from the server.
+                Default is True.
+            _spec_property_naming (bool): True if the variable names in the input data
+                are serialized names, as specified in the OpenAPI document.
+                False if the variable names in the input data
+                are pythonic names, e.g. snake case (default)
+            _content_type (str/None): force body content-type.
+                Default is None and content-type will be predicted by allowed
+                content-types and body.
+            _host_index (int/None): specifies the index of the server
+                that we want to use.
+                Default is read from the configuration.
+            async_req (bool): execute request asynchronously
+
+        Returns:
+            bool, date, datetime, dict, float, int, list, str, none_type
+                If the method is called asynchronously, returns the request
+                thread.
+        """
+        kwargs['async_req'] = kwargs.get(
+            'async_req', False
+        )
+        kwargs['_return_http_data_only'] = kwargs.get(
+            '_return_http_data_only', True
+        )
+        kwargs['_preload_content'] = kwargs.get(
+            '_preload_content', True
+        )
+        kwargs['_request_timeout'] = kwargs.get(
+            '_request_timeout', None
+        )
+        kwargs['_check_input_type'] = kwargs.get(
+            '_check_input_type', True
+        )
+        kwargs['_check_return_type'] = kwargs.get(
+            '_check_return_type', True
+        )
+        kwargs['_spec_property_naming'] = kwargs.get(
+            '_spec_property_naming', False
+        )
+        kwargs['_content_type'] = kwargs.get(
+            '_content_type')
+        kwargs['_host_index'] = kwargs.get('_host_index')
+        return self.disk_impact_bottom_up_v1_component_ssd_post_endpoint.call_with_http_info(**kwargs)
 
     def motherboard_impact_bottom_up_v1_component_motherboard_post(
         self,
@@ -655,7 +729,7 @@ class ComponentApi(object):
 
         Keyword Args:
             verbose (bool): [optional] if omitted the server will use the default value of True
-            component_mother_board (ComponentMotherBoard): [optional]
+            mother_board (MotherBoard): [optional]
             _return_http_data_only (bool): response data without head status
                 code and headers. Default is True.
             _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -730,7 +804,7 @@ class ComponentApi(object):
 
         Keyword Args:
             verbose (bool): [optional] if omitted the server will use the default value of True
-            component_power_supply (ComponentPowerSupply): [optional]
+            power_supply (PowerSupply): [optional]
             _return_http_data_only (bool): response data without head status
                 code and headers. Default is True.
             _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -805,7 +879,7 @@ class ComponentApi(object):
 
         Keyword Args:
             verbose (bool): [optional] if omitted the server will use the default value of True
-            component_ram (ComponentRAM): [optional]
+            ram (Ram): [optional]
             _return_http_data_only (bool): response data without head status
                 code and headers. Default is True.
             _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -863,79 +937,4 @@ class ComponentApi(object):
             '_content_type')
         kwargs['_host_index'] = kwargs.get('_host_index')
         return self.ram_impact_bottom_up_v1_component_ram_post_endpoint.call_with_http_info(**kwargs)
-
-    def ssd_impact_bottom_up_v1_component_ssd_post(
-        self,
-        **kwargs
-    ):
-        """Ssd Impact Bottom Up  # noqa: E501
-
-        # ✔️SSD impacts from configuration ### 💡 Smart complete All missing data are retrieve with the closest available values. If no data are available default maximizing data are used  ### 👄 Verbose If set at true, shows the the values used for each attribute*Components have no units since they represent a single instance of a component.* ### 🧮 Measure <h3>ssd<sub>manuf<sub><em>criteria</em></sub></sub> =  ( ssd<sub>size</sub> ssd<sub>density</sub> ) x ssd<sub>manuf_die<sub><em>criteria</em></sub></sub> + ssd<sub>manuf_base<sub><em>criteria</em></sub></sub></h3>   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-
-        >>> thread = api.ssd_impact_bottom_up_v1_component_ssd_post(async_req=True)
-        >>> result = thread.get()
-
-
-        Keyword Args:
-            verbose (bool): [optional] if omitted the server will use the default value of True
-            component_ssd (ComponentSSD): [optional]
-            _return_http_data_only (bool): response data without head status
-                code and headers. Default is True.
-            _preload_content (bool): if False, the urllib3.HTTPResponse object
-                will be returned without reading/decoding response data.
-                Default is True.
-            _request_timeout (int/float/tuple): timeout setting for this request. If
-                one number provided, it will be total request timeout. It can also
-                be a pair (tuple) of (connection, read) timeouts.
-                Default is None.
-            _check_input_type (bool): specifies if type checking
-                should be done one the data sent to the server.
-                Default is True.
-            _check_return_type (bool): specifies if type checking
-                should be done one the data received from the server.
-                Default is True.
-            _spec_property_naming (bool): True if the variable names in the input data
-                are serialized names, as specified in the OpenAPI document.
-                False if the variable names in the input data
-                are pythonic names, e.g. snake case (default)
-            _content_type (str/None): force body content-type.
-                Default is None and content-type will be predicted by allowed
-                content-types and body.
-            _host_index (int/None): specifies the index of the server
-                that we want to use.
-                Default is read from the configuration.
-            async_req (bool): execute request asynchronously
-
-        Returns:
-            bool, date, datetime, dict, float, int, list, str, none_type
-                If the method is called asynchronously, returns the request
-                thread.
-        """
-        kwargs['async_req'] = kwargs.get(
-            'async_req', False
-        )
-        kwargs['_return_http_data_only'] = kwargs.get(
-            '_return_http_data_only', True
-        )
-        kwargs['_preload_content'] = kwargs.get(
-            '_preload_content', True
-        )
-        kwargs['_request_timeout'] = kwargs.get(
-            '_request_timeout', None
-        )
-        kwargs['_check_input_type'] = kwargs.get(
-            '_check_input_type', True
-        )
-        kwargs['_check_return_type'] = kwargs.get(
-            '_check_return_type', True
-        )
-        kwargs['_spec_property_naming'] = kwargs.get(
-            '_spec_property_naming', False
-        )
-        kwargs['_content_type'] = kwargs.get(
-            '_content_type')
-        kwargs['_host_index'] = kwargs.get('_host_index')
-        return self.ssd_impact_bottom_up_v1_component_ssd_post_endpoint.call_with_http_info(**kwargs)
 

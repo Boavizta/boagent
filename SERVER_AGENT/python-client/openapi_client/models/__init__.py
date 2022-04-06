@@ -9,18 +9,13 @@
 # import sys
 # sys.setrecursionlimit(n)
 
-from openapi_client.model.component_cpu import ComponentCPU
-from openapi_client.model.component_case import ComponentCase
-from openapi_client.model.component_hdd import ComponentHDD
-from openapi_client.model.component_mother_board import ComponentMotherBoard
-from openapi_client.model.component_power_supply import ComponentPowerSupply
-from openapi_client.model.component_ram import ComponentRAM
-from openapi_client.model.component_ssd import ComponentSSD
+from openapi_client.model.case import Case
 from openapi_client.model.configuration_server import ConfigurationServer
 from openapi_client.model.cpu import Cpu
 from openapi_client.model.disk import Disk
 from openapi_client.model.http_validation_error import HTTPValidationError
 from openapi_client.model.model_server import ModelServer
+from openapi_client.model.mother_board import MotherBoard
 from openapi_client.model.power_supply import PowerSupply
 from openapi_client.model.ram import Ram
 from openapi_client.model.server_dto import ServerDTO

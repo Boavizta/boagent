@@ -127,31 +127,25 @@ Class | Method | HTTP request | Description
 *CloudApi* | [**server_get_all_archetype_name_v1_cloud_aws_all_instances_get**](docs/CloudApi.md#server_get_all_archetype_name_v1_cloud_aws_all_instances_get) | **GET** /v1/cloud/aws/all_instances | Server Get All Archetype Name
 *ComponentApi* | [**case_impact_bottom_up_v1_component_case_post**](docs/ComponentApi.md#case_impact_bottom_up_v1_component_case_post) | **POST** /v1/component/case | Case Impact Bottom Up
 *ComponentApi* | [**cpu_impact_bottom_up_v1_component_cpu_post**](docs/ComponentApi.md#cpu_impact_bottom_up_v1_component_cpu_post) | **POST** /v1/component/cpu | Cpu Impact Bottom Up
-*ComponentApi* | [**hdd_impact_bottom_up_v1_component_hdd_post**](docs/ComponentApi.md#hdd_impact_bottom_up_v1_component_hdd_post) | **POST** /v1/component/hdd | Hdd Impact Bottom Up
+*ComponentApi* | [**disk_impact_bottom_up_v1_component_hdd_post**](docs/ComponentApi.md#disk_impact_bottom_up_v1_component_hdd_post) | **POST** /v1/component/hdd | Disk Impact Bottom Up
+*ComponentApi* | [**disk_impact_bottom_up_v1_component_ssd_post**](docs/ComponentApi.md#disk_impact_bottom_up_v1_component_ssd_post) | **POST** /v1/component/ssd | Disk Impact Bottom Up
 *ComponentApi* | [**motherboard_impact_bottom_up_v1_component_motherboard_post**](docs/ComponentApi.md#motherboard_impact_bottom_up_v1_component_motherboard_post) | **POST** /v1/component/motherboard | Motherboard Impact Bottom Up
 *ComponentApi* | [**power_supply_impact_bottom_up_v1_component_power_supply_post**](docs/ComponentApi.md#power_supply_impact_bottom_up_v1_component_power_supply_post) | **POST** /v1/component/power_supply | Power Supply Impact Bottom Up
 *ComponentApi* | [**ram_impact_bottom_up_v1_component_ram_post**](docs/ComponentApi.md#ram_impact_bottom_up_v1_component_ram_post) | **POST** /v1/component/ram | Ram Impact Bottom Up
-*ComponentApi* | [**ssd_impact_bottom_up_v1_component_ssd_post**](docs/ComponentApi.md#ssd_impact_bottom_up_v1_component_ssd_post) | **POST** /v1/component/ssd | Ssd Impact Bottom Up
 *ServerApi* | [**server_get_all_archetype_name_v1_server_all_default_models_get**](docs/ServerApi.md#server_get_all_archetype_name_v1_server_all_default_models_get) | **GET** /v1/server/all_default_models | Server Get All Archetype Name
-*ServerApi* | [**server_impact_by_config_v1_server_bottom_up_post**](docs/ServerApi.md#server_impact_by_config_v1_server_bottom_up_post) | **POST** /v1/server/bottom-up | Server Impact By Config
 *ServerApi* | [**server_impact_by_config_v1_server_post**](docs/ServerApi.md#server_impact_by_config_v1_server_post) | **POST** /v1/server/ | Server Impact By Config
 *ServerApi* | [**server_impact_by_model_v1_server_model_get**](docs/ServerApi.md#server_impact_by_model_v1_server_model_get) | **GET** /v1/server/model | Server Impact By Model
 
 
 ## Documentation For Models
 
- - [ComponentCPU](docs/ComponentCPU.md)
- - [ComponentCase](docs/ComponentCase.md)
- - [ComponentHDD](docs/ComponentHDD.md)
- - [ComponentMotherBoard](docs/ComponentMotherBoard.md)
- - [ComponentPowerSupply](docs/ComponentPowerSupply.md)
- - [ComponentRAM](docs/ComponentRAM.md)
- - [ComponentSSD](docs/ComponentSSD.md)
+ - [Case](docs/Case.md)
  - [ConfigurationServer](docs/ConfigurationServer.md)
  - [Cpu](docs/Cpu.md)
  - [Disk](docs/Disk.md)
  - [HTTPValidationError](docs/HTTPValidationError.md)
  - [ModelServer](docs/ModelServer.md)
+ - [MotherBoard](docs/MotherBoard.md)
  - [PowerSupply](docs/PowerSupply.md)
  - [Ram](docs/Ram.md)
  - [ServerDTO](docs/ServerDTO.md)
