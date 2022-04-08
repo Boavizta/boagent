@@ -6,7 +6,25 @@ from openapi_client.model.cpu import Cpu
 
 from pprint import pprint
 
+from disk import Partition, Disk, DiskException
+from ram.ram import get_ram_info
+from cpu import get_cpu
+
 def main():
+    disks = get_disks()
+    pprint(disks)
+    ram = get_ram_info()
+    pprint(ram)
+    cpu = get_cpu()
+    pprint(cpu)
+    call_api()
+
+def get_disks():
+    disk = Disk()
+    disk.lookup()
+    return disk
+
+def call_api():
     config = Configuration(
         host="http://localhost:5000",
     )

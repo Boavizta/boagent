@@ -11,21 +11,24 @@ def is_set(id, reg_idx, bit):
     else:
         return "--"
 
-print("Vendor ID         : %s" % cpu_vendor())
-print("CPU name          : %s" % cpu_name())
-print("Microarchitecture : %s%s" % cpu_microarchitecture())
-print("Vector instructions supported:")
-print("SSE       : %s" % is_set(1, 3, 25))
-print("SSE2      : %s" % is_set(1, 3, 26))
-print("SSE3      : %s" % is_set(1, 2, 0))
-print("SSSE3     : %s" % is_set(1, 2, 9))
-print("SSE4.1    : %s" % is_set(1, 2, 19))
-print("SSE4.2    : %s" % is_set(1, 2, 20))
-print("SSE4a     : %s" % is_set(0x80000001, 2, 6))
-print("AVX       : %s" % is_set(1, 2, 28))
-print("AVX2      : %s" % is_set(7, 1, 5))
-print("BMI1      : %s" % is_set(7, 1, 3))
-print("BMI2      : %s" % is_set(7, 1, 8))
-
-
-print("{}".format(get_cpu_info()))
+def get_cpu():
+    cpu_info = {
+        "vendor": cpu_vendor(),
+        "name": cpu_name(),
+        "microarch": cpu_microarchitecture(),
+        "vector_instructions": {
+            "sse": is_set(1, 3, 25),
+            "sse2": is_set(1, 3, 26),
+            "sse3": is_set(1, 2, 0),
+            "ssse3": is_set(1, 2, 9),
+            "sse4.1": is_set(1, 2, 19),
+            "sse4.2": is_set(1, 2, 20),
+            "sse4a": is_set(0x80000001, 2, 6),
+            "avx": is_set(1, 2, 28),
+            "avx2": is_set(7, 1, 5),
+            "bmi1": is_set(7, 1, 3),
+            "bmi2": is_set(7, 1, 8),
+        },
+        "cpu_info": get_cpu_info()
+    }
+    return cpu_info
