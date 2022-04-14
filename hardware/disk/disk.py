@@ -60,6 +60,9 @@ class Disk:
     def size(self):
         return self._size
 
+    def vendor(self):
+        return self._model.split(' ')[0]
+
     @property
     def model(self):
         return self._model

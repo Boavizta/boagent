@@ -1,26 +1,32 @@
 #!/usr/bin/env python3
 
 import click
+import json
+import sys
 from disk import Partition, Disk, DiskException
 from pprint import pprint
 
 @click.command()
 @click.option("--count", default=1, help="Number of greetings")
 def main(count):
-    pprint(format_disk_output(disk()))
+    res = format_disks(disks())
+    json.dump(res, sys.stdout, indent=4)
+    return 0
 
-def disk():
-    disk = Disk(mount_point='/boot/efi')
-    disk.lookup()
-    print(disk._mount_point)
-    return disk
+def disks():
+    disks = [Disk(mount_point='/boot')]
+    for disk in disks:
+        disk.lookup()
+    return disks
 
-def format_disk_output(disk):
-    print(type(disk))
-    print(dir(disk))
-    return disk
-
-
+def format_disks(disks):
+    res = {"disks": []}
+    for disk in disks:
+        res["disks"].append({
+                "capacity": disk.size,
+                "manufacturer": disk.vendor()
+            })
+    return res
 
 if __name__ == '__main__':
     main()
