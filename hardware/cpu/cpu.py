@@ -11,8 +11,8 @@ def is_set(id, reg_idx, bit):
     else:
         return "--"
 
-def get_cpu():
-    cpu_info = {
+def get_cpus():
+    cpu_info = [{
         "vendor": cpu_vendor(),
         "name": cpu_name(),
         "microarch": cpu_microarchitecture(),
@@ -30,5 +30,5 @@ def get_cpu():
             "bmi2": is_set(7, 1, 8),
         },
         "cpu_info": get_cpu_info()
-    }
+    }]
     return cpu_info
