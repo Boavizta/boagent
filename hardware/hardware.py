@@ -5,6 +5,7 @@ import json
 import sys
 from disk import Partition, Disk, DiskException
 from cpu import get_cpus
+from ram import get_ram_info
 from pprint import pprint
 
 @click.command()
@@ -13,6 +14,7 @@ def main(count):
     res = {}
     res["disks"] = format_disks(disks())
     res["cpus"] = format_cpus(cpus())
+    res["rams"] = format_rams(rams())
     json.dump(res, sys.stdout, indent=4)
     return 0
 
@@ -42,6 +44,19 @@ def format_cpus(cpus):
             "units": 1,
             "core_units": cpu["cpu_info"]["count"],
             "family": cpu["microarch"][0]
+        })
+    return res
+
+def rams():
+    rams = get_ram_info()
+    return rams
+
+def format_rams(rams):
+    res = []
+    for ram in rams:
+        res.append({
+            "capacity": ram.size_gb,
+            "manufacturer": ram.manufacturer
         })
     return res
 
