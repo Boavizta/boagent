@@ -37,6 +37,18 @@ class Disk:
             self._mount_point = '/boot'
         self._looked_up = False
 
+    def __get_type(self):
+        name = self._partitions[0].name.split('0')[0]
+        with open("/sys/block/{}/queue/rotational".format(name), 'r') as fd:
+            res = fd.read()
+
+        if int(res) == 0:
+            return "ssd"
+        elif int(res) == 1:
+            return "hdd"
+        else:
+            return "not sure"
+
     @property
     def type(self):
         return self._type
@@ -84,11 +96,11 @@ class Disk:
         except FileNotFoundError:
             self._model = 'Unknown model'
 
+        self._type = self.__get_type()
         # Get total size and type
         for part in self._partitions:
             if part.minor == 0:
                 self._size = part.blocks // (1024 * 1024)
-                self._type = part.name.split('0')[0]
 
         self._looked_up = True
 
