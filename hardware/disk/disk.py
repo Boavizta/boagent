@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from os import stat, major as _major
+from os import stat, path, major as _major
 
 
 class DiskException(Exception):
@@ -39,15 +39,18 @@ class Disk:
 
     def __get_type(self):
         name = self._partitions[0].name.split('0')[0]
-        with open("/sys/block/{}/queue/rotational".format(name), 'r') as fd:
-            res = fd.read()
 
-        if int(res) == 0:
-            return "ssd"
-        elif int(res) == 1:
-            return "hdd"
-        else:
-            return "not sure"
+        disk_type = "not sure"
+        type_path = "/sys/block/{}/queue/rotational".format(name)
+        if path.exists(type_path):
+            with open(type_path, 'r') as fd:
+                res = fd.read()
+                if int(res) == 0:
+                    disk_type = "ssd"
+                elif int(res) == 1:
+                    disk_type = "hdd"
+
+        return disk_type
 
     @property
     def type(self):
