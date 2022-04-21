@@ -1,0 +1,151 @@
+openapi: 3.1.0
+info:
+  title: Query API
+  version: 1.0.0
+  summary: >-
+    The query API allows you to determine the environmental footprint for
+    different types of scenarios (time-baed or machine-based). 
+  description: >-
+    Use this API to get the environmental footprint for your any operation
+    happening on the server.
+
+
+    You can use a time-based query in order to get the carbon emissions that
+    have been created during the processing of a request or a background
+    operation (e.g. making a thumbnail).
+
+
+    If you simply want the environmental footprint of a running pod or virtual
+    machine, from when it started to now (or to when it stopped), you can query
+    using the pod or virtual machine identifier.
+  license:
+    name: GPL v3
+    url: 'https://github.com/SDIAlliance/carbon-footprint-ssa/blob/main/LICENSE'
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  /query:
+    parameters: []
+    get:
+      summary: Get
+      operationId: get-query
+      description: 'Get the environmental footprint for a machine, pod or timeframe.'
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+          in: query
+          name: k8s_pod_uuid
+          description: >-
+            Each pod in K8s has a unique identifier. UUIDs are standardized as
+            ISO/IEC 9834-8 and as ITU-T X.667.
+        - schema:
+            type: array
+            uniqueItems: true
+            behavior: Read Only
+          in: query
+          name: k8s_pod_uuids
+          description: Query multiple in pods in K8s based on UUID
+        - schema:
+            type: string
+            format: time
+          in: query
+          name: start_time
+          description: >-
+            Unix timestamp to specify from which point in time you want to
+            retrieve the footprint
+        - schema:
+            type: string
+            format: time
+          in: query
+          name: end_time
+          description: >-
+            Unix timestamp to specify until which point in time you want to get
+            the footprint for. If you only specify start_time and not end_time,
+            it will return the footprint up until the current moment.
+        - schema:
+            type: string
+          in: query
+          name: os_instance_id
+          description: >-
+            Query a specific OpenStack virtual machine, specified by its
+            instance ID
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ../models/Environmental-Footprint.yaml
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_message:
+                    type: string
+              examples:
+                Missing any filters:
+                  value:
+                    error_message: >-
+                      At least one filter parameter has to be given:
+                      k8s_pod_uuid, os_instance_id or start_time
+        '406':
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        param:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                        - param
+                        - message
+                required:
+                  - errors
+              examples:
+                K8s Pod UUID invalid:
+                  value:
+                    errors:
+                      - param: k8s_pod_uuid
+                        message: Invalid pod uuid or not found.
+                Invalid start_time or end_time:
+                  value:
+                    errors:
+                      - param: start_time
+                        message: is not a valid unix timestamp
+                      - param: end_time
+                        message: is not a valid unix timestamp
+                Invalid OpenStack Instance:
+                  value:
+                    errors:
+                      - param: os_instance_id
+                        message: invalid instance identifier or not found
+                K8s Pod UUIDs not an array:
+                  value:
+                    errors:
+                      - param: k8s_pod_uuids
+                        message: must be an array of UUIDs
+                K8 Pod UUIDs contains invalid UUID:
+                  value:
+                    errors:
+                      - param: k8s_pod_uuids
+                        message: >-
+                          contains an invalid UUID or not found:
+                          the-uuid-should-be-here
+        '500':
+          description: Internal Server Error
+  '':
+    parameters: []
+components:
+  schemas: {}

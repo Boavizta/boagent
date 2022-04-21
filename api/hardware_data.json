@@ -1,0 +1,21 @@
+{
+    "disks": [
+        {
+            "capacity": 223,
+            "manufacturer": "INTEL"
+        }
+    ],
+    "cpus": [
+        {
+            "units": 1,
+            "core_units": 4,
+            "family": "broadwell"
+        }
+    ],
+    "rams": [
+        {
+            "capacity": 15,
+            "manufacturer": null
+        }
+    ]
+}
