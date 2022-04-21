@@ -9,13 +9,17 @@ from ram import get_ram_info
 from pprint import pprint
 
 @click.command()
-@click.option("--count", default=1, help="Number of greetings")
-def main(count):
+@click.option("--output-file", help="File to output the hardwate data to")
+def main(output_file):
     res = {}
     res["disks"] = format_disks(disks())
     res["cpus"] = format_cpus(cpus())
     res["rams"] = format_rams(rams())
-    json.dump(res, sys.stdout, indent=4)
+    if output_file is not None:
+        with open(output_file, 'w') as fd:
+            json.dump(res, fd, indent=4)
+    else:
+        json.dump(res, sys.stdout, indent=4)
     return 0
 
 def disks():
