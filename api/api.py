@@ -8,6 +8,7 @@ from openapi_client.api.component_api import ComponentApi
 from openapi_client.model.cpu import Cpu
 from openapi_client.model.ram import Ram
 from openapi_client.model.disk import Disk
+from openapi_client.model.mother_board import MotherBoard
 
 hardware_file_name = "hardware_data.json"
 impact_file_name = "impact_data.json"
@@ -22,22 +23,39 @@ async def query(start_time: float = 0.0, end_time: float = 0.0):
         end_time += now + 30
 
     hardware_data = get_hardware_data()
-    emboddied_impact_data = get_emboddied_impact_data(hardware_data)
+    embedded_impact_data = get_embedded_impact_data(hardware_data)
+    total_embedded_emissions = get_total_embedded_emissions(embedded_impact_data)
 
     res = {
         "start_time": start_time,
         "end_time": end_time,
         "hardware_data": hardware_data,
-        "emboddied_impact_data": emboddied_impact_data,
+        "embedded_impact_data": embedded_impact_data,
         "power_data": "not implemented yet",
         "resources_data": "not implemented yet",
         "total_emissions": "not implemented yet",
         "total_power_consumption": "not implemented yet",
-        "total_embedded_emissions": "not implemented yet",
+        "total_embedded_emissions": total_embedded_emissions,
         "total_operational_emissions": "not implemented yet"
     }
 
     return res
+
+def get_total_embedded_emissions(embedded_impact_data):
+    total = 0.0
+
+    for d in embedded_impact_data['disks_impact']:
+        total += float(d['impacts']['gwp']['manufacture'])
+
+    for r in embedded_impact_data['rams_impact']:
+        total += float(r['impacts']['gwp']['manufacture'])
+
+    for c in embedded_impact_data['cpus_impact']:
+        total += float(c['impacts']['gwp']['manufacture'])
+
+    total += float(embedded_impact_data['motherboard_impact']['impacts']['gwp']['manufacture'])
+
+    return round(total,1)
 
 def get_hardware_data():
     hardware_cli = "../hardware/hardware.py"
@@ -46,7 +64,7 @@ def get_hardware_data():
         data = json.load(fd)
         return data
 
-def get_emboddied_impact_data(hardware_data):
+def get_embedded_impact_data(hardware_data):
     config = Configuration(
         host="http://localhost:5000",
     )
@@ -70,10 +88,14 @@ def get_emboddied_impact_data(hardware_data):
             res_disks.append(component_api.disk_impact_bottom_up_v1_component_ssd_post(disk=disk))
         else:
             res_disks.append(component_api.disk_impact_bottom_up_v1_component_hdd_post(disk=disk))
+
+    res_motherboard = component_api.motherboard_impact_bottom_up_v1_component_motherboard_post(mother_board=MotherBoard(**hardware_data['mother_board']))
+
     return {
         "disks_impact": res_disks,
         "rams_impact": res_rams,
-        "cpus_impact": res_cpus
+        "cpus_impact": res_cpus,
+        "motherboard_impact": res_motherboard
     }
     #impact_cli = "../impact/impact.py"
     #p = run([impact_cli, "--output-file", impact_file_name])

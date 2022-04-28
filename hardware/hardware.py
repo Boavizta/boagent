@@ -15,6 +15,7 @@ def main(output_file):
     res["disks"] = format_disks(disks())
     res["cpus"] = format_cpus(cpus())
     res["rams"] = format_rams(rams())
+    res["mother_board"] = format_mother_board(mother_board())
     if output_file is not None:
         with open(output_file, 'w') as fd:
             json.dump(res, fd, indent=4)
@@ -64,6 +65,12 @@ def format_rams(rams):
             "manufacturer": ram.manufacturer
         })
     return res
+
+def mother_board():
+    pass
+
+def format_mother_board(mother_board):
+    return {}
 
 if __name__ == '__main__':
     main()
