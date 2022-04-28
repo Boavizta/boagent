@@ -66,7 +66,10 @@ def get_emboddied_impact_data(hardware_data):
     res_disks = []
     for d in hardware_data['disks']:
         disk = Disk(**d)
-        res_disks.append(component_api.disk_impact_bottom_up_v1_component_hdd_post(disk=disk))
+        if d == "ssd":
+            res_disks.append(component_api.disk_impact_bottom_up_v1_component_ssd_post(disk=disk))
+        else:
+            res_disks.append(component_api.disk_impact_bottom_up_v1_component_hdd_post(disk=disk))
     return {
         "disks_impact": res_disks,
         "rams_impact": res_rams,
