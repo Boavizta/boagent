@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from subprocess import run
+from subprocess import run, Popen
 import time, json
 from contextlib import redirect_stdout
 from pprint import pprint
@@ -12,26 +12,42 @@ from openapi_client.model.mother_board import MotherBoard
 
 hardware_file_name = "hardware_data.json"
 impact_file_name = "impact_data.json"
+power_file_name = "power_data.json"
 app = FastAPI()
+items = {}
+
+#@app.on_event("startup")
+#def startup_event():
+#    # Runs scaphandre as a daemon and stores the process information.
+#    time_step = 5
+#    power_cli = "scaphandre"
+#    p = Popen([power_cli, "json", "-f", power_file_name, "-s", str(time_step)])
+#    items["scaphandre_process"] = p
+
+#@app.on_event("shutdown")
+#def shutdown_event():
+#    with open("log.txt", mode="a") as log:
+#        log.write("Application shutdown")
 
 @app.get("/query")
 async def query(start_time: float = 0.0, end_time: float = 0.0):
     now: float = time.time()
     if start_time == 0.0:
-        start_time = now
+        start_time = now - 200
     if end_time == 0.0:
-        end_time += now + 30
+        end_time = now
 
     hardware_data = get_hardware_data()
     embedded_impact_data = get_embedded_impact_data(hardware_data)
     total_embedded_emissions = get_total_embedded_emissions(embedded_impact_data)
+    power_data = get_power_data(start_time, end_time)
 
     res = {
         "start_time": start_time,
         "end_time": end_time,
         "hardware_data": hardware_data,
         "embedded_impact_data": embedded_impact_data,
-        "power_data": "not implemented yet",
+        "power_data": power_data,
         "resources_data": "not implemented yet",
         "total_emissions": "not implemented yet",
         "total_power_consumption": "not implemented yet",
@@ -40,6 +56,17 @@ async def query(start_time: float = 0.0, end_time: float = 0.0):
     }
 
     return res
+
+#TODO run scaphandre in the start of the API, then store timed JSON somewhere, then get the appropriate data when a requests comes
+def get_power_data(start_time, end_time):
+    power_cli = "scaphandre"
+    with open(power_file_name, 'r') as fd:
+        # Get all items of the json list where start_time <= host.timestamp <= end_time
+        data = json.load(fd)
+        for e in data:
+            print("e: {} start_time: {} end_time: {}".format(e, start_time, end_time))
+        res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
+        return res
 
 def get_total_embedded_emissions(embedded_impact_data):
     total = 0.0
