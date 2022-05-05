@@ -60,13 +60,26 @@ async def query(start_time: float = 0.0, end_time: float = 0.0):
 #TODO run scaphandre in the start of the API, then store timed JSON somewhere, then get the appropriate data when a requests comes
 def get_power_data(start_time, end_time):
     power_cli = "scaphandre"
+    power_data = {}
     with open(power_file_name, 'r') as fd:
         # Get all items of the json list where start_time <= host.timestamp <= end_time
         data = json.load(fd)
-        for e in data:
-            print("e: {} start_time: {} end_time: {}".format(e, start_time, end_time))
         res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
-        return res
+        power_data['raw_data'] = res
+        power_data['host_avg_consumption'] = compute_average_consumption(res)
+        return power_data
+
+def compute_average_consumption(power_data):
+    # Host energy consumption
+    total_host = 0.0
+    avg_host = 0.0
+    if len(power_data) > 0:
+        for r in power_data:
+            total_host += float(r['host']['consumption'])
+
+        avg_host = total_host / len(power_data)
+
+    return avg_host
 
 def get_total_embedded_emissions(embedded_impact_data):
     total = 0.0
