@@ -50,6 +50,4 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
-test/test_case.py
-test/test_mother_board.py
 tox.ini

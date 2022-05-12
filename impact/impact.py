@@ -4,10 +4,8 @@ import click
 
 @click.command()
 @click.option("--file", default="./hardware.json", help="Path to a JSON file containing hardware specifications.")
+@click.option("--output-file", help="File to output the impact data to")
 def main():
-
-
-def call_api(cpu, ram, disks):
     config = Configuration(
         host="http://localhost:5000",
     )

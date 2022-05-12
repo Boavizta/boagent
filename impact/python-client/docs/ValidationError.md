@@ -4,7 +4,7 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**loc** | **[str]** |  | 
+**loc** | **[bool, date, datetime, dict, float, int, list, str, none_type]** |  | 
 **msg** | **str** |  | 
 **type** | **str** |  | 
 **any string name** | **bool, date, datetime, dict, float, int, list, str, none_type** | any string name can be used but the value must be the correct type | [optional]

@@ -81,7 +81,7 @@ class ValidationError(ModelNormal):
                 and the value is attribute type.
         """
         return {
-            'loc': ([str],),  # noqa: E501
+            'loc': ([bool, date, datetime, dict, float, int, list, str, none_type],),  # noqa: E501
             'msg': (str,),  # noqa: E501
             'type': (str,),  # noqa: E501
         }
@@ -108,7 +108,7 @@ class ValidationError(ModelNormal):
         """ValidationError - a model defined in OpenAPI
 
         Args:
-            loc ([str]):
+            loc ([bool, date, datetime, dict, float, int, list, str, none_type]):
             msg (str):
             type (str):
 
@@ -201,7 +201,7 @@ class ValidationError(ModelNormal):
         """ValidationError - a model defined in OpenAPI
 
         Args:
-            loc ([str]):
+            loc ([bool, date, datetime, dict, float, int, list, str, none_type]):
             msg (str):
             type (str):
 

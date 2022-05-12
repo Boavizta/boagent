@@ -5,10 +5,13 @@ from contextlib import redirect_stdout
 from pprint import pprint
 from openapi_client import ApiClient, Configuration
 from openapi_client.api.component_api import ComponentApi
+from openapi_client.api.server_api import ServerApi
 from openapi_client.model.cpu import Cpu
 from openapi_client.model.ram import Ram
 from openapi_client.model.disk import Disk
 from openapi_client.model.mother_board import MotherBoard
+from openapi_client.model.usage_server import UsageServer
+from openapi_client.model.server_dto import ServerDTO
 
 hardware_file_name = "hardware_data.json"
 impact_file_name = "impact_data.json"
@@ -41,6 +44,7 @@ async def query(start_time: float = 0.0, end_time: float = 0.0):
     embedded_impact_data = get_embedded_impact_data(hardware_data)
     total_embedded_emissions = get_total_embedded_emissions(embedded_impact_data)
     power_data = get_power_data(start_time, end_time)
+    total_operational_emissions = get_total_operational_emissions(power_data)
 
     res = {
         "start_time": start_time,
@@ -52,12 +56,23 @@ async def query(start_time: float = 0.0, end_time: float = 0.0):
         "total_emissions": "not implemented yet",
         "total_power_consumption": "not implemented yet",
         "total_embedded_emissions": total_embedded_emissions,
-        "total_operational_emissions": "not implemented yet"
+        "total_operational_emissions": total_operational_emissions
     }
 
     return res
 
-#TODO run scaphandre in the start of the API, then store timed JSON somewhere, then get the appropriate data when a requests comes
+def get_total_operational_emissions(power_data):
+    kwargs_usage = {
+            "usage_location": "FR",
+            "hours_electrical_consumption": power_data['host_avg_consumption'] / 1000.0
+    }
+    usage_server = UsageServer(**kwargs_usage)
+    server_dto = ServerDTO(usage=usage_server)
+    server_api = ServerApi(get_boavizta_api_client())
+    res = server_api.server_impact_by_config_v1_server_post(server_dto=server_dto)
+    pprint(res)
+    return res['impacts']['gwp']['use']
+
 def get_power_data(start_time, end_time):
     power_cli = "scaphandre"
     power_data = {}
@@ -67,6 +82,8 @@ def get_power_data(start_time, end_time):
         res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
         power_data['raw_data'] = res
         power_data['host_avg_consumption'] = compute_average_consumption(res)
+        if end_time - start_time <= 3600:
+            power_data['warning'] = "The time windows is lower than one hour, so the energy consumption esimate in Watts Hour is a bold extrapolation."
         return power_data
 
 def compute_average_consumption(power_data):
@@ -77,7 +94,7 @@ def compute_average_consumption(power_data):
         for r in power_data:
             total_host += float(r['host']['consumption'])
 
-        avg_host = total_host / len(power_data)
+        avg_host = total_host / len(power_data) / 1000000
 
     return avg_host
 
@@ -104,13 +121,17 @@ def get_hardware_data():
         data = json.load(fd)
         return data
 
-def get_embedded_impact_data(hardware_data):
+def get_boavizta_api_client():
     config = Configuration(
         host="http://localhost:5000",
     )
     client = ApiClient(
         configuration=config, pool_threads=2
     )
+    return client
+
+def get_embedded_impact_data(hardware_data):
+    client = get_boavizta_api_client()
     component_api = ComponentApi(client)
     res_cpus = []
     for c in hardware_data['cpus']:
@@ -137,9 +158,3 @@ def get_embedded_impact_data(hardware_data):
         "cpus_impact": res_cpus,
         "motherboard_impact": res_motherboard
     }
-    #impact_cli = "../impact/impact.py"
-    #p = run([impact_cli, "--output-file", impact_file_name])
-    ## define the entrypoint and parameters
-    #with open(impact_file_name, 'r') as fd:
-    #    data = json.load(fd)
-    #    return data
