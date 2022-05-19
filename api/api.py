@@ -14,7 +14,6 @@ from openapi_client.model.usage_server import UsageServer
 from openapi_client.model.server_dto import ServerDTO
 
 hardware_file_name = "hardware_data.json"
-impact_file_name = "impact_data.json"
 power_file_name = "power_data.json"
 app = FastAPI()
 items = {}
@@ -44,14 +43,15 @@ async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = 
     embedded_impact_data = get_embedded_impact_data(hardware_data)
     total_embedded_emissions = get_total_embedded_emissions(embedded_impact_data)
     power_data = get_power_data(start_time, end_time)
-    total_operational_emissions = get_total_operational_emissions(power_data)
+    boaviztapi_data = get_total_operational_emissions(power_data)
+    total_operational_emissions = boaviztapi_data['impacts']['gwp']['use']
 
     res = {
         "calculated_emissions": total_embedded_emissions+total_operational_emissions,
         "start_time": start_time,
         "end_time": end_time,
         "emissions_calculation_data": {
-            "energy_consumption": power_data['host_avg_consumption'] / 1000.0,
+            "energy_consumption": power_data['host_avg_consumption'],
             "embodied_emissions": total_embedded_emissions,
             "operational_emissions": total_operational_emissions,
         }
@@ -63,20 +63,23 @@ async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = 
             "embedded_impact_data": embedded_impact_data,
             "power_data": power_data,
             "resources_data": "not implemented yet",
+            "boaviztapi_data": boaviztapi_data
         }
 
     return res
 
 def get_total_operational_emissions(power_data):
     kwargs_usage = {
-            "usage_location": "FR",
-            "hours_electrical_consumption": power_data['host_avg_consumption'] / 1000.0
+        "usage_location": "FRA",
+        "hours_electrical_consumption": power_data['host_avg_consumption'],
+        "hours_use_time": 1.0
     }
+    print("avg : {}".format(power_data['host_avg_consumption']))
     usage_server = UsageServer(**kwargs_usage)
     server_dto = ServerDTO(usage=usage_server)
     server_api = ServerApi(get_boavizta_api_client())
     res = server_api.server_impact_by_config_v1_server_post(server_dto=server_dto)
-    return res['impacts']['gwp']['use']
+    return res#['impacts']['gwp']['use']
 
 def get_power_data(start_time, end_time):
     power_cli = "scaphandre"
@@ -88,7 +91,7 @@ def get_power_data(start_time, end_time):
         power_data['raw_data'] = res
         power_data['host_avg_consumption'] = compute_average_consumption(res)
         if end_time - start_time <= 3600:
-            power_data['warning'] = "The time window is lower than one hour, so the energy consumption esimate in Watt.Hour is incomplete and is a bold extrapolation."
+            power_data['warning'] = "The time window is lower than one hour, but the energy consumption esimate is in Watt.Hour. So this is an extrapolation of the power usage profile on watt hour. Be careful with this data."
         return power_data
 
 def compute_average_consumption(power_data):
@@ -99,7 +102,7 @@ def compute_average_consumption(power_data):
         for r in power_data:
             total_host += float(r['host']['consumption'])
 
-        avg_host = total_host / len(power_data) / 1000000
+        avg_host = total_host / len(power_data) / 1000000.0 # from microwatts to watts
 
     return avg_host
 
