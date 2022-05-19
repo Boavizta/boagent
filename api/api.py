@@ -57,6 +57,9 @@ async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = 
         }
     }
 
+    if "warning" in power_data:
+        res["emissions_calculation_data"]["energy_consumption_warning"] = power_data["warning"]
+
     if verbose:
         res["emissions_calculation_data"]["raw_data"] = {
             "hardware_data": hardware_data,
@@ -91,7 +94,7 @@ def get_power_data(start_time, end_time):
         power_data['raw_data'] = res
         power_data['host_avg_consumption'] = compute_average_consumption(res)
         if end_time - start_time <= 3600:
-            power_data['warning'] = "The time window is lower than one hour, but the energy consumption esimate is in Watt.Hour. So this is an extrapolation of the power usage profile on watt hour. Be careful with this data."
+            power_data['warning'] = "The time window is lower than one hour, but the energy consumption esimate is in Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be careful with this data."
         return power_data
 
 def compute_average_consumption(power_data):
