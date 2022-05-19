@@ -33,7 +33,7 @@ items = {}
 #        log.write("Application shutdown")
 
 @app.get("/query")
-async def query(start_time: float = 0.0, end_time: float = 0.0):
+async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = False):
     now: float = time.time()
     if start_time == 0.0:
         start_time = now - 200
@@ -47,17 +47,23 @@ async def query(start_time: float = 0.0, end_time: float = 0.0):
     total_operational_emissions = get_total_operational_emissions(power_data)
 
     res = {
+        "calculated_emissions": total_embedded_emissions+total_operational_emissions,
         "start_time": start_time,
         "end_time": end_time,
-        "hardware_data": hardware_data,
-        "embedded_impact_data": embedded_impact_data,
-        "power_data": power_data,
-        "resources_data": "not implemented yet",
-        "total_emissions": "not implemented yet",
-        "total_power_consumption": "not implemented yet",
-        "total_embedded_emissions": total_embedded_emissions,
-        "total_operational_emissions": total_operational_emissions
+        "emissions_calculation_data": {
+            "energy_consumption": power_data['host_avg_consumption'] / 1000.0,
+            "embodied_emissions": total_embedded_emissions,
+            "operational_emissions": total_operational_emissions,
+        }
     }
+
+    if verbose:
+        res["emissions_calculation_data"]["raw_data"] = {
+            "hardware_data": hardware_data,
+            "embedded_impact_data": embedded_impact_data,
+            "power_data": power_data,
+            "resources_data": "not implemented yet",
+        }
 
     return res
 
@@ -70,7 +76,6 @@ def get_total_operational_emissions(power_data):
     server_dto = ServerDTO(usage=usage_server)
     server_api = ServerApi(get_boavizta_api_client())
     res = server_api.server_impact_by_config_v1_server_post(server_dto=server_dto)
-    pprint(res)
     return res['impacts']['gwp']['use']
 
 def get_power_data(start_time, end_time):
@@ -83,7 +88,7 @@ def get_power_data(start_time, end_time):
         power_data['raw_data'] = res
         power_data['host_avg_consumption'] = compute_average_consumption(res)
         if end_time - start_time <= 3600:
-            power_data['warning'] = "The time windows is lower than one hour, so the energy consumption esimate in Watts Hour is a bold extrapolation."
+            power_data['warning'] = "The time window is lower than one hour, so the energy consumption esimate in Watt.Hour is incomplete and is a bold extrapolation."
         return power_data
 
 def compute_average_consumption(power_data):
