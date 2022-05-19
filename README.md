@@ -10,7 +10,38 @@ Once the API is running, a Swagger interface is available on localhost:8000/docs
 
 ## How to setup
 
+### BoaviztAPI
 
+You need to build the BoaviztAPI container image, then run the container locally on port 5000.
+
+Look at the BoaviztAPI for the setup.
+
+
+### BoaviztaAPI SDK
+
+Once the BoaviztAPI is running, the generate.sh script will download the new openapi.json definition and generate the client lib :
+
+```
+cd impact
+bach generate.sh
+```
+
+Generate and install the lib as a pip package :
+
+```
+cd impact/python-client
+bash build.sh
+```
+
+### Scaphandre TO BE IMPROVED
+
+Pour obtenir les données de puissance et d'énergie, il faut lancer scaphandre en arrière plan avec l'exporter json en écrivant les données dans un fichier, dans le même dossier que celui depuis lequel vous avez lancé l'API:
+
+```
+scaphandre json -s 5 -t 9999999999 -f power_data.json
+```
+
+Une feature doit être publiée prochainement dans scaphandre pour ne pas avoir à ajouter un timeout avec l'option `-t`. En attendant, vous pouvez compiler le binaire depuis la branche `feature/#169-allow-json-exporter-to-run-as-a-daemon` de scaphandre.
 
 ## Deeper explanations
 
