@@ -60,10 +60,12 @@ def rams():
 def format_rams(rams):
     res = []
     for ram in rams:
-        res.append({
+        options = {
             "capacity": ram.size_gb,
-            "manufacturer": ram.manufacturer
-        })
+        }
+        if ram.manufacturer is not None and len(ram.manufacturer) > 0:
+            options["manufacturer"] = ram.manufacturer
+        res.append(options)
     return res
 
 def mother_board():
