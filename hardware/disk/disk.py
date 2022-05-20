@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from os import stat, path, major as _major
-
+import os
+import re
 
 class DiskException(Exception):
     pass
@@ -35,6 +36,16 @@ class Disk:
         self._mount_point = mount_point
         if not mount_point:
             self._mount_point = '/boot'
+        self._sysfs_path = None
+        self._looked_up = False
+
+    def __init__(self, sysfs_device_path):
+        self._type = None
+        self._size = None
+        self._model = None
+        self._partitions = []
+        self._mount_point = None
+        self._sysfs_path = sysfs_device_path
         self._looked_up = False
 
     def __get_type(self):
@@ -45,10 +56,7 @@ class Disk:
         if path.exists(type_path):
             with open(type_path, 'r') as fd:
                 res = fd.read()
-                if int(res) == 0:
-                    disk_type = "ssd"
-                elif int(res) == 1:
-                    disk_type = "hdd"
+                disk_type = Disk.__rotational_info_to_disk_type(res)
 
         return disk_type
 
@@ -67,12 +75,8 @@ class Disk:
     def model(self):
         return self._model
 
-    def lookup(self):
-        device = None
-
-        if self._looked_up:
-            return
-
+    # TODO kept for now, maybe remove if lookup_by_sysfs is sufficient
+    def _lookup_by_mountpoint(self):
         try:
             device = stat(self._mount_point).st_dev
         except FileNotFoundError as ex:
@@ -108,6 +112,55 @@ class Disk:
             if part.minor == 0:
                 self._size = part.blocks // (1024 * 1024)
 
+    @staticmethod
+    def __try_to_read_first_line(item_path, default_value):
+        retour = default_value
+        if os.path.exists(item_path):
+            with open(item_path, 'r') as f:
+                retour = f.readline().strip()
+        return retour
+
+    @staticmethod
+    def __safe_int(maybeint):
+        if maybeint is not None:
+            try:
+                return int(maybeint)
+            except ValueError:
+                # on retournera null
+                pass
+        return None
+
+    @staticmethod
+    def __rotational_info_to_disk_type(info):
+        retour = "Unknown"
+        iinfo = Disk.__safe_int(info)
+        if iinfo is not None:
+            if iinfo == 0:
+                retour = "ssd"
+            elif iinfo == 1:
+                retour = "hdd"
+        return retour
+
+    def _lookup_by_sysfs_path(self):
+        self._model = Disk.__try_to_read_first_line(f'{self._sysfs_path}/device/model', 'Unknown model')
+        rotational = Disk.__try_to_read_first_line(f'{self._sysfs_path}/queue/rotational', None)
+        self._type = Disk.__rotational_info_to_disk_type(rotational)
+        sectors_count = Disk.__safe_int(Disk.__try_to_read_first_line(f'{self._sysfs_path}/size', None))
+        if sectors_count is not None:
+            # Linux uses 512 bytes sectors
+            self._size = sectors_count // (2 * 1024 * 1024)
+
+    def lookup(self):
+        device = None
+
+        if self._looked_up:
+            return
+
+        if self._mount_point is not None:
+            self._lookup_by_mountpoint()
+        else:
+            self._lookup_by_sysfs_path()
+
         self._looked_up = True
 
     def __repr__(self):
@@ -136,3 +189,16 @@ class Disk:
                 ret += '\n'
 
         return ret
+
+
+def search_physical_drives():
+    disks = []
+
+    virtual_drive_pattern = re.compile('.*/devices/virtual/.*')
+    for possible_drive in os.scandir('/sys/block'):
+        realpath = os.path.realpath(possible_drive.path)
+        # path seems to point to a "real" drive
+        if virtual_drive_pattern.match(realpath) is None:
+            disks.append(Disk(sysfs_device_path=realpath))
+
+    return disks
