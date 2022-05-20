@@ -3,7 +3,7 @@
 import click
 import json
 import sys
-from disk import Partition, Disk, DiskException, search_physical_drives
+from disk import search_physical_drives
 from cpu import get_cpus
 from ram import get_ram_info
 from pprint import pprint

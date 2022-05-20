@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from os import stat, path, major as _major
 import os
 import re
 
@@ -28,37 +27,16 @@ class Partition:
 
 
 class Disk:
-    def __init__(self, mount_point=None):
-        self._type = None
-        self._size = None
-        self._model = None
-        self._partitions = []
-        self._mount_point = mount_point
-        if not mount_point:
-            self._mount_point = '/boot'
-        self._sysfs_path = None
-        self._looked_up = False
-
     def __init__(self, sysfs_device_path):
         self._type = None
         self._size = None
+        self._blocks = None
         self._model = None
+        self._major_minor = None
         self._partitions = []
-        self._mount_point = None
         self._sysfs_path = sysfs_device_path
+        self._name = os.path.basename(sysfs_device_path)
         self._looked_up = False
-
-    def __get_type(self):
-        name = self._partitions[0].name.split('0')[0]
-
-        disk_type = "not sure"
-        type_path = "/sys/block/{}/queue/rotational".format(name)
-        if path.exists(type_path):
-            with open(type_path, 'r') as fd:
-                res = fd.read()
-                disk_type = Disk.__rotational_info_to_disk_type(res)
-
-        return disk_type
 
     @property
     def type(self):
@@ -74,43 +52,6 @@ class Disk:
     @property
     def model(self):
         return self._model
-
-    # TODO kept for now, maybe remove if lookup_by_sysfs is sufficient
-    def _lookup_by_mountpoint(self):
-        try:
-            device = stat(self._mount_point).st_dev
-        except FileNotFoundError as ex:
-            raise DiskException('Cannot find mount point '
-                                f'{self._mount_point}.') from ex
-
-        # Get Major
-        major = _major(device)
-
-        with open('/proc/partitions', 'r') as fs:
-            lines = fs.readlines()
-
-            # Skip two first lines
-            lines.pop(0)  # major minor  #blocks  name
-            lines.pop(0)  # Empty line
-
-            for line in lines:
-                part = Partition.from_proc(line)
-                if part.major == major:
-                    self._partitions.append(part)
-
-        # Extract device information
-        device_path = f'/sys/dev/block/{major}:0/device'
-        try:
-            with open(f'{device_path}/model', 'r') as fs:
-                self._model = fs.readline().strip()
-        except FileNotFoundError:
-            self._model = 'Unknown model'
-
-        self._type = self.__get_type()
-        # Get total size and type
-        for part in self._partitions:
-            if part.minor == 0:
-                self._size = part.blocks // (1024 * 1024)
 
     @staticmethod
     def __try_to_read_first_line(item_path, default_value):
@@ -141,25 +82,35 @@ class Disk:
                 retour = "hdd"
         return retour
 
-    def _lookup_by_sysfs_path(self):
-        self._model = Disk.__try_to_read_first_line(f'{self._sysfs_path}/device/model', 'Unknown model')
-        rotational = Disk.__try_to_read_first_line(f'{self._sysfs_path}/queue/rotational', None)
-        self._type = Disk.__rotational_info_to_disk_type(rotational)
-        sectors_count = Disk.__safe_int(Disk.__try_to_read_first_line(f'{self._sysfs_path}/size', None))
-        if sectors_count is not None:
-            # Linux uses 512 bytes sectors
-            self._size = sectors_count // (2 * 1024 * 1024)
+    def _populate_partitions(self):
+        """
+        Retrieve partitions information for one device from sysfs
+        """
 
     def lookup(self):
+        """
+        Retrieve disk information from /sys/block/xxx where xxx is device logical name.
+        Data read/guessed :
+        * disk model (usually "Vendor Model")
+        * disk type (hdd / ssd), guessed from /sys/block/xxx/queue/rotational
+        * disk size, computed from sectors count
+        * partitions
+        """
         device = None
 
         if self._looked_up:
             return
 
-        if self._mount_point is not None:
-            self._lookup_by_mountpoint()
-        else:
-            self._lookup_by_sysfs_path()
+        self._model = Disk.__try_to_read_first_line(f'{self._sysfs_path}/device/model', 'Unknown model')
+        rotational = Disk.__try_to_read_first_line(f'{self._sysfs_path}/queue/rotational', None)
+        self._type = Disk.__rotational_info_to_disk_type(rotational)
+        self._major_minor = Disk.__try_to_read_first_line(f'{self._sysfs_path}/dev', None)
+        sectors_count = Disk.__safe_int(Disk.__try_to_read_first_line(f'{self._sysfs_path}/size', None))
+        if sectors_count is not None:
+            # Linux uses 512 bytes sectors
+            self._size = sectors_count // (2 * 1024 * 1024)
+            self._blocks = sectors_count
+        self._populate_partitions()
 
         self._looked_up = True
 
@@ -168,19 +119,14 @@ class Disk:
             self.lookup()
 
         ret = ''
-        for part in self._partitions:
-            if part.minor == 0:
-                main_dev = part
-                break
-
-        ret = f'Disk ({main_dev.major}:{main_dev.minor}) {main_dev.name}: \n'
-        ret += f'\tBlocks: {main_dev.blocks}\n'
-        ret += f'\tSize: {self.size}Gb\n'
-        ret += f'\tModel: {self.model}\n'
-        ret += f'\tType: {self.type}\n'
+        ret = f'Disk ({self._major_minor}) {self._name}: \n'
+        ret += f'\tBlocks: {self._blocks}\n'
+        ret += f'\tSize: {self._size}Gb\n'
+        ret += f'\tModel: {self._model}\n'
+        ret += f'\tType: {self._type}\n'
         ret += '\n'
 
-        ret += f'Disk has {len(self._partitions) - 1} partition(s): \n'
+        ret += f'Disk has {len(self._partitions)} partition(s): \n'
         for part in self._partitions:
             if part.minor != 0:
                 ret += f'\tBlocks: {part.blocks}\n'
