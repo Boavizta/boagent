@@ -17,6 +17,7 @@ hardware_file_name = "hardware_data.json"
 power_file_name = "power_data.json"
 app = FastAPI()
 items = {}
+DEFAULT_USAGE_LOCATION = "EEE"
 
 #@app.on_event("startup")
 #def startup_event():
@@ -32,7 +33,7 @@ items = {}
 #        log.write("Application shutdown")
 
 @app.get("/query")
-async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = False):
+async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = False, location: str = DEFAULT_USAGE_LOCATION):
     now: float = time.time()
     if start_time == 0.0:
         start_time = now - 200
@@ -43,7 +44,7 @@ async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = 
     embedded_impact_data = get_embedded_impact_data(hardware_data)
     total_embedded_emissions = get_total_embedded_emissions(embedded_impact_data)
     power_data = get_power_data(start_time, end_time)
-    boaviztapi_data = get_total_operational_emissions(power_data)
+    boaviztapi_data = get_total_operational_emissions(power_data, location)
     total_operational_emissions = boaviztapi_data['impacts']['gwp']['use']
 
     res = {
@@ -59,6 +60,9 @@ async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = 
 
     if "warning" in power_data:
         res["emissions_calculation_data"]["energy_consumption_warning"] = power_data["warning"]
+    if "verbose" in boaviztapi_data:
+        if boaviztapi_data["verbose"]["USAGE-1"]["usage_location"]["status"] == "MODIFY":
+            res["emissions_calculation_data"]["usage_location_warning"] = "The provided trigram doesnt match an existing country. So this result is based on global European electricity mix. Be careful with this data."
 
     if verbose:
         res["emissions_calculation_data"]["raw_data"] = {
@@ -71,9 +75,9 @@ async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = 
 
     return res
 
-def get_total_operational_emissions(power_data):
+def get_total_operational_emissions(power_data, location):
     kwargs_usage = {
-        "usage_location": "FRA",
+        "usage_location": location,
         "hours_electrical_consumption": power_data['host_avg_consumption'],
         "hours_use_time": 1.0
     }
