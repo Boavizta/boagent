@@ -8,6 +8,14 @@ This is an API, you could use either your browser, curl, or call it directly fro
 
 Once the API is running, a Swagger interface is available on localhost:8000/docs.
 
+To run it :
+
+```
+cd api/
+pip3 install -r requirements.txt
+uvicorn api:app --reload
+```
+
 ## How to setup
 
 ### BoaviztAPI
