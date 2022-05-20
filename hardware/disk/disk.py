@@ -86,6 +86,21 @@ class Disk:
         """
         Retrieve partitions information for one device from sysfs
         """
+        part_info_path_base = f'{self._sysfs_path}/{self._name}'
+        index = 1
+        part_info_path = f'{part_info_path_base}{index}'
+        while os.path.exists(part_info_path):
+            majmin = Disk.__try_to_read_first_line(f'{part_info_path}/dev', '-1:-1').split(':')
+
+            self._partitions.append(Partition(major=Disk.__safe_int(majmin[0]),
+                                              minor=Disk.__safe_int(majmin[1]),
+                                              blocks=Disk.__safe_int(Disk.__try_to_read_first_line(f'{part_info_path}/size', 0)),
+                                              name=f'{self._name}{index}'
+                                              )
+                                    )
+            index += 1
+            part_info_path = f'{part_info_path_base}{index}'
+
 
     def lookup(self):
         """
@@ -130,7 +145,7 @@ class Disk:
         for part in self._partitions:
             if part.minor != 0:
                 ret += f'\tBlocks: {part.blocks}\n'
-                ret += f'\tSize: {part.blocks // (1024 * 1024)}Gb\n'
+                ret += f'\tSize: {part.blocks // (2 * 1024 * 1024)}Gb\n'
                 ret += f'\tName: {part.name}\n'
                 ret += '\n'
 
