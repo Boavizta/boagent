@@ -31,7 +31,7 @@ Once the BoaviztAPI is running, the generate.sh script will download the new ope
 
 ```
 cd impact
-bach generate.sh
+bash generate.sh
 ```
 
 Generate and install the lib as a pip package :
