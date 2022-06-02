@@ -3,7 +3,7 @@
 import click
 import json
 import sys
-from disk import Partition, Disk, DiskException
+from disk import search_physical_drives
 from cpu import get_cpus
 from ram import get_ram_info
 from pprint import pprint
@@ -24,7 +24,7 @@ def main(output_file):
     return 0
 
 def disks():
-    disks = [Disk(mount_point='/boot')]
+    disks = search_physical_drives()
     for disk in disks:
         disk.lookup()
     return disks
