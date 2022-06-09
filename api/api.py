@@ -3,15 +3,15 @@ from subprocess import run, Popen
 import time, json
 from contextlib import redirect_stdout
 from pprint import pprint
-from openapi_client import ApiClient, Configuration
-from openapi_client.api.component_api import ComponentApi
-from openapi_client.api.server_api import ServerApi
-from openapi_client.model.cpu import Cpu
-from openapi_client.model.ram import Ram
-from openapi_client.model.disk import Disk
-from openapi_client.model.mother_board import MotherBoard
-from openapi_client.model.usage_server import UsageServer
-from openapi_client.model.server_dto import ServerDTO
+from boaviztapi_sdk import ApiClient, Configuration
+from boaviztapi_sdk.api.component_api import ComponentApi
+from boaviztapi_sdk.api.server_api import ServerApi
+from boaviztapi_sdk.model.cpu import Cpu
+from boaviztapi_sdk.model.ram import Ram
+from boaviztapi_sdk.model.disk import Disk
+from boaviztapi_sdk.model.mother_board import MotherBoard
+from boaviztapi_sdk.model.usage_server import UsageServer
+from boaviztapi_sdk.model.server_dto import ServerDTO
 
 hardware_file_name = "hardware_data.json"
 power_file_name = "power_data.json"
