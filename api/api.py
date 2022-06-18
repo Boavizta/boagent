@@ -56,15 +56,14 @@ async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = 
             "operational_emissions": total_operational_emissions,
         }
     }
+    usage_location_status = boaviztapi_data["verbose"]["USAGE-1"]["usage_location"]["status"]
+    if usage_location_status == "MODIFY":
+        res["emissions_calculation_data"]["usage_location_warning"] = "The provided trigram doesn't match any existing country. So this result is based on average European electricity mix. Be careful with this data."
+    elif usage_location_status == "SET":
+        res["emissions_calculation_data"]["usage_location_warning"] = "As no information was provided about your location, this result is based on average European electricity mix. Be careful with this data."
 
     if "warning" in power_data:
         res["emissions_calculation_data"]["energy_consumption_warning"] = power_data["warning"]
-    if "verbose" in boaviztapi_data:
-        usage_location_status = boaviztapi_data["verbose"]["USAGE-1"]["usage_location"]["status"]
-        if usage_location_status == "MODIFY":
-            res["emissions_calculation_data"]["usage_location_warning"] = "The provided trigram doesn't match any existing country. So this result is based on global European electricity mix. Be careful with this data."
-        elif usage_location_status == "SET":
-            res["emissions_calculation_data"]["usage_location_warning"] = "As no information was provided about your location, this result is based on global European electricity mix. Be careful with this data."
 
     if verbose:
         res["emissions_calculation_data"]["raw_data"] = {
