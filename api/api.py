@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from subprocess import run, Popen
 import time, json
 from contextlib import redirect_stdout
@@ -18,21 +18,7 @@ power_file_name = "power_data.json"
 app = FastAPI()
 items = {}
 
-#@app.on_event("startup")
-#def startup_event():
-#    # Runs scaphandre as a daemon and stores the process information.
-#    time_step = 5
-#    power_cli = "scaphandre"
-#    p = Popen([power_cli, "json", "-f", power_file_name, "-s", str(time_step)])
-#    items["scaphandre_process"] = p
-
-#@app.on_event("shutdown")
-#def shutdown_event():
-#    with open("log.txt", mode="a") as log:
-#        log.write("Application shutdown")
-
-@app.get("/query")
-async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = False):
+def get_metrics(start_time: float, end_time: float, verbose: bool):
     now: float = time.time()
     if start_time == 0.0:
         start_time = now - 200
@@ -42,34 +28,98 @@ async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = 
     hardware_data = get_hardware_data()
     embedded_impact_data = get_embedded_impact_data(hardware_data)
     total_embedded_emissions = get_total_embedded_emissions(embedded_impact_data)
-    power_data = get_power_data(start_time, end_time)
-    boaviztapi_data = get_total_operational_emissions(power_data)
-    total_operational_emissions = boaviztapi_data['impacts']['gwp']['use']
-
+    #power_data = get_power_data(start_time, end_time)
+    #boaviztapi_data = get_total_operational_emissions(power_data)
+    #total_operational_emissions = boaviztapi_data['impacts']['gwp']['use']
+    # default format for each metric :
+    # name: {
+    #   value: value,
+    #   description: "this is my description",
+    #   type: gauge|counter|...,
+    #   unit: "Unit"
+    # }
+    #
     res = {
-        "calculated_emissions": total_embedded_emissions+total_operational_emissions,
-        "start_time": start_time,
-        "end_time": end_time,
+        "calculated_emissions": {
+            "value": total_embedded_emissions,
+            "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between start_time and end_time",
+            "type": "gauge",
+            "unit": "kg CO2eq",
+            "long_unit": "kilograms CO2 equivalent"
+        },
+        #total_operational_emissions,
+        "start_time": {
+            "value": start_time,
+            "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
+            "type": "counter",
+            "unit": "s",
+            "long_unit": "seconds"
+        },
+        "end_time": {
+            "value": end_time,
+            "description": "End time for the evaluation, in timestamp format (seconds since 1970)",
+            "type": "counter",
+            "unit": "s",
+            "long_unit": "seconds"
+        },
         "emissions_calculation_data": {
-            "energy_consumption": power_data['host_avg_consumption'],
-            "embodied_emissions": total_embedded_emissions,
-            "operational_emissions": total_operational_emissions,
+            #"energy_consumption": power_data['host_avg_consumption'],
+            "embedded_emissions": {
+                "value": total_embedded_emissions,
+                "description": "Embedded carbon emissions (manufacturing phase)",
+                "type": "gauge",
+                "unit": "kg CO2eq",
+                "long_unit": "kilograms CO2 equivalent"
+            }
+            #"operational_emissions": total_operational_emissions,
         }
     }
 
-    if "warning" in power_data:
-        res["emissions_calculation_data"]["energy_consumption_warning"] = power_data["warning"]
+    #if "warning" in power_data:
+    #    res["emissions_calculation_data"]["energy_consumption_warning"] = power_data["warning"]
 
     if verbose:
         res["emissions_calculation_data"]["raw_data"] = {
             "hardware_data": hardware_data,
             "embedded_impact_data": embedded_impact_data,
-            "power_data": power_data,
+            #"power_data": power_data,
             "resources_data": "not implemented yet",
-            "boaviztapi_data": boaviztapi_data
+            #"boaviztapi_data": boaviztapi_data
         }
 
     return res
+
+@app.get("/metrics")
+async def metrics(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = False, output: str = "json"):
+    return Response(content=format_prometheus_output(get_metrics(start_time, end_time, verbose)), media_type="plain-text")
+
+@app.get("/query")
+async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = False):
+    return get_metrics(start_time, end_time, verbose)
+
+def format_prometheus_output(res):
+    response = ""
+    for k, v in res.items():
+        if "value" in v and "type" in v:
+            if "description" not in v:
+                v["description"] = "TODO: define me"
+            response += format_prometheus_metric(k, "{}. {}".format(v["description"], "In {} ({}).".format(v["long_unit"], v["unit"])), v["type"], v["value"])
+    #response += format_prometheus_metric("energy_consumption", "Energy consumed in the evaluation time window (evaluated at least for an hour, be careful if the time windows is lower than 1 hour), in Wh", "counter", res["emissions_calculation_data"]["energy_consumption"])
+        else:
+            for x, y in v.items():
+                if "value" in y and "type" in y:
+                    if "description" not in y:
+                        y["description"] = "TODO: define me"
+                    response += format_prometheus_metric("{}_{}".format(k,x), "{}. {}".format(y["description"], "In {} ({}).".format(y["long_unit"], y["unit"])), y["type"], y["value"])
+
+    return response
+
+def format_prometheus_metric(metric_name, metric_description, metric_type, metric_value):
+    response = """# HELP {} {}
+# TYPE {} {}
+{} {}
+""".format(metric_name, metric_description, metric_name, metric_type, metric_name, metric_value)
+    return response
 
 def get_total_operational_emissions(power_data):
     kwargs_usage = {
