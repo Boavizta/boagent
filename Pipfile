@@ -1,0 +1,31 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pydantic = '*'
+fastapi = '0.75.2'
+uvicorn = '*'
+pandas = '*'
+aiofile = '*'
+mangum = "*"
+boaviztapi-sdk='0.1.2'
+cpuid='0.0.10'
+py-cpuinfo='8.0.0'
+dataclasses='0.8'
+
+[dev-packages]
+mkdocs = '*'
+pytest = '*'
+atomicwrites = "*"
+mkdocs-material = "*"
+httpx = '*'
+pytest-asyncio = '*'
+requests = '*'
+setuptools-pipfile = "==0.4.1"
+twine = "==3.2.0"
+bump2version = "==1.0.1"
+
+[requires]
+python_version = "3.8"

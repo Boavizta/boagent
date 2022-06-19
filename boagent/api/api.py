@@ -142,8 +142,12 @@ def format_prometheus_metric(metric_name, metric_description, metric_type, metri
     return response
 
 def get_total_operational_emissions(start_time, end_time, host_avg_consumption = None, location = None):
+    hours_use_time = (end_time - start_time) / 3600.0
+    if hours_use_time < 1.0:
+        hours_use_time = 1.0
+    print("hours_use_time: {}".format(hours_use_time))
     kwargs_usage = {
-        "hours_use_time": 1.0
+        "hours_use_time": hours_use_time
     }
     if location:
         kwargs_usage["usage_location"] = location
