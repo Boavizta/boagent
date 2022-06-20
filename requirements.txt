@@ -1,0 +1,9 @@
+fastapi==0.75.2
+uvicorn
+pandas
+aiofile
+mangum
+boaviztapi-sdk==0.1.2
+cpuid==0.0.10
+py-cpuinfo==8.0.0
+dataclasses==0.8
