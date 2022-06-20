@@ -12,11 +12,17 @@ from boaviztapi_sdk.model.disk import Disk
 from boaviztapi_sdk.model.mother_board import MotherBoard
 from boaviztapi_sdk.model.usage_server import UsageServer
 from boaviztapi_sdk.model.server_dto import ServerDTO
+#from os import env
 
 hardware_file_name = "hardware_data.json"
 power_file_name = "power_data.json"
 app = FastAPI()
 items = {}
+
+#@app.start()
+#async def start():
+#    config_file = env.get("BOAGENT_CONFIG_FILE", "./config.yaml")
+#    with open(config_file, 'r') as fd:
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool):
     now: float = time.time()
@@ -27,7 +33,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
 
     hardware_data = get_hardware_data()
     embedded_impact_data = get_embedded_impact_data(hardware_data)
-    total_embedded_emissions = get_total_embedded_emissions(embedded_impact_data)
+    total_embedded_impacts = get_total_embedded_impacts(embedded_impact_data)
 
     res = {"emissions_calculation_data":{}}
 
@@ -39,22 +45,38 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             res["emissions_calculation_data"]["energy_consumption_warning"] = power_data["warning"]
     boaviztapi_data = get_total_operational_emissions(start_time, end_time, host_avg_consumption, location)
 
+    if measure_power :
+        res["total_operational_emissions"] = {
+            "value": boaviztapi_data["impacts"]["gwp"]["use"],
+            "description": "GHG emissions related to usage, from start_time to end_time.",
+            "type": "gauge",
+            "unit": "s",
+            "long_unit": "seconds"
+        }
+        res["total_operational_abiotic_resources_depletion"] = {
+            "value": boaviztapi_data["impacts"]["adp"]["use"],
+            "description": "Abiotic Resources Depletion (minerals & metals, ADPe) due to the usage phase.",
+            "type": "gauge",
+            "unit": "kgSbeq",
+            "long_unit": "kilograms Antimony equivalent"
+        }
+        res["total_operational_primary_energy_consumed"] = {
+            "value": boaviztapi_data["impacts"]["pe"]["use"],
+            "description": "Primary Energy consumed due to the usage phase.",
+            "type": "gauge",
+            "unit": "MJ",
+            "long_unit": "Mega Joules"
+        }
+
 
     res["calculated_emissions"] = {
-        "value": total_embedded_emissions+boaviztapi_data["impacts"]["gwp"]["use"],
+        "value": total_embedded_impacts["gwp"]+boaviztapi_data["impacts"]["gwp"]["use"],
         "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between start_time and end_time",
         "type": "gauge",
         "unit": "kg CO2eq",
         "long_unit": "kilograms CO2 equivalent"
     }
 
-    res["total_operational_emissions"] = {
-        "value": boaviztapi_data["impacts"]["gwp"]["use"],
-        "description": "GHG emissions related to usage, from start_time to end_time.",
-        "type": "gauge",
-        "unit": "s",
-        "long_unit": "seconds"
-    }
     res["start_time"] = {
         "value": start_time,
         "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
@@ -69,6 +91,27 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
         "unit": "s",
         "long_unit": "seconds"
     }
+    res["embedded_emissions"] = {
+        "value": total_embedded_impacts["gwp"],
+        "description": "Embedded carbon emissions (manufacturing phase)",
+        "type": "gauge",
+        "unit": "kg CO2eq",
+        "long_unit": "kilograms CO2 equivalent"
+    }
+    res["embedded_abiotic_resources_depletion"] = {
+        "value": total_embedded_impacts["adp"],
+        "description": "Embedded abiotic ressources consumed (manufacturing phase)",
+        "type": "gauge",
+        "unit": "kg Sbeq",
+        "long_unit": "kilograms ADP equivalent"
+    }
+    res["embedded_primary_energy"] = {
+        "value": total_embedded_impacts["pe"],
+        "description": "Embedded primary energy consumed (manufacturing phase)",
+        "type": "gauge",
+        "unit": "MJ",
+        "long_unit": "Mega Joules"
+    }
     res["emissions_calculation_data"] = {
         "average_power_measured": {
             "value": host_avg_consumption,
@@ -76,13 +119,6 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             "type": "gauge",
             "unit": "W",
             "long_unit": "Watts"
-        },
-        "embedded_emissions": {
-            "value": total_embedded_emissions,
-            "description": "Embedded carbon emissions (manufacturing phase)",
-            "type": "gauge",
-            "unit": "kg CO2eq",
-            "long_unit": "kilograms CO2 equivalent"
         },
         "electricity_carbon_intensity": {
             "value": boaviztapi_data["verbose"]["USAGE-1"]["gwp_factor"]["used_value"],
@@ -187,21 +223,29 @@ def compute_average_consumption(power_data):
 
     return avg_host
 
-def get_total_embedded_emissions(embedded_impact_data):
-    total = 0.0
+def get_total_embedded_impacts(embedded_impact_data):
+    res = {}
 
-    for d in embedded_impact_data['disks_impact']:
-        total += float(d['impacts']['gwp']['manufacture'])
+    for imp in ["gwp", "pe", "adp"] :
+        total = 0.0
 
-    for r in embedded_impact_data['rams_impact']:
-        total += float(r['impacts']['gwp']['manufacture'])
+        for d in embedded_impact_data['disks_impact']:
+            total += float(d['impacts'][imp]['manufacture'])
 
-    for c in embedded_impact_data['cpus_impact']:
-        total += float(c['impacts']['gwp']['manufacture'])
+        for r in embedded_impact_data['rams_impact']:
+            total += float(r['impacts'][imp]['manufacture'])
 
-    total += float(embedded_impact_data['motherboard_impact']['impacts']['gwp']['manufacture'])
+        for c in embedded_impact_data['cpus_impact']:
+            total += float(c['impacts'][imp]['manufacture'])
 
-    return round(total,1)
+        total += float(embedded_impact_data['motherboard_impact']['impacts'][imp]['manufacture'])
+
+        if imp != "adp":
+            res[imp] = round(total,1)
+        else:
+            res[imp] = total
+
+    return res
 
 def get_hardware_data():
     hardware_cli = "../hardware/hardware.py"
