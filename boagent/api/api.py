@@ -94,9 +94,9 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
     }
     usage_location_status = boaviztapi_data["verbose"]["USAGE-1"]["usage_location"]["status"]
     if usage_location_status == "MODIFY":
-        res["emissions_calculation_data"]["usage_location_warning"] = "The provided trigram doesn't match any existing country. So this result is based on average European electricity mix. Be careful with this data."
+        res["emissions_calculation_data"]["electricity_carbon_intensity"]["description"] += " WARNING : The provided trigram doesn't match any existing country. So this result is based on average European electricity mix. Be careful with this data."
     elif usage_location_status == "SET":
-        res["emissions_calculation_data"]["usage_location_warning"] = "As no information was provided about your location, this result is based on average European electricity mix. Be careful with this data."
+        res["emissions_calculation_data"]["electricity_carbon_intensity"]["description"] += "WARNING : As no information was provided about your location, this result is based on average European electricity mix. Be careful with this data."
 
     if verbose:
         res["emissions_calculation_data"]["raw_data"] = {
