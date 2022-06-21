@@ -11,10 +11,14 @@ Once the API is running, a Swagger interface is available on localhost:8000/docs
 To run it :
 
 ```
-cd api/
+cd boagent/
 pip3 install -r requirements.txt
+cd api/
 uvicorn api:app --reload
 ```
+
+The app can run without root privileges, but you won't get full data about the RAM and get some warnings.
+Run as root to have the best evaluation possible.
 
 ## How to setup
 
@@ -23,7 +27,6 @@ uvicorn api:app --reload
 You need to build the BoaviztAPI container image, then run the container locally on port 5000.
 
 Look at the BoaviztAPI for the setup.
-
 
 ### BoaviztaAPI SDK
 
@@ -79,33 +82,3 @@ Here are the impacts considered so far :
     - manufacturing (LCA) 🚧
     - shipping (LCA) ❌
     - end of life (LCA) ❌
-
-# Historic README from the #4th hackathon of @Boavizta
-
-# 👩🏻‍💻 Hackaton 4 - Proof of concept using BOAVIZTAPI
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
----
-
-## :dart: Objective
-
-As part of Boavizta's desire to improve the quality of the measurement of the environmental impacts of ICTs in organizations, boaviztapi project aims at giving access to the group's work to as many people as possible in an automated and industrialized way.
-
-The various data and methodologies integrated by Boavizta are aggregated and made available via an API.
-
-The objectif of the hackaton is to implement proof of concept of [use cases](https://github.com/Boavizta/Hackaton_4/issues) calling the boaviztapi.
-
-
-## :fast_forward: Request BOAVIZTAPI
-
-* See the OpenAPI specification: <http://hackaton.boavizta.org:5000/docs>
-
-* [Documentation](http://hackaton.boavizta.org/)
-
-* Access the demo API: <http://hackaton.boavizta.org:5000>
-
-
-## :scroll: License
-
-MIT
