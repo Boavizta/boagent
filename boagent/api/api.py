@@ -12,6 +12,7 @@ from boaviztapi_sdk.model.disk import Disk
 from boaviztapi_sdk.model.mother_board import MotherBoard
 from boaviztapi_sdk.model.usage_server import UsageServer
 from boaviztapi_sdk.model.server_dto import ServerDTO
+from datetime import datetime
 #from os import env
 
 hardware_file_name = "hardware_data.json"
@@ -145,13 +146,44 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
 
     return res
 
+def iso8061_as_timestamp(iso_time):
+    if iso_time == "0.0" or iso_time == "0":
+        return float(iso_time)
+    else:
+        try:
+            dt = datetime.fromisoformat(iso_time)
+            print("{} is an iso 8601 datetime".format(iso_time))
+        except Exception as e:
+            print("{} is not an iso 8601 datetime".format(iso_time))
+            print("Exception : {}".format(e))
+            try:
+                dt = datetime.fromtimestamp(int(iso_time))
+                print("{} is a timestamp".format(iso_time))
+            except Exception as e:
+                print("{} is not a timestamp".format(iso_time))
+                print("Exception : {}".format(e))
+        finally:
+            return dt.timestamp()
+
 @app.get("/metrics")
-async def metrics(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True):
-    return Response(content=format_prometheus_output(get_metrics(start_time, end_time, verbose, location, measure_power)), media_type="plain-text")
+async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True):
+    return Response(
+        content=format_prometheus_output(
+            get_metrics(
+                iso8061_as_timestamp(start_time),
+                iso8061_as_timestamp(end_time),
+                verbose, location, measure_power
+            )
+        ), media_type="plain-text"
+    )
 
 @app.get("/query")
-async def query(start_time: float = 0.0, end_time: float = 0.0, verbose: bool = False, location: str = None, measure_power: bool = True):
-    return get_metrics(start_time, end_time, verbose, location, measure_power)
+async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None, measure_power: bool = True):
+    return get_metrics(
+        iso8061_as_timestamp(start_time),
+        iso8061_as_timestamp(end_time),
+        verbose, location, measure_power
+    )
 
 def format_prometheus_output(res):
     response = ""
