@@ -65,20 +65,20 @@ This way, it is intended to evaluate the impacts on all life cycle phases (extra
 Here are the impacts considered so far :
 
 - Green House Gaz emissions / Global Warming Potential (see GHG protocol as a reference)
-    - resources extraction (LCA) / scope 3 (GHG protocol) ❌
+    - resources extraction (LCA) / scope 3 (GHG protocol) ✔️
     - use (LCA) / scope 2 (GHG protocol) ✔️
     - manufacturing (LCA) / scope 3 (GHG protocol) ✔️
     - shipping (LCA) / scope 3 (GHG protocol) ❌
     - end of life (LCA) / scope 3 (GHG protocol) ❌
 - Abiotic ressources depletion (minerals), criteria called ADP or Abiotic Depletion Potential
-    - resources extraction (LCA) ❌
-    - use (LCA) ❌
-    - manufacturing (LCA) 🚧
+    - resources extraction (LCA) ✔️
+    - use (LCA) ✔️
+    - manufacturing (LCA) ✔️
     - shipping (LCA) ❌
     - end of life (LCA) ❌
 - Primary energy usage : PE
-    - resources extraction (LCA) ❌
-    - use (LCA) ❌
-    - manufacturing (LCA) 🚧
+    - resources extraction (LCA) ✔️
+    - use (LCA) ✔️
+    - manufacturing (LCA) ✔️
     - shipping (LCA) ❌
     - end of life (LCA) ❌
