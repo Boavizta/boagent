@@ -52,8 +52,8 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             "value": boaviztapi_data["impacts"]["gwp"]["use"],
             "description": "GHG emissions related to usage, from start_time to end_time.",
             "type": "gauge",
-            "unit": "s",
-            "long_unit": "seconds"
+            "unit": "kg CO2eq",
+            "long_unit": "kilograms CO2 equivalent"
         }
         res["total_operational_abiotic_resources_depletion"] = {
             "value": boaviztapi_data["impacts"]["adp"]["use"],
@@ -217,8 +217,8 @@ def format_prometheus_metric(metric_name, metric_description, metric_type, metri
 
 def get_total_operational_emissions(start_time, end_time, host_avg_consumption = None, location = None):
     hours_use_time = (end_time - start_time) / 3600.0
-    if hours_use_time < 1.0:
-        hours_use_time = 1.0
+    #if hours_use_time < 1.0:
+    #    hours_use_time = 1.0
     print("hours_use_time: {}".format(hours_use_time))
     kwargs_usage = {
         "hours_use_time": hours_use_time
