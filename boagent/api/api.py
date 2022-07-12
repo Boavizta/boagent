@@ -13,6 +13,7 @@ from boaviztapi_sdk.model.mother_board import MotherBoard
 from boaviztapi_sdk.model.usage_server import UsageServer
 from boaviztapi_sdk.model.server_dto import ServerDTO
 from datetime import datetime
+from dateutil import parser
 #from os import env
 
 hardware_file_name = "hardware_data.json"
@@ -150,20 +151,25 @@ def iso8061_as_timestamp(iso_time):
     if iso_time == "0.0" or iso_time == "0":
         return float(iso_time)
     else:
+        dt = None
         try:
-            dt = datetime.fromisoformat(iso_time)
+            dt = parser.parse(iso_time)
             print("{} is an iso 8601 datetime".format(iso_time))
         except Exception as e:
             print("{} is not an iso 8601 datetime".format(iso_time))
             print("Exception : {}".format(e))
             try:
-                dt = datetime.fromtimestamp(int(iso_time))
+                dt = datetime.fromtimestamp(int(round(float(iso_time))))
                 print("{} is a timestamp".format(iso_time))
             except Exception as e:
                 print("{} is not a timestamp".format(iso_time))
                 print("Exception : {}".format(e))
+                print("Parser would give : {}".format(parser.parse(iso_time)))
         finally:
-            return dt.timestamp()
+            if dt:
+                return dt.timestamp()
+            else:
+                return float(iso_time)
 
 @app.get("/metrics")
 async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True):
