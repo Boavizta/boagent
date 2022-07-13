@@ -16,6 +16,8 @@ from datetime import datetime
 from dateutil import parser
 #from os import env
 
+seconds_in_one_year = 31536000
+default_lifetime = 5.0
 hardware_file_name = "hardware_data.json"
 power_file_name = "power_data.json"
 app = FastAPI()
@@ -26,16 +28,18 @@ items = {}
 #    config_file = env.get("BOAGENT_CONFIG_FILE", "./config.yaml")
 #    with open(config_file, 'r') as fd:
 
-def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool):
+def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float):
     now: float = time.time()
     if start_time == 0.0:
-        start_time = now - 200
+        start_time = now - 3600
     if end_time == 0.0:
         end_time = now
+    if end_time - start_time >= lifetime*seconds_in_one_year:
+        lifetime = (end_time - start_time) / float(seconds_in_one_year)
 
     hardware_data = get_hardware_data()
     embedded_impact_data = get_embedded_impact_data(hardware_data)
-    total_embedded_impacts = get_total_embedded_impacts(embedded_impact_data)
+    total_embedded_impacts = get_total_embedded_impacts(start_time, end_time, embedded_impact_data, lifetime)
 
     res = {"emissions_calculation_data":{}}
 
@@ -172,23 +176,23 @@ def iso8061_as_timestamp(iso_time):
                 return float(iso_time)
 
 @app.get("/metrics")
-async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True):
+async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True, lifetime: float = default_lifetime):
     return Response(
         content=format_prometheus_output(
             get_metrics(
                 iso8061_as_timestamp(start_time),
                 iso8061_as_timestamp(end_time),
-                verbose, location, measure_power
+                verbose, location, measure_power, lifetime
             )
         ), media_type="plain-text"
     )
 
 @app.get("/query")
-async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None, measure_power: bool = True):
+async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None, measure_power: bool = True, lifetime: float = default_lifetime):
     return get_metrics(
         iso8061_as_timestamp(start_time),
         iso8061_as_timestamp(end_time),
-        verbose, location, measure_power
+        verbose, location, measure_power, lifetime
     )
 
 def format_prometheus_output(res):
@@ -217,8 +221,6 @@ def format_prometheus_metric(metric_name, metric_description, metric_type, metri
 
 def get_total_operational_emissions(start_time, end_time, host_avg_consumption = None, location = None):
     hours_use_time = (end_time - start_time) / 3600.0
-    #if hours_use_time < 1.0:
-    #    hours_use_time = 1.0
     print("hours_use_time: {}".format(hours_use_time))
     kwargs_usage = {
         "hours_use_time": hours_use_time
@@ -234,7 +236,7 @@ def get_total_operational_emissions(start_time, end_time, host_avg_consumption =
     server_dto = ServerDTO(usage=usage_server)
     server_api = ServerApi(get_boavizta_api_client())
     res = server_api.server_impact_by_config_v1_server_post(server_dto=server_dto)
-    return res#['impacts']['gwp']['use']
+    return res
 
 def get_power_data(start_time, end_time):
     power_cli = "scaphandre"
@@ -261,8 +263,10 @@ def compute_average_consumption(power_data):
 
     return avg_host
 
-def get_total_embedded_impacts(embedded_impact_data):
+def get_total_embedded_impacts(start_time: float, end_time: float, embedded_impact_data: dict, lifetime: float):
     res = {}
+    ratio = (end_time - start_time) / (lifetime*seconds_in_one_year)
+    print("end_time: {} start_time: {} lifetime: {} ratio: {}".format(end_time, start_time, lifetime, ratio))
 
     for imp in ["gwp", "pe", "adp"] :
         total = 0.0
@@ -278,10 +282,12 @@ def get_total_embedded_impacts(embedded_impact_data):
 
         total += float(embedded_impact_data['motherboard_impact']['impacts'][imp]['manufacture'])
 
-        if imp != "adp":
-            res[imp] = round(total,1)
-        else:
-            res[imp] = total
+        total = total * ratio
+
+        #if imp != "adp":
+        #    res[imp] = round(total,1)
+        #else:
+        res[imp] = total
 
     return res
 
