@@ -13,7 +13,7 @@ from boaviztapi_sdk.model.mother_board import MotherBoard
 from boaviztapi_sdk.model.usage_server import UsageServer
 from boaviztapi_sdk.model.server_dto import ServerDTO
 from datetime import datetime
-from utils import iso8601_or_timestamp_as_timestamp
+from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric
 #from os import env
 
 seconds_in_one_year = 31536000
@@ -27,6 +27,27 @@ items = {}
 #async def start():
 #    config_file = env.get("BOAGENT_CONFIG_FILE", "./config.yaml")
 #    with open(config_file, 'r') as fd:
+
+@app.get("/metrics")
+async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True, lifetime: float = default_lifetime):
+    return Response(
+        content=format_prometheus_output(
+            get_metrics(
+                iso8601_or_timestamp_as_timestamp(start_time),
+                iso8601_or_timestamp_as_timestamp(end_time),
+                verbose, location, measure_power, lifetime
+            )
+        ), media_type="plain-text"
+    )
+
+@app.get("/query")
+async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None, measure_power: bool = True, lifetime: float = default_lifetime):
+    return get_metrics(
+        iso8601_or_timestamp_as_timestamp(start_time),
+        iso8601_or_timestamp_as_timestamp(end_time),
+        verbose, location, measure_power, lifetime
+    )
+
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float):
     now: float = time.time()
@@ -150,50 +171,6 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
         }
 
     return res
-
-@app.get("/metrics")
-async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True, lifetime: float = default_lifetime):
-    return Response(
-        content=format_prometheus_output(
-            get_metrics(
-                iso8601_or_timestamp_as_timestamp(start_time),
-                iso8601_or_timestamp_as_timestamp(end_time),
-                verbose, location, measure_power, lifetime
-            )
-        ), media_type="plain-text"
-    )
-
-@app.get("/query")
-async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None, measure_power: bool = True, lifetime: float = default_lifetime):
-    return get_metrics(
-        iso8601_or_timestamp_as_timestamp(start_time),
-        iso8601_or_timestamp_as_timestamp(end_time),
-        verbose, location, measure_power, lifetime
-    )
-
-def format_prometheus_output(res):
-    response = ""
-    for k, v in res.items():
-        if "value" in v and "type" in v:
-            if "description" not in v:
-                v["description"] = "TODO: define me"
-            response += format_prometheus_metric(k, "{}. {}".format(v["description"], "In {} ({}).".format(v["long_unit"], v["unit"])), v["type"], v["value"])
-    #response += format_prometheus_metric("energy_consumption", "Energy consumed in the evaluation time window (evaluated at least for an hour, be careful if the time windows is lower than 1 hour), in Wh", "counter", res["emissions_calculation_data"]["energy_consumption"])
-        else:
-            for x, y in v.items():
-                if "value" in y and "type" in y:
-                    if "description" not in y:
-                        y["description"] = "TODO: define me"
-                    response += format_prometheus_metric("{}_{}".format(k,x), "{}. {}".format(y["description"], "In {} ({}).".format(y["long_unit"], y["unit"])), y["type"], y["value"])
-
-    return response
-
-def format_prometheus_metric(metric_name, metric_description, metric_type, metric_value):
-    response = """# HELP {} {}
-# TYPE {} {}
-{} {}
-""".format(metric_name, metric_description, metric_name, metric_type, metric_name, metric_value)
-    return response
 
 def get_total_operational_emissions(start_time, end_time, host_avg_consumption = None, location = None):
     hours_use_time = (end_time - start_time) / 3600.0
