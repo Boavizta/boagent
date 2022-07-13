@@ -13,7 +13,7 @@ from boaviztapi_sdk.model.mother_board import MotherBoard
 from boaviztapi_sdk.model.usage_server import UsageServer
 from boaviztapi_sdk.model.server_dto import ServerDTO
 from datetime import datetime
-from dateutil import parser
+from utils import iso8601_or_timestamp_as_timestamp
 #from os import env
 
 seconds_in_one_year = 31536000
@@ -151,37 +151,13 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
 
     return res
 
-def iso8061_as_timestamp(iso_time):
-    if iso_time == "0.0" or iso_time == "0":
-        return float(iso_time)
-    else:
-        dt = None
-        try:
-            dt = parser.parse(iso_time)
-            print("{} is an iso 8601 datetime".format(iso_time))
-        except Exception as e:
-            print("{} is not an iso 8601 datetime".format(iso_time))
-            print("Exception : {}".format(e))
-            try:
-                dt = datetime.fromtimestamp(int(round(float(iso_time))))
-                print("{} is a timestamp".format(iso_time))
-            except Exception as e:
-                print("{} is not a timestamp".format(iso_time))
-                print("Exception : {}".format(e))
-                print("Parser would give : {}".format(parser.parse(iso_time)))
-        finally:
-            if dt:
-                return dt.timestamp()
-            else:
-                return float(iso_time)
-
 @app.get("/metrics")
 async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True, lifetime: float = default_lifetime):
     return Response(
         content=format_prometheus_output(
             get_metrics(
-                iso8061_as_timestamp(start_time),
-                iso8061_as_timestamp(end_time),
+                iso8601_or_timestamp_as_timestamp(start_time),
+                iso8601_or_timestamp_as_timestamp(end_time),
                 verbose, location, measure_power, lifetime
             )
         ), media_type="plain-text"
@@ -190,8 +166,8 @@ async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool 
 @app.get("/query")
 async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None, measure_power: bool = True, lifetime: float = default_lifetime):
     return get_metrics(
-        iso8061_as_timestamp(start_time),
-        iso8061_as_timestamp(end_time),
+        iso8601_or_timestamp_as_timestamp(start_time),
+        iso8601_or_timestamp_as_timestamp(end_time),
         verbose, location, measure_power, lifetime
     )
 
