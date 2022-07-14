@@ -46,13 +46,11 @@ bash build.sh
 
 ### Scaphandre TO BE IMPROVED
 
-Pour obtenir les données de puissance et d'énergie, il faut lancer scaphandre en arrière plan avec l'exporter json en écrivant les données dans un fichier, dans le même dossier que celui depuis lequel vous avez lancé l'API:
+To get power consumption metrics, you need scaphandre runnig in the background, with the json exporter. This will write power metrics to a file, that Boagent will read :
 
 ```
-scaphandre json -s 5 -t 9999999999 -f power_data.json
+scaphandre json -s 5 -f power_data.json
 ```
-
-Une feature doit être publiée prochainement dans scaphandre pour ne pas avoir à ajouter un timeout avec l'option `-t`. En attendant, vous pouvez compiler le binaire depuis la branche `feature/#169-allow-json-exporter-to-run-as-a-daemon` de scaphandre.
 
 ## Deeper explanations
 
