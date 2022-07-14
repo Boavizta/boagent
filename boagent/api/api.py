@@ -14,22 +14,25 @@ from boaviztapi_sdk.model.usage_server import UsageServer
 from boaviztapi_sdk.model.server_dto import ServerDTO
 from datetime import datetime
 from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric
+from config import settings
 #from os import env
 
-seconds_in_one_year = 31536000
-default_lifetime = 5.0
-hardware_file_name = "hardware_data.json"
-power_file_name = "power_data.json"
 app = FastAPI()
 items = {}
 
-#@app.start()
-#async def start():
-#    config_file = env.get("BOAGENT_CONFIG_FILE", "./config.yaml")
-#    with open(config_file, 'r') as fd:
+@app.get("/info")
+async def info():
+    return {
+        "seconds_in_one_year": settings.seconds_in_one_year,
+        "default_lifetime": settings.default_lifetime,
+        "hardware_file_name": settings.hardware_file_name,
+        "power_file_name": settings.power_file_name,
+        "hardware_cli": settings.hardware_cli,
+        "boaviztapi_endpoint": settings.boaviztapi_endpoint
+    }
 
 @app.get("/metrics")
-async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True, lifetime: float = default_lifetime):
+async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True, lifetime: float =settings.default_lifetime):
     return Response(
         content=format_prometheus_output(
             get_metrics(
@@ -41,7 +44,7 @@ async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool 
     )
 
 @app.get("/query")
-async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None, measure_power: bool = True, lifetime: float = default_lifetime):
+async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None, measure_power: bool = True, lifetime: float =settings.default_lifetime):
     return get_metrics(
         iso8601_or_timestamp_as_timestamp(start_time),
         iso8601_or_timestamp_as_timestamp(end_time),
@@ -55,8 +58,8 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
         start_time = now - 3600
     if end_time == 0.0:
         end_time = now
-    if end_time - start_time >= lifetime*seconds_in_one_year:
-        lifetime = (end_time - start_time) / float(seconds_in_one_year)
+    if end_time - start_time >= lifetime * settings.seconds_in_one_year:
+        lifetime = (end_time - start_time) / float(settings.seconds_in_one_year)
 
     hardware_data = get_hardware_data()
     embedded_impact_data = get_embedded_impact_data(hardware_data)
@@ -174,7 +177,6 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
 
 def get_total_operational_emissions(start_time, end_time, host_avg_consumption = None, location = None):
     hours_use_time = (end_time - start_time) / 3600.0
-    print("hours_use_time: {}".format(hours_use_time))
     kwargs_usage = {
         "hours_use_time": hours_use_time
     }
@@ -192,9 +194,8 @@ def get_total_operational_emissions(start_time, end_time, host_avg_consumption =
     return res
 
 def get_power_data(start_time, end_time):
-    power_cli = "scaphandre"
     power_data = {}
-    with open(power_file_name, 'r') as fd:
+    with open(settings.power_file_name, 'r') as fd:
         # Get all items of the json list where start_time <= host.timestamp <= end_time
         data = json.load(fd)
         res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
@@ -218,7 +219,7 @@ def compute_average_consumption(power_data):
 
 def get_total_embedded_impacts(start_time: float, end_time: float, embedded_impact_data: dict, lifetime: float):
     res = {}
-    ratio = (end_time - start_time) / (lifetime*seconds_in_one_year)
+    ratio = (end_time - start_time) / (lifetime*settings.seconds_in_one_year)
     print("end_time: {} start_time: {} lifetime: {} ratio: {}".format(end_time, start_time, lifetime, ratio))
 
     for imp in ["gwp", "pe", "adp"] :
@@ -245,15 +246,14 @@ def get_total_embedded_impacts(start_time: float, end_time: float, embedded_impa
     return res
 
 def get_hardware_data():
-    hardware_cli = "../hardware/hardware.py"
-    p = run([hardware_cli, "--output-file", hardware_file_name])
-    with open(hardware_file_name, 'r') as fd:
+    p = run([settings.hardware_cli, "--output-file", settings.hardware_file_name])
+    with open(settings.hardware_file_name, 'r') as fd:
         data = json.load(fd)
         return data
 
 def get_boavizta_api_client():
     config = Configuration(
-        host="http://localhost:5000",
+        host=settings.boaviztapi_endpoint,
     )
     client = ApiClient(
         configuration=config, pool_threads=2
