@@ -28,6 +28,8 @@ You need either to use an existing BoaviztAPI endpoint, or to build the BoaviztA
 
 Depending or your setup, specify the endpoint to be used with the environment variable `BOAVIZTAPI_ENDPOINT`, see [Configuration](#Configuration).
 
+Ensure that the version of BoaviztAPI SDK installed (see `requirements.txt`) is the same as the version of the API running the endpoint you use.
+
 ### Scaphandre TO BE IMPROVED
 
 To get power consumption metrics, you need scaphandre runnig in the background, with the json exporter. This will write power metrics to a file, that Boagent will read :
