@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Response
+from pprint import pprint
 from subprocess import run, Popen
 import time, json
 from contextlib import redirect_stdout
@@ -54,6 +55,10 @@ async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = 
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float, fetch_hardware: bool = False):
     now: float = time.time()
+    if start_time and end_time:
+        ratio = (end_time - start_time) / (lifetime*settings.seconds_in_one_year)
+    else:
+        ratio = 1.0
     if start_time == 0.0:
         start_time = now - 3600
     if end_time == 0.0:
@@ -64,7 +69,6 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
     hardware_data = get_hardware_data(fetch_hardware)
 
     res = {"emissions_calculation_data":{}}
-    ratio = (end_time - start_time) / (lifetime*settings.seconds_in_one_year)
 
     host_avg_consumption = None
     if measure_power:
@@ -171,8 +175,6 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
     if verbose:
         res["emissions_calculation_data"]["raw_data"] = {
             "hardware_data": hardware_data,
-            "embedded_impact_data": embedded_impact_data,
-            #"power_data": power_data,
             "resources_data": "not implemented yet",
             "boaviztapi_data": boaviztapi_data
         }
@@ -248,16 +250,16 @@ def query_machine_impact_data(model: dict = None, configuration: dict = None, us
     return server_impact
 
 def generate_machine_configuration(hardware_data):
-    return {
-       "configuration": {
-           "cpu": {
-               "units": hardware_data['cpus'][0]["units"],
-               "core_units": hardware_data['cpus'][0]["core_units"],
-               "family": hardware_data['cpus'][0]['family']
-           },
-           "ram": sort_ram(hardware_data["rams"]),
-           "disk": sort_disks(hardware_data["disks"]),
-           "motherboard": hardware_data["mother_board"] if "mother_board" in hardware_data else { "units": 1 }, #TODO: improve once the API provides more detail input
-           "power_supply": hardware_data["power_supply"] if "power_supply" in hardware_data else { "units": 2 }
-       }
-   }
+    config =  {
+        "cpu": {
+            "units": hardware_data['cpus'][0]["units"],
+            "core_units": hardware_data['cpus'][0]["core_units"],
+            "family": hardware_data['cpus'][0]['family']
+        },
+        "ram": sort_ram(hardware_data["rams"]),
+        "disk": sort_disks(hardware_data["disks"]),
+        "motherboard": hardware_data["mother_board"] if "mother_board" in hardware_data else { "units": 1 }, #TODO: improve once the API provides more detail input
+        "power_supply": hardware_data["power_supply"] if "power_supply" in hardware_data else { "units": 1 } #TODO: if cpu is a small one, guess that power supply is light/average weight of a laptops power supply ?
+    }
+    #pprint(config)
+    return config
