@@ -10,9 +10,10 @@ from boaviztapi_sdk.model.ram import Ram
 from boaviztapi_sdk.model.disk import Disk
 from boaviztapi_sdk.model.mother_board import MotherBoard
 from boaviztapi_sdk.model.usage_server import UsageServer
+from boaviztapi_sdk.model.model_server import ModelServer
 from boaviztapi_sdk.model.server_dto import ServerDTO
 from datetime import datetime
-from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric
+from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 #from os import env
 
@@ -61,10 +62,9 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
         lifetime = (end_time - start_time) / float(settings.seconds_in_one_year)
 
     hardware_data = get_hardware_data(fetch_hardware)
-    embedded_impact_data = get_embedded_impact_data(hardware_data)
-    total_embedded_impacts = get_total_embedded_impacts(start_time, end_time, embedded_impact_data, lifetime)
 
     res = {"emissions_calculation_data":{}}
+    ratio = (end_time - start_time) / (lifetime*settings.seconds_in_one_year)
 
     host_avg_consumption = None
     if measure_power:
@@ -72,7 +72,12 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
         host_avg_consumption = power_data["host_avg_consumption"]
         if "warning" in power_data:
             res["emissions_calculation_data"]["energy_consumption_warning"] = power_data["warning"]
-    boaviztapi_data = get_total_operational_emissions(start_time, end_time, host_avg_consumption, location)
+
+    boaviztapi_data = query_machine_impact_data(
+        model=None,
+        configuration=generate_machine_configuration(hardware_data),
+        usage=format_usage_request(start_time, end_time, host_avg_consumption, location)
+    )
 
     if measure_power :
         res["total_operational_emissions"] = {
@@ -99,7 +104,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
 
 
     res["calculated_emissions"] = {
-        "value": total_embedded_impacts["gwp"]+boaviztapi_data["impacts"]["gwp"]["use"],
+        "value": boaviztapi_data["impacts"]["gwp"]["manufacture"]*ratio+boaviztapi_data["impacts"]["gwp"]["use"],
         "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between start_time and end_time",
         "type": "gauge",
         "unit": "kg CO2eq",
@@ -121,21 +126,21 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
         "long_unit": "seconds"
     }
     res["embedded_emissions"] = {
-        "value": total_embedded_impacts["gwp"],
+        "value": boaviztapi_data["impacts"]["gwp"]["manufacture"]*ratio,
         "description": "Embedded carbon emissions (manufacturing phase)",
         "type": "gauge",
         "unit": "kg CO2eq",
         "long_unit": "kilograms CO2 equivalent"
     }
     res["embedded_abiotic_resources_depletion"] = {
-        "value": total_embedded_impacts["adp"],
+        "value": boaviztapi_data["impacts"]["adp"]["manufacture"]*ratio,
         "description": "Embedded abiotic ressources consumed (manufacturing phase)",
         "type": "gauge",
         "unit": "kg Sbeq",
         "long_unit": "kilograms ADP equivalent"
     }
     res["embedded_primary_energy"] = {
-        "value": total_embedded_impacts["pe"],
+        "value": boaviztapi_data["impacts"]["pe"]["manufacture"]*ratio,
         "description": "Embedded primary energy consumed (manufacturing phase)",
         "type": "gauge",
         "unit": "MJ",
@@ -174,7 +179,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
 
     return res
 
-def get_total_operational_emissions(start_time, end_time, host_avg_consumption = None, location = None):
+def format_usage_request(start_time, end_time, host_avg_consumption = None, location = None):
     hours_use_time = (end_time - start_time) / 3600.0
     kwargs_usage = {
         "hours_use_time": hours_use_time
@@ -183,14 +188,7 @@ def get_total_operational_emissions(start_time, end_time, host_avg_consumption =
         kwargs_usage["usage_location"] = location
     if host_avg_consumption:
         kwargs_usage["hours_electrical_consumption"] = host_avg_consumption
-
-    # else guess location TODO # https://github.com/Boavizta/boagent/issues/25
-
-    usage_server = UsageServer(**kwargs_usage)
-    server_dto = ServerDTO(usage=usage_server)
-    server_api = ServerApi(get_boavizta_api_client())
-    res = server_api.server_impact_by_config_v1_server_post(server_dto=server_dto)
-    return res
+    return kwargs_usage
 
 def get_power_data(start_time, end_time):
     power_data = {}
@@ -216,33 +214,6 @@ def compute_average_consumption(power_data):
 
     return avg_host
 
-def get_total_embedded_impacts(start_time: float, end_time: float, embedded_impact_data: dict, lifetime: float):
-    res = {}
-    ratio = (end_time - start_time) / (lifetime*settings.seconds_in_one_year)
-
-    for imp in ["gwp", "pe", "adp"] :
-        total = 0.0
-
-        for d in embedded_impact_data['disks_impact']:
-            total += float(d['impacts'][imp]['manufacture'])
-
-        for r in embedded_impact_data['rams_impact']:
-            total += float(r['impacts'][imp]['manufacture'])
-
-        for c in embedded_impact_data['cpus_impact']:
-            total += float(c['impacts'][imp]['manufacture'])
-
-        total += float(embedded_impact_data['motherboard_impact']['impacts'][imp]['manufacture'])
-
-        total = total * ratio
-
-        #if imp != "adp":
-        #    res[imp] = round(total,1)
-        #else:
-        res[imp] = total
-
-    return res
-
 def get_hardware_data(fetch_hardware: bool):
     data = {}
     if fetch_hardware:
@@ -262,40 +233,31 @@ def read_hardware_data():
 def build_hardware_data():
     p = run([settings.hardware_cli, "--output-file", settings.hardware_file_path])
 
-def get_boavizta_api_client():
-    config = Configuration(
-        host=settings.boaviztapi_endpoint,
-    )
-    client = ApiClient(
-        configuration=config, pool_threads=2
-    )
-    return client
+def query_machine_impact_data(model: dict = None, configuration: dict = None, usage: dict = None):
+    server_api = ServerApi(get_boavizta_api_client())
 
-def get_embedded_impact_data(hardware_data):
-    client = get_boavizta_api_client()
-    component_api = ComponentApi(client)
-    res_cpus = []
-    for c in hardware_data['cpus']:
-        cpu = Cpu(**c)
-        res_cpus.append(component_api.cpu_impact_bottom_up_v1_component_cpu_post(cpu=cpu))
-    res_rams = []
-    for r in hardware_data['rams']:
-        ram = Ram(**r)
-        res_rams.append(component_api.ram_impact_bottom_up_v1_component_ram_post(ram=ram))
+    server_impact = None
 
-    res_disks = []
-    for d in hardware_data['disks']:
-        disk = Disk(**d)
-        if d == "ssd":
-            res_disks.append(component_api.disk_impact_bottom_up_v1_component_ssd_post(disk=disk))
-        else:
-            res_disks.append(component_api.disk_impact_bottom_up_v1_component_hdd_post(disk=disk))
+    if configuration:
+        server_dto = ServerDTO(usage=usage, configuration=configuration)
+        server_impact = server_api.server_impact_by_config_v1_server_post(server_dto=server_dto)
+    elif model:
+        server_dto = ServerDTO(usage=usage, model=model)
+        server_impact = server_api.server_impact_by_model_v1_server_get(server_dto=server_dto)
 
-    res_motherboard = component_api.motherboard_impact_bottom_up_v1_component_motherboard_post(mother_board=MotherBoard(**hardware_data['mother_board']))
+    return server_impact
 
+def generate_machine_configuration(hardware_data):
     return {
-        "disks_impact": res_disks,
-        "rams_impact": res_rams,
-        "cpus_impact": res_cpus,
-        "motherboard_impact": res_motherboard
-    }
+       "configuration": {
+           "cpu": {
+               "units": hardware_data['cpus'][0]["units"],
+               "core_units": hardware_data['cpus'][0]["core_units"],
+               "family": hardware_data['cpus'][0]['family']
+           },
+           "ram": sort_ram(hardware_data["rams"]),
+           "disk": sort_disks(hardware_data["disks"]),
+           "motherboard": hardware_data["mother_board"] if "mother_board" in hardware_data else { "units": 1 }, #TODO: improve once the API provides more detail input
+           "power_supply": hardware_data["power_supply"] if "power_supply" in hardware_data else { "units": 2 }
+       }
+   }

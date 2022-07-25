@@ -1,4 +1,42 @@
+from boaviztapi_sdk import ApiClient, Configuration
 from dateutil import parser
+from config import settings
+
+def sort_ram(items: list):
+    hash_map = {}
+    for r in items:
+        if "{}:{}".format(r["capacity"], r["manufacturer"]) in hash_map:
+            hash_map["{}:{}".format(r["capacity"], r["manufacturer"])]["units"]+=1
+        else:
+            hash_map["{}:{}".format(r["capacity"], r["manufacturer"])] = {
+                "units": 1,
+                "manufacturer": r["manufacturer"],
+                "capacity": r["capacity"]
+            }
+    return [v for k,v in hash_map.items()]
+
+def sort_disks(items: list):
+    hash_map = {}
+    for r in items:
+        if "{}:{}".format(r["capacity"], r["manufacturer"], r["type"]) in hash_map:
+            hash_map["{}:{}:{}".format(r["capacity"], r["manufacturer"], r["type"])]["units"]+=1
+        else:
+            hash_map["{}:{}".format(r["capacity"], r["manufacturer"], r["type"])] = {
+                "units": 1,
+                "manufacturer": r["manufacturer"],
+                "capacity": r["capacity"],
+                "type": r["type"]
+            }
+    return [v for k,v in hash_map.items()]
+
+def get_boavizta_api_client():
+    config = Configuration(
+        host=settings.boaviztapi_endpoint,
+    )
+    client = ApiClient(
+        configuration=config, pool_threads=2
+    )
+    return client
 
 def iso8601_or_timestamp_as_timestamp(iso_time: str):
     '''

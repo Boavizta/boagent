@@ -20,29 +20,13 @@ uvicorn api:app --reload
 The app can run without root privileges, but you won't get full data about the RAM and get some warnings.
 Run as root to have the best evaluation possible.
 
-## How to setup
+## Setup required
 
-### BoaviztAPI
+### Access to BoaviztAPI
 
-You need to build the BoaviztAPI container image, then run the container locally on port 5000.
+You need either to use an existing BoaviztAPI endpoint, or to build the BoaviztAPI container image, then run the container locally on port 5000.
 
-Look at the BoaviztAPI for the setup.
-
-### BoaviztaAPI SDK
-
-Once the BoaviztAPI is running, the generate.sh script will download the new openapi.json definition and generate the client lib :
-
-```
-cd impact
-bash generate.sh
-```
-
-Generate and install the lib as a pip package :
-
-```
-cd impact/python-client
-bash build.sh
-```
+Depending or your setup, specify the endpoint to be used with the environment variable `BOAVIZTAPI_ENDPOINT`, see [Configuration](#Configuration).
 
 ### Scaphandre TO BE IMPROVED
 
@@ -51,6 +35,22 @@ To get power consumption metrics, you need scaphandre runnig in the background, 
 ```
 scaphandre json -s 5 -f power_data.json
 ```
+
+## Configuration
+
+Boagent can be configured with the following variables :
+
+- `DEFAULT_LIFETIME`: machines lifetime used to compute the scope 3 / manufacturing, transport, end of life impacts
+- `HARDWARE_FILE_PATH`: path to the file containing the hardware list (output from hardware.py)
+- `POWER_FILE_PATH`: path to the file containing power mearsurements (output from [Scaphandre](https://github.com/hubblo-org/scaphandre) with JSON exporter)
+- `HARDWARE_CLI`: path to the executable file to collect hardware information (hardware.py from this project)
+- `BOAVIZTAPI_ENDPOINT`: http endpoint to the BoaviztAPI, in the form `http://myendpoint.com:PORTNUMBER`
+
+You can set those variables in the following order (as interpreted by the tool):
+
+1. export the variable in the environment
+2. write it in the .env file in the same folder as `api.py`
+3. rely on default values from `config.py`
 
 ## Deeper explanations
 
