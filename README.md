@@ -54,6 +54,8 @@ You can set those variables in the following order (as interpreted by the tool):
 2. write it in the .env file in the same folder as `api.py`
 3. rely on default values from `config.py`
 
+You can check the configuration applied by querying the `/info` route.
+
 ## Deeper explanations
 
 ### Environmental metrics
