@@ -8,6 +8,8 @@ This is an API, you could use either your browser, curl, or call it directly fro
 
 Once the API is running, a Swagger interface is available on localhost:8000/docs.
 
+### Run natively
+
 To run it :
 
 ```
@@ -20,9 +22,15 @@ uvicorn api:app --reload
 The app can run without root privileges, but you won't get full data about the RAM and get some warnings.
 Run as root to have the best evaluation possible.
 
+### Run in docker-compose (with all the requirements)
+
+To get the full setup easily, you could run the stack in docker-compose. `docker-compose.yml`, at the root of the project will build a docker image from the source for boagent, and setup a container for [Scaphandre](#Scaphandre) and another for the [BoaviztAPI](#BoaviztAPI), allowing you to get the full evaluation easily on a physical machine.
+
+Please see [Configuration](#Configuration) for the environment variables you can tweak in the Boagent container.
+
 ## Setup required
 
-### Access to BoaviztAPI
+### BoaviztAPI
 
 You need either to use an existing BoaviztAPI endpoint, or to build the BoaviztAPI container image, then run the container locally on port 5000.
 
@@ -30,9 +38,9 @@ Depending or your setup, specify the endpoint to be used with the environment va
 
 Ensure that the version of BoaviztAPI SDK installed (see `requirements.txt`) is the same as the version of the API running the endpoint you use.
 
-### Scaphandre TO BE IMPROVED
+### Scaphandre
 
-To get power consumption metrics, you need scaphandre runnig in the background, with the json exporter. This will write power metrics to a file, that Boagent will read :
+To get power consumption metrics, you need [Scaphandre](https://github.com/hubblo-org/scaphandre) runnig in the background, with the json exporter. This will write power metrics to a file, that Boagent will read :
 
 ```
 scaphandre json -s 5 -f power_data.json

@@ -23,7 +23,7 @@ services:
       - "powerdata:/app/data:ro"
 
   scaphandre:
-    image: hubblo/scaphandre:latest
+    image: hubblo/scaphandre:dev
     volumes:
       - type: bind
         source: /proc
