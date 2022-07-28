@@ -22,9 +22,13 @@ uvicorn api:app --reload
 The app can run without root privileges, but you won't get full data about the RAM and get some warnings.
 Run as root to have the best evaluation possible.
 
+### Run in a docker container
+
+You could pull the [image](https://github.com/Boavizta/boagent/pkgs/container/boagent) with `docker pull ghcr.io/boavizta/boagent:latest`.
+
 ### Run in docker-compose (with all the requirements)
 
-To get the full setup easily, you could run the stack in docker-compose. `docker-compose.yml`, at the root of the project will build a docker image from the source for boagent, and setup a container for [Scaphandre](#Scaphandre) and another for the [BoaviztAPI](#BoaviztAPI), allowing you to get the full evaluation easily on a physical machine.
+To get the full setup easily, you could run the stack in docker-compose with `docker-compose up -d`. `docker-compose.yml`, at the root of the project will build a docker image from the source for boagent, and setup a container for [Scaphandre](#Scaphandre) and another for the [BoaviztAPI](#BoaviztAPI), allowing you to get the full evaluation easily on a physical machine.
 
 Please see [Configuration](#Configuration) for the environment variables you can tweak in the Boagent container.
 
