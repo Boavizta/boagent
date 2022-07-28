@@ -26,7 +26,7 @@ async def info():
     return {
         "seconds_in_one_year": settings.seconds_in_one_year,
         "default_lifetime": settings.default_lifetime,
-        "hardware_file_path": settings.hardware_file_name,
+        "hardware_file_path": settings.hardware_file_path,
         "power_file_path": settings.power_file_path,
         "hardware_cli": settings.hardware_cli,
         "boaviztapi_endpoint": settings.boaviztapi_endpoint
