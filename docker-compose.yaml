@@ -32,7 +32,7 @@ services:
         source: /sys/class/powercap
         target: /sys/class/powercap
       - "powerdata:/app/data:rw"
-    command: [ "json", "-s", "5", "-t", "9999999", "-f", "/app/data/power_data.json" ]                         
+    command: [ "json", "-s", "5", "-f", "/app/data/power_data.json" ]                         
     networks:
       - boagent-network
     
