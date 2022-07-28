@@ -28,4 +28,4 @@ jobs:
         run: docker build . --tag ghcr.io/boavizta/boagent:$(python3 setup.py --version)
 
       - name: Push docker image
-        docker push ghcr.io/boavizta/boagent:$(python3 setup.py --version)
+        run: docker push ghcr.io/boavizta/boagent:$(python3 setup.py --version)
