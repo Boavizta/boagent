@@ -2,6 +2,16 @@
 from cpuinfo import get_cpu_info
 from cpuid import *
 import cpuid_native
+import sys
+
+
+def get_socket_number_linux(location="/sys/devices/system/node/possible"):
+    if sys.platform != "linux":
+        return "cannot compute socket number for other OS than linux"
+    with open(location, 'r') as f:
+        data = f.read()
+    return int(data.split('-')[-1])+1
+
 
 def is_set(id, reg_idx, bit):
     regs = cpuid(id)
@@ -29,6 +39,29 @@ def get_cpus():
             "bmi1": is_set(7, 1, 3),
             "bmi2": is_set(7, 1, 8),
         },
-        "cpu_info": get_cpu_info()
+        "cpu_info": get_cpu_info(),
+        "nb_socket": get_socket_number_linux()
     }]
     return cpu_info
+
+
+
+
+
+if __name__ =="__main__":
+    print("socket number linux from a file : {}".format(get_socket_number_linux())) 
+    print("Info from the library cpuid-py:")
+    cpu_info = get_cpus()
+    for toto in [cpu_info[0], get_cpu_info()]:
+        print("\n\n\n")
+        for key,value in toto.items():
+            if(value is dict):
+                for i,j in value.items():
+                    if(j is dict):
+                        for a,b in value.items():
+                            print("{} : {}\n".format(a ,b))
+
+                    print("{} : {}\n".format(i,j))
+
+            else:
+                print("{} : {}\n".format(key,value))
