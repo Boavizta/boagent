@@ -5,12 +5,18 @@ from config import settings
 def sort_ram(items: list):
     hash_map = {}
     for r in items:
-        if "{}:{}".format(r["capacity"], r["manufacturer"]) in hash_map:
-            hash_map["{}:{}".format(r["capacity"], r["manufacturer"])]["units"]+=1
+        if "manufacturer" in r:
+            if "{}:{}".format(r["capacity"], r["manufacturer"]) in hash_map:
+                hash_map["{}:{}".format(r["capacity"], r["manufacturer"])]["units"]+=1
+            else:
+                hash_map["{}:{}".format(r["capacity"], r["manufacturer"])] = {
+                    "units": 1,
+                    "manufacturer": r["manufacturer"],
+                    "capacity": r["capacity"]
+                }
         else:
-            hash_map["{}:{}".format(r["capacity"], r["manufacturer"])] = {
+            hash_map["{}".format(r["capacity"])] = {
                 "units": 1,
-                "manufacturer": r["manufacturer"],
                 "capacity": r["capacity"]
             }
     return [v for k,v in hash_map.items()]

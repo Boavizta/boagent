@@ -44,14 +44,10 @@ def cpus():
     return cpus
 
 def format_cpus(cpus):
-    res = []
     for cpu in cpus:
-        res.append({
-            "units": 1,
-            "core_units": cpu["cpu_info"]["count"],
-            "family": cpu["microarch"][0]
-        })
-    return res
+        cpu["core_units"] = cpu["cpu_info"]["count"]
+        cpu["family"] = cpu["microarch"][0]
+    return cpus
 
 def rams():
     rams = get_ram_info()

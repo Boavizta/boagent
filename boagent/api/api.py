@@ -250,6 +250,7 @@ def query_machine_impact_data(model: dict = None, configuration: dict = None, us
     return server_impact
 
 def generate_machine_configuration(hardware_data):
+    pprint(hardware_data)
     config =  {
         "cpu": {
             "units": hardware_data['cpus'][0]["units"],
