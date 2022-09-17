@@ -13,7 +13,7 @@ from pprint import pprint
 def main(output_file):
     res = {}
     res["disks"] = format_disks(disks())
-    res["cpus"] = format_cpus(cpus())
+    res["cpus"] = format_cpus(get_cpus())
     res["rams"] = format_rams(rams())
     res["mother_board"] = format_mother_board(mother_board())
     if output_file is not None:
@@ -39,14 +39,11 @@ def format_disks(disks):
         })
     return res
 
-def cpus():
-    cpus = get_cpus()
-    return cpus
-
 def format_cpus(cpus):
     for cpu in cpus:
         cpu["core_units"] = cpu["cpu_info"]["count"]
-        cpu["family"] = cpu["microarch"][0]
+        print("cpu[microarch][0][0] : {}".format(cpu["microarch"][0][0]))
+        cpu["family"] = cpu["microarch"][0][0].upper()+cpu["microarch"][0][1:] # Ensure first letter of CPU family is upper case, while boaviztapi 2.0 is not released and cpu family usage is not fixed
     return cpus
 
 def rams():

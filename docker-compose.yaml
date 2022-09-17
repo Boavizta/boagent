@@ -3,14 +3,14 @@ version: '3.2'
 services:
 
   boagent:
-    image: ghcr.io/boavizta/boagent:0.0.1
+    #image: ghcr.io/boavizta/boagent:0.0.1
     ## UNCOMMENT THE NEXT TWO LINES TO USE THIS DOCKER FILE AS A DEV ENVIRONMENT
-    #build:
-    #  context: .
+    build:
+      context: .
     environment:
       BOAVIZTAPI_ENDPOINT: "http://boaviztapi:5000"
       DEFAULT_LIFETIME: 5.0
-      HARDWARE_FILE_PATH: "./hardware_data.json"
+      HARDWARE_FILE_PATH: "/home/boagent/hardware_data.json"
       POWER_FILE_PATH: "/app/data/power_data.json"
     depends_on:
       - boaviztapi
@@ -34,7 +34,7 @@ services:
         source: /sys/class/powercap
         target: /sys/class/powercap
       - "powerdata:/app/data:rw"
-    command: [ "json", "-s", "5", "-f", "/app/data/power_data.json" ]                         
+    command: [ "json", "-s", "10", "-f", "/app/data/power_data.json" ]                         
     networks:
       - boagent-network
     

@@ -253,7 +253,7 @@ def generate_machine_configuration(hardware_data):
     pprint(hardware_data)
     config =  {
         "cpu": {
-            "units": hardware_data['cpus'][0]["units"],
+            "units": len(hardware_data["cpus"]),
             "core_units": hardware_data['cpus'][0]["core_units"],
             "family": hardware_data['cpus'][0]['family']
         },

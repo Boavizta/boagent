@@ -8,7 +8,7 @@ RUN useradd -ms /bin/bash boagent
 
 USER boagent
 
-WORKDIR app
+WORKDIR /home/boagent
 
 COPY . .
 
