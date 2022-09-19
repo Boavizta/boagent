@@ -1,4 +1,11 @@
-# Boagent
+<p align="center">
+    <img src="https://raw.githubusercontent.com/Boavizta/boaviztapi/dev/boavizta-logo-4.png" width="100">
+</p>
+<h1 align="center">
+  Boagent
+</h1>
+
+---
 
 Local API / sidecar / companion of a running application that computes and gives insights to the application regarding its environmental impacts. If no parameters are passed to the API to isolate the application, then the impact of the whole machine is calculated.
 
@@ -6,7 +13,7 @@ Local API / sidecar / companion of a running application that computes and gives
 
 This is an API, you could use either your browser, curl, or call it directly from an application (which is the main usecase).
 
-Once the API is running, a Swagger interface is available on localhost:8000/docs.
+Once the API is running, a Swagger interface is available on [localhost:8000/docs](http://localhost:8000/docs).
 
 ### Run natively
 
