@@ -159,14 +159,14 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             "long_unit": "Watts"
         },
         "electricity_carbon_intensity": {
-            "value": boaviztapi_data["verbose"]["USAGE-1"]["gwp_factor"]["used_value"],
+            "value": boaviztapi_data["verbose"]["USAGE"]["gwp_factor"]["value"],
             "description": "Carbon intensity of the elextricity mixed. Mix considered : {}".format(location),
             "type": "gauge",
             "unit": "kg CO2eq / kWh",
             "long_unit": "Kilograms CO2 equivalent per KiloWattHour"
         }
     }
-    usage_location_status = boaviztapi_data["verbose"]["USAGE-1"]["usage_location"]["status"]
+    usage_location_status = boaviztapi_data["verbose"]["USAGE"]["usage_location"]["status"]
     if usage_location_status == "MODIFY":
         res["emissions_calculation_data"]["electricity_carbon_intensity"]["description"] += " WARNING : The provided trigram doesn't match any existing country. So this result is based on average European electricity mix. Be careful with this data."
     elif usage_location_status == "SET":
