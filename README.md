@@ -28,6 +28,10 @@ You could pull the [image](https://github.com/Boavizta/boagent/pkgs/container/bo
 
 ### Run in docker-compose (with all the requirements)
 
+To get started you need docker and docker-compose installed on your machine. On a debian or ubuntu machine, run :
+
+    # apt update && apt install -y docker.io docker-compose
+
 To get the full setup easily, you could run the stack in docker-compose with `docker-compose up -d`. `docker-compose.yml`, at the root of the project will build a docker image from the source for boagent, and setup a container for [Scaphandre](#Scaphandre) and another for the [BoaviztAPI](#BoaviztAPI), allowing you to get the full evaluation easily on a physical machine.
 
 Please see [Configuration](#Configuration) for the environment variables you can tweak in the Boagent container.
