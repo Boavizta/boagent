@@ -1,0 +1,54 @@
+version: '3.2'
+
+services:
+
+  boagent:
+    image: ghcr.io/boavizta/boagent:latest
+    environment:
+      BOAVIZTAPI_ENDPOINT: "http://boaviztapi:5000"
+      DEFAULT_LIFETIME: 5.0
+      HARDWARE_FILE_PATH: "/home/boagent/hardware_data.json"
+      POWER_FILE_PATH: "/app/data/power_data.json"
+    depends_on:
+      - boaviztapi
+      - scaphandre
+    ports: 
+      - "8000:8000"
+    networks:
+      - boagent-network
+    volumes:
+      - "/proc:/proc"
+      - "/sys:/sys:ro"
+      - "powerdata:/app/data:ro"
+
+  scaphandre:
+    image: hubblo/scaphandre:dev
+    volumes:
+      - type: bind
+        source: /proc
+        target: /proc
+      - type: bind
+        source: /sys/class/powercap
+        target: /sys/class/powercap
+      - "powerdata:/app/data:rw"
+    command: [ "json", "-s", "10", "-f", "/app/data/power_data.json" ]                         
+    networks:
+      - boagent-network
+    
+  boaviztapi:
+    #image: ghcr.io/boavizta/boaviztapi:0.1.2
+    image: bpetit/boaviztapi:v0.1.3
+    ports: 
+      - "5000:5000"
+    networks:
+      - boagent-network
+
+volumes:
+  powerdata: {}
+
+networks:
+  boagent-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.33.0/24
