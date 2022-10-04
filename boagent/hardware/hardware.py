@@ -6,7 +6,6 @@ import sys
 from disk import search_physical_drives
 from cpu import get_cpus
 from ram import get_ram_info
-from pprint import pprint
 
 @click.command()
 @click.option("--output-file", help="File to output the hardwate data to")

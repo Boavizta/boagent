@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Response
-from pprint import pprint
 from subprocess import run, Popen
 import time, json
 from contextlib import redirect_stdout
@@ -250,7 +249,6 @@ def query_machine_impact_data(model: dict = None, configuration: dict = None, us
     return server_impact
 
 def generate_machine_configuration(hardware_data):
-    pprint(hardware_data)
     config =  {
         "cpu": {
             "units": len(hardware_data["cpus"]),
@@ -262,5 +260,4 @@ def generate_machine_configuration(hardware_data):
         "motherboard": hardware_data["mother_board"] if "mother_board" in hardware_data else { "units": 1 }, #TODO: improve once the API provides more detail input
         "power_supply": hardware_data["power_supply"] if "power_supply" in hardware_data else { "units": 1 } #TODO: if cpu is a small one, guess that power supply is light/average weight of a laptops power supply ?
     }
-    #pprint(config)
     return config
