@@ -15,6 +15,7 @@ from boaviztapi_sdk.model.server_dto import ServerDTO
 from datetime import datetime
 from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
+from db import read_db, fixture
 #from os import env
 
 app = FastAPI()
@@ -30,6 +31,19 @@ async def info():
         "hardware_cli": settings.hardware_cli,
         "boaviztapi_endpoint": settings.boaviztapi_endpoint
     }
+
+#@app.get("/web")
+#async def web():
+#    return Response(
+#        content=,
+#    )
+
+@app.get("/csv")
+async def csv(since: str = "now"):
+    return Response(
+        content=str(read_db(settings.db_path)),
+        media_type="text/csv"
+    )
 
 @app.get("/metrics")
 async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True, lifetime: float =settings.default_lifetime, fetch_hardware: bool = False):
