@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     hardware_cli: str = os.getenv("HARDWARE_CLI") if os.getenv("HARDWARE_CLI") else "../hardware/hardware.py"
     boaviztapi_endpoint: str = os.getenv("BOAVIZTAPI_ENDPOINT") if os.getenv("BOAVIZTAPI_ENDPOINT") else "http://localhost:5000"
     db_path: str = os.getenv("BOAGENT_DB_PATH") if os.getenv("BOAGENT_DB_PATH") else "../../db/boagent.db"
+    public_path: str = os.getenv("BOAGENT_PUBLIC_PATH") if os.getenv("BOAGENT_PUBLIC_PATH") else "../public"
+    assets_path: str = os.getenv("BOAGENT_ASSETS_PATH") if os.getenv("BOAGENT_ASSETS_PATH") else "../public/assets"
+    PROJECT_NAME: str = "boagent"
+    PROJECT_VERSION: str = "0.1.0"
 
     class Config:
         env_file = ".env"

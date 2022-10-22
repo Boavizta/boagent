@@ -1,4 +1,6 @@
 from fastapi import FastAPI, Response
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from subprocess import run, Popen
 import time, json
 from contextlib import redirect_stdout
@@ -16,9 +18,16 @@ from datetime import datetime
 from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 from db import read_db, fixture
-#from os import env
 
-app = FastAPI()
+def configure_static(app):
+    app.mount("/assets", StaticFiles(directory=settings.assets_path), name="assets")
+
+def configure_app():
+    app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
+    configure_static(app)
+    return app
+
+app = configure_app()
 items = {}
 
 @app.get("/info")
@@ -32,11 +41,13 @@ async def info():
         "boaviztapi_endpoint": settings.boaviztapi_endpoint
     }
 
-#@app.get("/web")
-#async def web():
-#    return Response(
-#        content=,
-#    )
+@app.get("/web", response_class=HTMLResponse)
+async def web():
+    res = ""
+    with open("{}/index.html".format(settings.public_path), 'r') as fd:
+        res = fd.read()
+    fd.close()
+    return res
 
 @app.get("/csv")
 async def csv(since: str = "now"):
