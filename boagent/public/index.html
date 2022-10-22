@@ -1,0 +1,19 @@
+<html>
+<head>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<script type="text/javascript"
+  src="assets/dygraph.min.js"></script>
+<link rel="stylesheet" src="assets/dygraph.css" />
+</head>
+<body>
+<div id="graphdiv2"
+  style="width:500px; height:300px;"></div>
+<script type="text/javascript">
+  g2 = new Dygraph(
+    document.getElementById("graphdiv2"),
+    "assets/temperatures.csv", // path to CSV file
+    {}          // options
+  );
+</script>
+</body>
+</html>
