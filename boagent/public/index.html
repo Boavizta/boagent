@@ -1,19 +1,240 @@
 <html>
+
 <head>
-<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
-<script type="text/javascript"
-  src="assets/dygraph.min.js"></script>
-<link rel="stylesheet" src="assets/dygraph.css" />
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="assets/main.css" />
+    <script type="text/javascript" src="assets/dygraph.min.js"></script>
+    <script type="text/javascript" src="assets/synchronizer.js"></script>
+    <script type="text/javascript" src="assets/pureknob.js"></script>
 </head>
-<body>
-<div id="graphdiv2"
-  style="width:500px; height:300px;"></div>
-<script type="text/javascript">
-  g2 = new Dygraph(
-    document.getElementById("graphdiv2"),
-    "assets/temperatures.csv", // path to CSV file
-    {}          // options
-  );
+
+<body style="background-color: #262B30; color: white; font-family: Ubuntu,serif">
+
+    <div class="scores-box">
+        <div class="score-box">
+            <h3>Actual intensity</h3>
+            <div id="intensity"></div>
+        </div>
+        <div class="score-box">
+            <h3>Operational Yearly impact</h3>
+            <div id="operational-score"></div>
+        </div>
+        <div class="score-box">
+            <h3>Opti-score</h3>
+            <div id="server-score"></div>
+        </div>
+        <div class="score-box">
+            <h3>Embodied yearly impact</h3>
+            <div id="embodied-score"></div>
+        </div>
+        <div class="score-box">
+            <h3>CPU load</h3>
+            <div id="load-score"></div>
+        </div>
+    </div>
+
+    <div class="box-legend">
+        <h3>Server impact</h3>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum. Sed volutpat ligula vestibulum dapibus ultrices. Aliquam erat volutpat. Suspendisse non diam in nulla volutpat tincidunt id nec orci. Cras eu semper nunc. Proin molestie dictum volutpat. Donec et dapibus ipsum. Integer iaculis rhoncus odio, vitae volutpat justo mollis iaculis.</p>
+    </div>
+    <div class="box">
+        <div id="graphimpact" style="width:100%;; height:200px;"></div>
+    </div>
+
+
+    <div class="box-legend">
+        <h3>Carbon intensity</h3>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum. Sed volutpat ligula vestibulum dapibus ultrices. Aliquam erat volutpat. Suspendisse non diam in nulla volutpat tincidunt id nec orci. Cras eu semper nunc. Proin molestie dictum volutpat. Donec et dapibus ipsum. Integer iaculis rhoncus odio, vitae volutpat justo mollis iaculis.</p>
+    </div>
+    <div class="box">
+        <div id="graphforcast" style="width:100%;height:200px;"></div>
+    </div>
+
+    <div class="box-legend">
+        <h3>Server load</h3>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum. Sed volutpat ligula vestibulum dapibus ultrices. Aliquam erat volutpat. Suspendisse non diam in nulla volutpat tincidunt id nec orci. Cras eu semper nunc. Proin molestie dictum volutpat. Donec et dapibus ipsum. Integer iaculis rhoncus odio, vitae volutpat justo mollis iaculis.</p>
+    </div>
+    <div class="box">
+        <div id="graphload" style="width:100%;; height:200px;"></div>
+    </div>
+
+<script>
+    var graphforcast = new Dygraph(
+        document.getElementById("graphforcast"),
+        "assets/data.csv", // path to CSV file
+        {
+            fillGraph: true,
+            visibility: [true, false, false, false, false, false, false, false, false, false, false],
+            underlayCallback: function(canvas, area, g) {
+                function highlight_period(x_start, x_end) {
+                    var canvas_left_x = g.toDomXCoord(x_start);
+                    var canvas_right_x = g.toDomXCoord(x_end);
+                    var canvas_width = canvas_right_x - canvas_left_x;
+                    canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
+                }
+
+                for (let i = 0; i < g.numRows()-1; i++) {
+                    if (g.getValue(i, 10) === 0){
+                        for (let j = i+1; j < g.numRows()-1; j++) {
+                            if (g.getValue(j, 10) !== 0){
+                                console.log("low : (" + i + ", " + j + ")")
+                                canvas.fillStyle = "rgb(197,255,197)";
+                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                break;
+                            }
+                        }
+                    }
+                    else if (g.getValue(i, 10) === 2){
+                        for (let j = i+1; j < g.numRows()-1; j++) {
+                            console.log("high : (" + i + ", " + j + ")")
+                            if (g.getValue(j, 10) !== 2){
+                                canvas.fillStyle =  "rgba(255, 153, 153)";
+                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    var graphimpact = new Dygraph(
+        document.getElementById("graphimpact"),
+        "assets/data.csv", // path to CSV file
+        {
+            fillGraph: true,
+            stackedGraph: true,
+            visibility: [false, false, false, false, false, false, false, false, true, false, true],
+            underlayCallback: function(canvas, area, g) {
+                function highlight_period(x_start, x_end) {
+                    var canvas_left_x = g.toDomXCoord(x_start);
+                    var canvas_right_x = g.toDomXCoord(x_end);
+                    var canvas_width = canvas_right_x - canvas_left_x;
+                    canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
+                }
+
+                for (let i = 0; i < g.numRows()-1; i++) {
+                    if (g.getValue(i, 10) === 0){
+                        for (let j = i+1; j < g.numRows()-1; j++) {
+                            if (g.getValue(j, 10) !== 0){
+                                console.log("low : (" + i + ", " + j + ")")
+                                canvas.fillStyle = "rgb(197,255,197)";
+                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                break;
+                            }
+                        }
+                    }
+                    else if (g.getValue(i, 10) === 2){
+                        for (let j = i+1; j < g.numRows()-1; j++) {
+                            console.log("high : (" + i + ", " + j + ")")
+                            if (g.getValue(j, 10) !== 2){
+                                canvas.fillStyle =  "rgba(255, 153, 153)";
+                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    var graphload = new Dygraph(
+        document.getElementById("graphload"),
+        "assets/data.csv", // path to CSV file
+        {
+            fillGraph: true,
+            visibility: [false, true, true, false, false, false, false, false, false, false, false],
+            underlayCallback: function(canvas, area, g) {
+                function highlight_period(x_start, x_end) {
+                    var canvas_left_x = g.toDomXCoord(x_start);
+                    var canvas_right_x = g.toDomXCoord(x_end);
+                    var canvas_width = canvas_right_x - canvas_left_x;
+                    canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
+                }
+
+                for (let i = 0; i < g.numRows()-1; i++) {
+                    if (g.getValue(i, 10) === 0){
+                        for (let j = i+1; j < g.numRows()-1; j++) {
+                            if (g.getValue(j, 10) !== 0){
+                                console.log("low : (" + i + ", " + j + ")")
+                                canvas.fillStyle = "rgb(197,255,197)";
+                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                break;
+                            }
+                        }
+                    }
+                    else if (g.getValue(i, 10) === 2){
+                        for (let j = i+1; j < g.numRows()-1; j++) {
+                            console.log("high : (" + i + ", " + j + ")")
+                            if (g.getValue(j, 10) !== 2){
+                                canvas.fillStyle =  "rgba(255, 153, 153)";
+                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    Dygraph.synchronize([graphforcast, graphimpact, graphload], {
+        zoom: true,
+        selection: true,
+        range: false
+    });
+
+    const optiscore = pureknob.createKnob(300, 200);
+    optiscore.setProperty('angleStart', -0.75 * Math.PI);
+    optiscore.setProperty('angleEnd', 0.75 * Math.PI);
+    optiscore.setProperty('colorFG', '#88ff88');
+    optiscore.setProperty('valMin', 0);
+    optiscore.setProperty('valMax', 100);
+    optiscore.setProperty('readonly', true)
+    optiscore.setValue(45);
+    document.getElementById('server-score').appendChild(optiscore.node());
+
+    const operationnal = pureknob.createKnob(300, 150);
+    operationnal.setProperty('angleStart', -0.75 * Math.PI);
+    operationnal.setProperty('angleEnd', 0.75 * Math.PI);
+    operationnal.setProperty('colorFG', '#88ff88');
+    operationnal.setProperty('valMin', 0);
+    operationnal.setProperty('valMax', 100);
+    operationnal.setProperty('readonly', true)
+    operationnal.setValue(12);
+    document.getElementById('operational-score').appendChild(operationnal.node());
+
+    const embodied = pureknob.createKnob(300, 150);
+    embodied.setProperty('angleStart', -0.75 * Math.PI);
+    embodied.setProperty('angleEnd', 0.75 * Math.PI);
+    embodied.setProperty('colorFG', '#88ff88');
+    embodied.setProperty('valMin', 0);
+    embodied.setProperty('valMax', 100);
+    embodied.setProperty('readonly', true)
+    embodied.setValue(23);
+    document.getElementById('embodied-score').appendChild(embodied.node());
+
+    const loadscore = pureknob.createKnob(300, 150);
+    loadscore.setProperty('angleStart', -0.75 * Math.PI);
+    loadscore.setProperty('angleEnd', 0.75 * Math.PI);
+    loadscore.setProperty('colorFG', '#88ff88');
+    loadscore.setProperty('valMin', 0);
+    loadscore.setProperty('valMax', 100);
+    loadscore.setProperty('readonly', true)
+    loadscore.setValue(67);
+    document.getElementById('load-score').appendChild(loadscore.node());
+
+    const carbonintensity = pureknob.createKnob(300, 150);
+    carbonintensity.setProperty('angleStart', -0.75 * Math.PI);
+    carbonintensity.setProperty('angleEnd', 0.75 * Math.PI);
+    carbonintensity.setProperty('colorFG', '#88ff88');
+    carbonintensity.setProperty('valMin', 0);
+    carbonintensity.setProperty('valMax', 100);
+    carbonintensity.setProperty('readonly', true)
+    carbonintensity.setValue(37);
+    document.getElementById('intensity').appendChild(carbonintensity.node());
 </script>
+
+
 </body>
 </html>
+
