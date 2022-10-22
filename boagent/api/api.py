@@ -18,6 +18,8 @@ from datetime import datetime
 from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 from db import read_db, fixture
+from numpy import diff
+from pprint import pprint
 
 def configure_static(app):
     app.mount("/assets", StaticFiles(directory=settings.assets_path), name="assets")
@@ -51,8 +53,17 @@ async def web():
 
 @app.get("/csv")
 async def csv(since: str = "now"):
+    data = read_db(settings.db_path)
+    res = ""
+    for row in data:
+        line = ""
+        for r in row:
+            line += "{},".format(r)
+        res += "{}\n".format(line[:-1])
+    pprint(data) 
+    print(res)
     return Response(
-        content=str(read_db(settings.db_path)),
+        content=res,
         media_type="text/csv"
     )
 
