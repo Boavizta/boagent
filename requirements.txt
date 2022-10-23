@@ -1,3 +1,4 @@
+requests==2.28.1
 fastapi==0.75.2
 uvicorn
 pandas
