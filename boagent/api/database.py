@@ -15,7 +15,7 @@ class TimeSeriesRecord(Base):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     timestamp = Column(DateTime, unique=True, nullable=False)
-    value = Column(Float, unique=True, nullable=False)
+    value = Column(Float, nullable=False)
 
     @declared_attr
     def __tablename__(cls):
