@@ -17,7 +17,7 @@ from boaviztapi_sdk.model.server_dto import ServerDTO
 from datetime import datetime
 from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
-from db import read_db, fixture, highlight_spikes
+from db import read_db, highlight_spikes
 from pprint import pprint
 
 def configure_static(app):
@@ -51,15 +51,16 @@ async def web():
     return res
 
 @app.get("/csv")
-async def csv(since: str = "now"):
-    data = read_db(settings.db_path)
-    pprint(highlight_spikes(settings.db_path))
+async def csv(data: str, since: str = "now", until: str = "24h"):
     res = ""
-    for row in data:
-        line = ""
-        for r in row:
-            line += "{},".format(r)
-        res += "{}\n".format(line[:-1])
+    if data == "intensity":
+        data = read_db(settings.db_path)
+        pprint(highlight_spikes(settings.db_path))
+        for row in data:
+            line = ""
+            for r in row:
+                line += "{},".format(r)
+            res += "{}\n".format(line[:-1])
     return Response(
         content=res,
         media_type="text/csv"

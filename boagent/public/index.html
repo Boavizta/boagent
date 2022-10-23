@@ -61,7 +61,7 @@
 <script>
     var graphforcast = new Dygraph(
         document.getElementById("graphforcast"),
-        "assets/data.csv", // path to CSV file
+        "/csv?data=intensity&since=now&until=24h", // path to CSV file
         {
             fillGraph: true,
             visibility: [true, false, false, false, false, false, false, false, false, false, false],
@@ -100,7 +100,7 @@
 
     var graphimpact = new Dygraph(
         document.getElementById("graphimpact"),
-        "assets/data.csv", // path to CSV file
+        "/csv?data=impact", // path to CSV file
         {
             fillGraph: true,
             stackedGraph: true,
@@ -140,7 +140,7 @@
 
     var graphload = new Dygraph(
         document.getElementById("graphload"),
-        "assets/data.csv", // path to CSV file
+        "/csv?data=load", // path to CSV file
         {
             fillGraph: true,
             visibility: [false, true, true, false, false, false, false, false, false, false, false],

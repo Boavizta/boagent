@@ -35,7 +35,7 @@ def highlight_spikes(db_path: str):
     # get all values in a serie, as a tuple (timestamp,col)
     for c in column_names:
         print("colname = {}".format(c))
-        res = cur.execute("SELECT timestamp,{} FROM {}".format(c,TABLE_NAME))
+        res = cur.execute("SELECT date,{} FROM {}".format(c,TABLE_NAME))
         data = res.fetchall()
         values = [v[1] for v in data]
         # run diff on values
@@ -47,7 +47,7 @@ def highlight_spikes(db_path: str):
         # extract the tuples with value > 1.5 * avg_diff 
         spikes[c] = [get_timestamps_around_spike(spike, diffs, data) for spike in diffs if spike > 1.5 * avg_diff]
         if len(spikes[c]) > 0:
-            res = cur.execute("INSERT INTO spikes VALUES ({},{},\"{}\")".format(spikes[c][0][0],spikes[c][0][1],c))
+            res = cur.execute("INSERT INTO spikes VALUES (\"{}\",\"{}\",\"{}\")".format(spikes[c][0][0],spikes[c][0][1],c))
             insert_result = res.fetchall()
     # for each match
     #   insert a new (spike_start_timestamp,spike_stop_timestamp,spike_serie_name)
@@ -56,10 +56,3 @@ def highlight_spikes(db_path: str):
     cur.close()
     con.close()
     return spikes
-
-
-def fixture(db_path: str):
-    con = sqlite.connect(db_path)
-    cur = con.cursor()
-    res = cur.execute("CREATE TABLE aggregated_data(timestamp, val1, val2)")
-    return res
