@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pydantic = '*'
 fastapi = '0.75.2'
 uvicorn = '*'
 pandas = '*'
@@ -15,6 +14,8 @@ cpuid='0.0.10'
 py-cpuinfo='8.0.0'
 dataclasses='0.8'
 requests = "*"
+sqlalchemy = "*"
+pydantic = {extras = ["dotenv"], version = "*"}
 
 [dev-packages]
 mkdocs = '*'
