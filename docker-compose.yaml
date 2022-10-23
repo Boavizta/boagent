@@ -12,6 +12,7 @@ services:
       DEFAULT_LIFETIME: 5.0
       HARDWARE_FILE_PATH: "/home/boagent/hardware_data.json"
       POWER_FILE_PATH: "/app/data/power_data.json"
+        #user: boagent
     depends_on:
       - boaviztapi
       - scaphandre

@@ -6,7 +6,7 @@ RUN apt update && apt install gcc g++ -y
 
 RUN useradd -ms /bin/bash boagent
 
-USER boagent
+#USER boagent
 
 WORKDIR /home/boagent
 
