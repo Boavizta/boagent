@@ -24,7 +24,7 @@ services:
       - "/proc:/proc"
       - "/sys:/sys:ro"
       - "powerdata:/app/data:ro"
-      - "./db:/app/db:rw"
+      - "./db:/app/db"
 
   scaphandre:
     image: hubblo/scaphandre:dev
