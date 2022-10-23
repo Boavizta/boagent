@@ -69,7 +69,7 @@ async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
     start_date, end_date = parse_date_info(since, until)
     df = select_metric(session, data, start_date, end_date)
     return Response(
-        content=df.to_csv(),
+        content=df.to_csv(index=False),
         media_type="text/csv"
     )
 
