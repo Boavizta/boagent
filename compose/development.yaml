@@ -1,0 +1,12 @@
+services:
+  boagent:
+    entrypoint: [ "/bin/bash", "-c", "cd boagent/api && uvicorn api:app --host 0.0.0.0 --reload" ]
+    volumes:
+      - "$PWD:/home/boagent"
+
+  boaviztapi:
+    build:
+      context: ../boaviztapi
+      dockerfile: ../boaviztapi/Dockerfile.dev
+    volumes:
+      - "$PWD/../boaviztapi/boaviztapi:/app/boaviztapi"
