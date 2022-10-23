@@ -1,5 +1,6 @@
 import sqlite3
 from numpy import diff
+from pprint import pprint
 
 TABLE_NAME="aggregated_data"
 
@@ -45,9 +46,9 @@ def highlight_spikes(db_path: str):
         print("avg_diff = {}".format(+avg_diff))
         # extract the tuples with value > 1.5 * avg_diff 
         spikes[c] = [get_timestamps_around_spike(spike, diffs, data) for spike in diffs if spike > 1.5 * avg_diff]
-        #res = cur.execute("INSERT INTO spikes VALUES ({},{},\"{}\")".format(spikes[c][0][0],spikes[c][0][1],c))
-        #insert_result = res.fetchall()
-        #print(insert_result)
+        if len(spikes[c]) > 0:
+            res = cur.execute("INSERT INTO spikes VALUES ({},{},\"{}\")".format(spikes[c][0][0],spikes[c][0][1],c))
+            insert_result = res.fetchall()
     # for each match
     #   insert a new (spike_start_timestamp,spike_stop_timestamp,spike_serie_name)
     #       with spike_start_timestamp = previous_timestamp_before_match (matched_timestamp - previous_timestamp_before_match) / 2
