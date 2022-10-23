@@ -1,8 +1,12 @@
+from typing import Dict, Any
+
+import requests
 from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from subprocess import run, Popen
-import time, json
+import time
+import json
 from contextlib import redirect_stdout
 from boaviztapi_sdk import ApiClient, Configuration
 from boaviztapi_sdk.api.component_api import ComponentApi
@@ -14,10 +18,11 @@ from boaviztapi_sdk.model.mother_board import MotherBoard
 from boaviztapi_sdk.model.usage_server import UsageServer
 from boaviztapi_sdk.model.model_server import ModelServer
 from boaviztapi_sdk.model.server_dto import ServerDTO
-from datetime import datetime
-from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, get_boavizta_api_client, sort_ram, sort_disks
+from datetime import datetime, timedelta
+from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, \
+    get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
-from db import read_db, highlight_spikes
+from db import read_db, highlight_spikes, insert_metrics
 from pprint import pprint
 
 def configure_static(app):
@@ -84,6 +89,17 @@ async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = 
         iso8601_or_timestamp_as_timestamp(start_time),
         iso8601_or_timestamp_as_timestamp(end_time),
         verbose, location, measure_power, lifetime, fetch_hardware
+    )
+
+
+@app.get("/update")
+async def update():
+    response = query_electricity_carbon_intensity()
+    info = parse_electricity_carbon_intensity(response)
+    insert_metrics(
+        db_path=settings.db_path,
+        date=info['timestamp'],
+        metrics={'gwp_intensity': info['value']}
     )
 
 
@@ -296,3 +312,26 @@ def generate_machine_configuration(hardware_data):
         "power_supply": hardware_data["power_supply"] if "power_supply" in hardware_data else { "units": 1 } #TODO: if cpu is a small one, guess that power supply is light/average weight of a laptops power supply ?
     }
     return config
+
+
+def query_electricity_carbon_intensity() -> Dict[str, Any]:
+    url = settings.boaviztapi_endpoint + '/v1/usage_router/gwp/forcast_intensity?location=westus'
+    today = datetime.now() + timedelta(minutes=10)
+    start_date = today.strftime("%Y-%m-%dT%H:%M:%SZ")
+    stop_date = (today + timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    response = requests.post(url, json={
+        "source": "carbon_aware_api",
+        "url": settings.carbon_aware_api_endpoint,
+        "token": settings.carbon_aware_api_token,
+        "start_date": start_date,
+        "stop_date": stop_date
+    })
+    return response.json()[0]
+
+
+def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]):
+    first_forecast = carbon_aware_api_response['forecastData'][0]
+    return {
+        'timestamp': datetime.fromisoformat(first_forecast['timestamp']),
+        'value': first_forecast['value']
+    }

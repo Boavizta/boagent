@@ -1,6 +1,8 @@
 import sqlite3
+from datetime import datetime
+from typing import Dict, Any
+
 from numpy import diff
-from pprint import pprint
 
 TABLE_NAME="aggregated_data"
 
@@ -56,3 +58,18 @@ def highlight_spikes(db_path: str):
     cur.close()
     con.close()
     return spikes
+
+
+def insert_metrics(db_path: str, date: datetime, metrics: Dict[str, Any]):
+    con = connect_db(db_path)
+    cur = con.cursor()
+    columns = ['date'] + list(metrics.keys())
+    values = [date.strftime('%Y/%m/%d %H:%M:%S')] + list(metrics.values())
+    query_str = 'INSERT INTO aggregated_data ({}) VALUES ({})'.format(
+        ', '.join(columns),
+        ', '.join(['?'] * len(values))
+    )
+    cur.execute(query_str, tuple(values))
+    con.commit()
+    cur.close()
+    con.close()

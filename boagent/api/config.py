@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     assets_path: str = os.getenv("BOAGENT_ASSETS_PATH") if os.getenv("BOAGENT_ASSETS_PATH") else "../public/assets"
     PROJECT_NAME: str = "boagent"
     PROJECT_VERSION: str = "0.1.0"
+    carbon_aware_api_endpoint: str = os.getenv("CARBON_AWARE_API_ENDPOINT", "https://carbon-aware-api.azurewebsites.net")
+    carbon_aware_api_token: str = os.getenv("CARBON_AWARE_API_TOKEN")
 
     class Config:
         env_file = ".env"
