@@ -1,13 +1,13 @@
-from typing import Dict, Any
+import json
+import time
+from datetime import datetime, timedelta
+from subprocess import run
+from typing import Dict, Any, Tuple
 
 import requests
 from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from subprocess import run, Popen
-import time
-import json
-from contextlib import redirect_stdout
 from boaviztapi_sdk import ApiClient, Configuration
 from boaviztapi_sdk.api.component_api import ComponentApi
 from boaviztapi_sdk.api.server_api import ServerApi
@@ -18,23 +18,29 @@ from boaviztapi_sdk.model.mother_board import MotherBoard
 from boaviztapi_sdk.model.usage_server import UsageServer
 from boaviztapi_sdk.model.model_server import ModelServer
 from boaviztapi_sdk.model.server_dto import ServerDTO
-from datetime import datetime, timedelta
+
 from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, \
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
-from db import read_db, highlight_spikes, insert_metrics
-from pprint import pprint
+from database import create_database, get_session, get_engine, insert_metric, select_metric
+
 
 def configure_static(app):
     app.mount("/assets", StaticFiles(directory=settings.assets_path), name="assets")
+
 
 def configure_app():
     app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
     configure_static(app)
     return app
 
+
 app = configure_app()
 items = {}
+
+
+create_database(get_engine(db_path=settings.db_path))
+
 
 @app.get("/info")
 async def info():
@@ -47,6 +53,7 @@ async def info():
         "boaviztapi_endpoint": settings.boaviztapi_endpoint
     }
 
+
 @app.get("/web", response_class=HTMLResponse)
 async def web():
     res = ""
@@ -55,21 +62,17 @@ async def web():
     fd.close()
     return res
 
-@app.get("/csv")
-async def csv(data: str, since: str = "now", until: str = "24h"):
-    res = ""
-    if data == "intensity":
-        data = read_db(settings.db_path)
-        pprint(highlight_spikes(settings.db_path))
-        for row in data:
-            line = ""
-            for r in row:
-                line += "{},".format(r)
-            res += "{}\n".format(line[:-1])
+
+@app.get('/csv')
+async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
+    session = get_session(settings.db_path)
+    start_date, end_date = parse_date_info(since, until)
+    df = select_metric(session, data, start_date, end_date)
     return Response(
-        content=res,
+        content=df.to_csv(),
         media_type="text/csv"
     )
+
 
 @app.get("/metrics")
 async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True, lifetime: float =settings.default_lifetime, fetch_hardware: bool = False):
@@ -82,6 +85,7 @@ async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool 
             )
         ), media_type="plain-text"
     )
+
 
 @app.get("/query")
 async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None, measure_power: bool = True, lifetime: float =settings.default_lifetime, fetch_hardware: bool = False):
@@ -96,11 +100,10 @@ async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = 
 async def update():
     response = query_electricity_carbon_intensity()
     info = parse_electricity_carbon_intensity(response)
-    insert_metrics(
-        db_path=settings.db_path,
-        date=info['timestamp'],
-        metrics={'gwp_intensity': info['value']}
-    )
+    session = get_session(settings.db_path)
+    insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
+    session.commit()
+    session.close()
 
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float, fetch_hardware: bool = False):
@@ -231,6 +234,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
 
     return res
 
+
 def format_usage_request(start_time, end_time, host_avg_consumption = None, location = None):
     hours_use_time = (end_time - start_time) / 3600.0
     kwargs_usage = {
@@ -241,6 +245,7 @@ def format_usage_request(start_time, end_time, host_avg_consumption = None, loca
     if host_avg_consumption:
         kwargs_usage["hours_electrical_consumption"] = host_avg_consumption
     return kwargs_usage
+
 
 def get_power_data(start_time, end_time):
     power_data = {}
@@ -254,6 +259,7 @@ def get_power_data(start_time, end_time):
             power_data['warning'] = "The time window is lower than one hour, but the energy consumption estimate is in Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be careful with this data."
         return power_data
 
+
 def compute_average_consumption(power_data):
     # Host energy consumption
     total_host = 0.0
@@ -266,6 +272,7 @@ def compute_average_consumption(power_data):
 
     return avg_host
 
+
 def get_hardware_data(fetch_hardware: bool):
     data = {}
     if fetch_hardware:
@@ -277,13 +284,16 @@ def get_hardware_data(fetch_hardware: bool):
         data = read_hardware_data()
     return data
 
+
 def read_hardware_data():
     with open(settings.hardware_file_path, 'r') as fd:
         data = json.load(fd)
     return data
 
+
 def build_hardware_data():
     p = run([settings.hardware_cli, "--output-file", settings.hardware_file_path])
+
 
 def query_machine_impact_data(model: dict = None, configuration: dict = None, usage: dict = None):
     server_api = ServerApi(get_boavizta_api_client())
@@ -298,6 +308,7 @@ def query_machine_impact_data(model: dict = None, configuration: dict = None, us
         server_impact = server_api.server_impact_by_model_v1_server_get(server_dto=server_dto)
 
     return server_impact
+
 
 def generate_machine_configuration(hardware_data):
     config =  {
@@ -333,5 +344,29 @@ def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]
     first_forecast = carbon_aware_api_response['forecastData'][0]
     return {
         'timestamp': datetime.fromisoformat(first_forecast['timestamp']),
-        'value': first_forecast['value']
+        'value': round(first_forecast['value'], 3)
     }
+
+
+def parse_date_info(since: str, until: str) -> Tuple[datetime, datetime]:
+    end_date = datetime.now()
+    start_date = end_date - timedelta(hours=1)
+
+    if since == 'now':
+        end_date = datetime.now()
+    else:
+        ValueError(f'unknown value since={since}')
+
+    if until.endswith('d'):
+        days = int(until.replace('d', ''))
+        start_date = end_date - timedelta(days=days)
+    if until.endswith('h'):
+        hours = int(until.replace('h', ''))
+        start_date = end_date - timedelta(hours=hours)
+    elif until.endswith('m'):
+        minutes = int(until.replace('m', ''))
+        start_date = end_date - timedelta(minutes=minutes)
+    else:
+        ValueError(f'unknown value until={until}')
+
+    return start_date, end_date
