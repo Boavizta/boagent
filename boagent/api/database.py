@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Any, Optional
 
 import pandas as pd
-from sqlalchemy import Column, DateTime, Integer, Float, insert, select
+from sqlalchemy import Column, DateTime, Integer, Float, insert, select, inspect
 from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.orm import Session, declarative_base, declared_attr
 
@@ -32,8 +32,9 @@ metrics = {
 
 
 def create_database(engine: Engine) -> None:
+    inspector = inspect(engine)
     for model_name, model in metrics.items():
-        if not engine.has_table(model_name):
+        if not inspector.has_table(model_name):
             model.__table__.create(engine)
 
 
