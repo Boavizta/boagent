@@ -11,6 +11,8 @@
 
 <body style="background-color: #262B30; color: white; font-family: Ubuntu,serif">
 
+    <span id="forkongithub"><a href="https://github.com/Boavizta/boagent">Fork me on GitHub</a></span>
+
     <div class="scores-box">
         <div class="score-box">
             <h3>Actual intensity</h3>
@@ -104,10 +106,10 @@
 <script>
     var graphforcast = new Dygraph(
         document.getElementById("graphforcast"),
-        "/csv?data=carbonintensity&since=now&until=24h", // path to CSV file
+        "/carbon_intensity_forecast?since=now&until=24h", // path to CSV file
         {
             fillGraph: true,
-            visibility: [true, false, false, false, false, false, false, false, false, false, false],
+            visibility: [true, false],
             underlayCallback: function(canvas, area, g) {
                 function highlight_period(x_start, x_end) {
                     var canvas_left_x = g.toDomXCoord(x_start);
@@ -147,7 +149,7 @@
         {
             fillGraph: true,
             stackedGraph: true,
-            visibility: [false, false, false, false, false, false, false, false, true, false, true],
+            visibility: [true, false],
             underlayCallback: function(canvas, area, g) {
                 function highlight_period(x_start, x_end) {
                     var canvas_left_x = g.toDomXCoord(x_start);
@@ -251,9 +253,8 @@
     embodied.setProperty('angleEnd', 0.75 * Math.PI);
     embodied.setProperty('colorFG', '#88ff88');
     embodied.setProperty('valMin', 0);
-    embodied.setProperty('valMax', 100);
+    embodied.setProperty('valMax', 2000);
     embodied.setProperty('readonly', true)
-    embodied.setValue(23);
     document.getElementById('embodied-score').appendChild(embodied.node());
 
     const loadscore = pureknob.createKnob(300, 150);
@@ -275,6 +276,15 @@
     carbonintensity.setProperty('readonly', true)
     carbonintensity.setValue(37);
     document.getElementById('intensity').appendChild(carbonintensity.node());
+
+    fetch("/query")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            embodied.setValue(data.embedded_emissions.value);
+        })
+
 </script>
 
 

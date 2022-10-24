@@ -381,7 +381,7 @@ def parse_forecast_electricity_carbon_intensity(response: Dict[str, Any]) -> Lis
     results = []
     for item in forecasts:
         results.append({
-            'timestamp': datetime.fromisoformat(item['timestamp']),
+            'timestamp': datetime.fromisoformat(item['timestamp']).strftime("%Y-%m-%dT%H:%M:%SZ"),
             'value': item['value']
         })
     return results
