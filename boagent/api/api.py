@@ -1,9 +1,11 @@
 import json
+import math
 import time
 from datetime import datetime, timedelta
 from subprocess import run
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 
+import pandas as pd
 import requests
 from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
@@ -104,6 +106,20 @@ async def update():
     insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
     session.commit()
     session.close()
+    session.close()
+
+
+@app.get("/carbon_intensity_forecast")
+async def carbon_intensity_forecast(since: str = "now", until: str = "24h") -> Response:
+    start_date, stop_date = parse_date_info(since, until, forecast=True)
+    start_date = upper_round_date_minutes_with_base(start_date, base=5)
+    response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
+    forecasts = parse_forecast_electricity_carbon_intensity(response)
+    df = pd.DataFrame(forecasts)
+    return Response(
+        content=df.to_csv(index=False),
+        media_type="text/csv"
+    )
 
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float, fetch_hardware: bool = False):
@@ -348,25 +364,69 @@ def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]
     }
 
 
-def parse_date_info(since: str, until: str) -> Tuple[datetime, datetime]:
-    end_date = datetime.now()
-    start_date = end_date - timedelta(hours=1)
+def query_forecast_electricity_carbon_intensity(start_date: datetime, stop_date: datetime) -> Dict[str, Any]:
+    url = settings.boaviztapi_endpoint + f'/v1/usage_router/gwp/forecast_intensity?location={settings.azure_location}'
+    response = requests.post(url, json={
+        "source": "carbon_aware_api",
+        "url": settings.carbon_aware_api_endpoint,
+        "token": settings.carbon_aware_api_token,
+        "start_date": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "stop_date": stop_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+    })
+    return response.json()[0]
 
-    if since == 'now':
+
+def parse_forecast_electricity_carbon_intensity(response: Dict[str, Any]) -> List[Dict[str, Any]]:
+    forecasts = response['forecastData']
+    results = []
+    for item in forecasts:
+        results.append({
+            'timestamp': datetime.fromisoformat(item['timestamp']),
+            'value': item['value']
+        })
+    return results
+
+
+def parse_date_info(since: str, until: str, forecast: bool = False) -> Tuple[datetime, datetime]:
+    if forecast:
+        start_date = datetime.now()
+        end_date = start_date + timedelta(hours=1)
+    else:
         end_date = datetime.now()
+        start_date = end_date - timedelta(hours=1)
+
+    if since == 'now' and not forecast:
+        end_date = datetime.now()
+    elif since == 'now' and forecast:
+        start_date = datetime.now()
     else:
         ValueError(f'unknown value since={since}')
 
     if until.endswith('d'):
         days = int(until.replace('d', ''))
-        start_date = end_date - timedelta(days=days)
+        if forecast:
+            end_date = start_date + timedelta(days=days)
+        else:
+            start_date = end_date - timedelta(days=days)
     if until.endswith('h'):
         hours = int(until.replace('h', ''))
-        start_date = end_date - timedelta(hours=hours)
+        if forecast:
+            end_date = start_date + timedelta(hours=hours)
+        else:
+            start_date = end_date - timedelta(hours=hours)
     elif until.endswith('m'):
         minutes = int(until.replace('m', ''))
-        start_date = end_date - timedelta(minutes=minutes)
+        if forecast:
+            end_date = start_date + timedelta(minutes=minutes)
+        else:
+            start_date = end_date - timedelta(minutes=minutes)
     else:
         ValueError(f'unknown value until={until}')
 
     return start_date, end_date
+
+
+def upper_round_date_minutes_with_base(date: datetime, base: int) -> datetime:
+    delta_minutes = base * math.ceil((date.minute + 1) / base) - date.minute
+    return date + timedelta(minutes=delta_minutes)
+
