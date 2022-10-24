@@ -67,6 +67,7 @@ async def web():
 async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
     session = get_session(settings.db_path)
     start_date, end_date = parse_date_info(since, until)
+    print(end_date)
     df = select_metric(session, data, start_date, end_date)
     return Response(
         content=df.to_csv(index=False),

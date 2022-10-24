@@ -3,6 +3,7 @@
 <head>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="assets/main.css" />
+    <link rel="stylesheet" href="assets/table-style.css" />
     <script type="text/javascript" src="assets/dygraph.min.js"></script>
     <script type="text/javascript" src="assets/synchronizer.js"></script>
     <script type="text/javascript" src="assets/pureknob.js"></script>
@@ -58,6 +59,48 @@
         <div id="graphload" style="width:100%;; height:200px;"></div>
     </div>
 
+
+    <div class="box-legend">
+        <h3>Recommandations</h3>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum. Sed volutpat ligula vestibulum dapibus ultrices. Aliquam erat volutpat. Suspendisse non diam in nulla volutpat tincidunt id nec orci. Cras eu semper nunc. Proin molestie dictum volutpat. Donec et dapibus ipsum. Integer iaculis rhoncus odio, vitae volutpat justo mollis iaculis.</p>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th></th>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Recommendation</th>
+        </tr>
+        <thead>
+        <tbody>
+        <tr>
+            <td>🕝</td>
+            <td>2022/10/21 00:05:00</td>
+            <td>CRON</td>
+            <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum.</td>
+        </tr>
+        <tr>
+            <td>🕝</td>
+            <td>2022/10/21 00:05:00</td>
+            <td>CRON</td>
+            <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum.</td>
+        </tr>
+        <tr>
+            <td>⚠️</td>
+            <td>2022/10/21 00:05:00</td>
+            <td>PICK</td>
+            <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum.</td>
+        </tr>
+        <tr>
+            <td>⛔</td>
+            <td>2022/10/21 00:05:00</td>
+            <td>IDLE</td>
+            <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum.</td>
+        </tr>
+        </tbody>
+    </table>
+
 <script>
     var graphforcast = new Dygraph(
         document.getElementById("graphforcast"),
@@ -100,7 +143,7 @@
 
     var graphimpact = new Dygraph(
         document.getElementById("graphimpact"),
-        "/csv?data=impact", // path to CSV file
+        "/csv?data=ram_load&since=now&until=24h", // path to CSV file
         {
             fillGraph: true,
             stackedGraph: true,
@@ -140,7 +183,7 @@
 
     var graphload = new Dygraph(
         document.getElementById("graphload"),
-        "/csv?data=load", // path to CSV file
+        "/csv?data=ram_load&since=now&until=24h", // path to CSV file
         {
             fillGraph: true,
             visibility: [false, true, true, false, false, false, false, false, false, false, false],
