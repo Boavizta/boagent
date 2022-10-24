@@ -57,15 +57,15 @@ def insert_metric(session: Session, metric_name: str, timestamp: datetime, value
 def select_metric(session: Session,
                   metric_name: str,
                   start_date: Optional[datetime] = None,
-                  end_date: Optional[datetime] = None) -> pd.DataFrame:
+                  stop_date: Optional[datetime] = None) -> pd.DataFrame:
     model = metrics[metric_name]
-    if end_date is None:
-        end_date = datetime.now()
+    if stop_date is None:
+        stop_date = datetime.now()
     if start_date is None:
-        start_date = end_date - timedelta(hours=1)
+        start_date = stop_date - timedelta(hours=1)
     statement = select(model.timestamp, model.value).where(
         model.timestamp >= start_date,
-        model.timestamp <= end_date
+        model.timestamp <= stop_date
     )
     results = session.execute(statement).all()
     return pd.DataFrame(results)
