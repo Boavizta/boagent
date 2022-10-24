@@ -25,6 +25,7 @@ services:
       - "/sys:/sys:ro"
       - "powerdata:/app/data:ro"
       - "./db:/app/db"
+      - "../boaviztapi/boaviztapi:/app/boaviztapi"
 
   scaphandre:
     image: hubblo/scaphandre:dev
