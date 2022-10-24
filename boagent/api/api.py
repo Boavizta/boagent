@@ -327,10 +327,10 @@ def generate_machine_configuration(hardware_data):
 
 
 def query_electricity_carbon_intensity() -> Dict[str, Any]:
-    url = settings.boaviztapi_endpoint + '/v1/usage_router/gwp/forcast_intensity?location=westus'
-    today = datetime.now() + timedelta(minutes=10)
-    start_date = today.strftime("%Y-%m-%dT%H:%M:%SZ")
-    stop_date = (today + timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    url = settings.boaviztapi_endpoint + f'/v1/usage_router/gwp/current_intensity?location={settings.azure_location}'
+    today = datetime.now()
+    start_date = (today - timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    stop_date = today.strftime("%Y-%m-%dT%H:%M:%SZ")
     response = requests.post(url, json={
         "source": "carbon_aware_api",
         "url": settings.carbon_aware_api_endpoint,
@@ -338,14 +338,14 @@ def query_electricity_carbon_intensity() -> Dict[str, Any]:
         "start_date": start_date,
         "stop_date": stop_date
     })
-    return response.json()[0]
+    return response.json()
 
 
 def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]):
-    first_forecast = carbon_aware_api_response['forecastData'][0]
+    intensity_dict = carbon_aware_api_response['_value']
     return {
-        'timestamp': datetime.fromisoformat(first_forecast['timestamp']),
-        'value': round(first_forecast['value'], 3)
+        'timestamp': datetime.fromisoformat(intensity_dict['endTime']),
+        'value': round(intensity_dict['carbonIntensity'], 3)
     }
 
 

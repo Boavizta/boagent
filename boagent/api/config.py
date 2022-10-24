@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     assets_path: str = os.getenv("BOAGENT_ASSETS_PATH", "../public/assets")
     carbon_aware_api_endpoint: str = os.getenv("CARBON_AWARE_API_ENDPOINT", "https://carbon-aware-api.azurewebsites.net")
     carbon_aware_api_token: str = os.getenv("CARBON_AWARE_API_TOKEN")
+    azure_location: str = os.getenv("AZURE_LOCATION", "westus")
 
     class Config:
         env_file = ".env"
