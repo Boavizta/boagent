@@ -6,6 +6,10 @@ from sqlalchemy import Column, DateTime, Integer, Float, insert, select, inspect
 from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.orm import Session, declarative_base, declared_attr
 
+import json
+from utils import filter_date_range
+from config import settings
+
 
 Base = declarative_base()
 
@@ -69,3 +73,15 @@ def select_metric(session: Session,
     )
     results = session.execute(statement).all()
     return pd.DataFrame(results)
+
+
+def power_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame:
+    with open(settings.power_file_path,'r') as f: # if scaphandre is writing in the json -> KABOUM
+        data = json.loads(f.read())
+        lst = [d["host"] for d in data]
+        wanted_data = filter_date_range(lst, start_date, stop_date)
+        for d in wanted_data:
+            #d["timestamp"] = datetime.fromtimestamp(d["timestamp"]).isoformat()
+            d["timestamp"] = datetime.fromisoformat(datetime.fromtimestamp(d["timestamp"]).isoformat()).strftime("%Y-%m-%dT%H:%M:%SZ")
+            d["consumption"] = float("{:.4f}".format(d["consumption"] * 10**-3))
+        return pd.DataFrame(wanted_data,columns=["timestamp", "consumption"])

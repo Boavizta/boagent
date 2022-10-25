@@ -24,7 +24,7 @@ from boaviztapi_sdk.model.server_dto import ServerDTO
 from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, \
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
-from database import create_database, get_session, get_engine, insert_metric, select_metric
+from database import create_database, get_session, get_engine, insert_metric, select_metric, power_to_csv
 
 
 def configure_static(app):
@@ -67,9 +67,12 @@ async def web():
 
 @app.get('/csv')
 async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
-    session = get_session(settings.db_path)
     start_date, stop_date = parse_date_info(since, until)
-    df = select_metric(session, data, start_date, stop_date)
+    if data == "power":
+        df = power_to_csv(start_date,stop_date)
+    else:
+        session = get_session(settings.db_path)
+        df = select_metric(session, data, start_date, stop_date)
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"

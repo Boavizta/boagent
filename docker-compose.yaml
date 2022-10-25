@@ -47,6 +47,8 @@ services:
       - "5000:5000"
     networks:
       - boagent-network
+    volumes:
+      - "../boaviztapi/boaviztapi:/app/boaviztapi"
 
 volumes:
   powerdata: {}
