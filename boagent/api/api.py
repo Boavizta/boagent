@@ -24,7 +24,7 @@ from boaviztapi_sdk.model.server_dto import ServerDTO
 from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, \
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
-from database import create_database, get_session, get_engine, insert_metric, select_metric, power_to_csv
+from database import create_database, get_session, get_engine, insert_metric, select_metric, power_to_csv, highlight_spikes
 
 
 def configure_static(app):
@@ -69,15 +69,16 @@ async def web():
 async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
     start_date, stop_date = parse_date_info(since, until)
     if data == "power":
-        df = power_to_csv(start_date,stop_date)
+        df = highlight_spikes(power_to_csv(start_date,stop_date), "consumption")
     else:
         session = get_session(settings.db_path)
         df = select_metric(session, data, start_date, stop_date)
+    from pprint import pprint
+    pprint(df) 
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
     )
-
 
 @app.get("/metrics")
 async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True, lifetime: float =settings.default_lifetime, fetch_hardware: bool = False):
@@ -107,6 +108,7 @@ async def update():
     info = parse_electricity_carbon_intensity(response)
     session = get_session(settings.db_path)
     insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
+    highlight_spikes(session=session, metric_name='')
     session.commit()
     session.close()
     session.close()
@@ -381,6 +383,9 @@ def query_electricity_carbon_intensity() -> Dict[str, Any]:
 
 
 def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]):
+    from pprint import pprint
+    print("carbon aware api response : ")
+    pprint(carbon_aware_api_response)
     intensity_dict = carbon_aware_api_response['_value']
     return {
         'timestamp': datetime.fromisoformat(intensity_dict['endTime']),
