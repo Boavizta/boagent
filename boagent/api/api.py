@@ -125,6 +125,27 @@ async def carbon_intensity_forecast(since: str = "now", until: str = "24h") -> R
     )
 
 
+@app.get("/carbon_intensity")
+async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
+    _, stop_date = parse_date_info(since, until, forecast=True)
+    start_date, now = parse_date_info(since, until, forecast=False)
+
+    session = get_session(settings.db_path)
+    df_history = select_metric(session, 'carbonintensity', start_date, now)
+    df_history['forecast'] = False
+
+    now = upper_round_date_minutes_with_base(now, base=5)
+    response = query_forecast_electricity_carbon_intensity(now, stop_date)
+    forecasts = parse_forecast_electricity_carbon_intensity(response)
+    df_forecast = pd.DataFrame(forecasts)
+    df_forecast['forecast'] = True
+    df = pd.concat([df_history, df_forecast])
+    return Response(
+        content=df.to_csv(index=False),
+        media_type="text/csv"
+    )
+
+
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float, fetch_hardware: bool = False):
     now: float = time.time()
     if start_time and end_time:
