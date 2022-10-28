@@ -127,23 +127,23 @@
                     canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
                 }
 
-                for (let i = 0; i < g.numRows()-1; i++) {
-                    if (g.getValue(i, 10) === 0){
-                        for (let j = i+1; j < g.numRows()-1; j++) {
-                            if (g.getValue(j, 10) !== 0){
-                                console.log("low : (" + i + ", " + j + ")")
+                for (let i = 0; i < g.numRows(); i++) {
+                    if (g.getValue(i, 2) === -1){
+                        for (let j = i; j < g.numRows(); j++) {
+                            if (g.getValue(j, 2) !== -1){
                                 canvas.fillStyle = "rgb(197,255,197)";
                                 highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                i = j-1
                                 break;
                             }
                         }
                     }
-                    else if (g.getValue(i, 10) === 2){
-                        for (let j = i+1; j < g.numRows()-1; j++) {
-                            console.log("high : (" + i + ", " + j + ")")
-                            if (g.getValue(j, 10) !== 2){
+                    else if (g.getValue(i, 2) === 1){
+                        for (let j = i+1; j < g.numRows(); j++) {
+                            if (g.getValue(j, 2) !== 1){
                                 canvas.fillStyle =  "rgba(255, 153, 153)";
                                 highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                i = j-1
                                 break;
                             }
                         }
@@ -167,23 +167,23 @@
                     canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
                 }
 
-                for (let i = 0; i < g.numRows()-1; i++) {
-                    if (g.getValue(i, 10) === 0){
-                        for (let j = i+1; j < g.numRows()-1; j++) {
-                            if (g.getValue(j, 10) !== 0){
-                                console.log("low : (" + i + ", " + j + ")")
+                for (let i = 0; i < g.numRows(); i++) {
+                    if (g.getValue(i, 2) === -1){
+                        for (let j = i; j < g.numRows(); j++) {
+                            if (g.getValue(j, 2) !== -1){
                                 canvas.fillStyle = "rgb(197,255,197)";
                                 highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                i = j-1
                                 break;
                             }
                         }
                     }
-                    else if (g.getValue(i, 10) === 2){
-                        for (let j = i+1; j < g.numRows()-1; j++) {
-                            console.log("high : (" + i + ", " + j + ")")
-                            if (g.getValue(j, 10) !== 2){
+                    else if (g.getValue(i, 2) === 1){
+                        for (let j = i+1; j < g.numRows(); j++) {
+                            if (g.getValue(j, 2) !== 1){
                                 canvas.fillStyle =  "rgba(255, 153, 153)";
                                 highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                i = j-1
                                 break;
                             }
                         }
@@ -206,23 +206,23 @@
                     canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
                 }
 
-                for (let i = 0; i < g.numRows()-1; i++) {
-                    if (g.getValue(i, 10) === 0){
-                        for (let j = i+1; j < g.numRows()-1; j++) {
-                            if (g.getValue(j, 10) !== 0){
-                                console.log("low : (" + i + ", " + j + ")")
+                for (let i = 0; i < g.numRows(); i++) {
+                    if (g.getValue(i, 2) === -1){
+                        for (let j = i; j < g.numRows(); j++) {
+                            if (g.getValue(j, 2) !== -1){
                                 canvas.fillStyle = "rgb(197,255,197)";
                                 highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                i = j-1
                                 break;
                             }
                         }
                     }
-                    else if (g.getValue(i, 10) === 2){
-                        for (let j = i+1; j < g.numRows()-1; j++) {
-                            console.log("high : (" + i + ", " + j + ")")
-                            if (g.getValue(j, 10) !== 2){
+                    else if (g.getValue(i, 2) === 1){
+                        for (let j = i+1; j < g.numRows(); j++) {
+                            if (g.getValue(j, 2) !== 1){
                                 canvas.fillStyle =  "rgba(255, 153, 153)";
                                 highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                i = j-1
                                 break;
                             }
                         }
@@ -238,7 +238,6 @@
             fillGraph: true,
             visibility: [true, false],
             underlayCallback: function(canvas, area, g) {
-                console.log(g)
                 function highlight_period(x_start, x_end) {
                     var canvas_left_x = g.toDomXCoord(x_start);
                     var canvas_right_x = g.toDomXCoord(x_end);
@@ -246,23 +245,23 @@
                     canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
                 }
 
-                for (let i = 0; i < g.numRows()-1; i++) {
-                    if (g.getValue(i, 10) === 0){
-                        for (let j = i+1; j < g.numRows()-1; j++) {
-                            if (g.getValue(j, 10) !== 0){
-                                console.log("low : (" + i + ", " + j + ")")
+                for (let i = 0; i < g.numRows(); i++) {
+                    if (g.getValue(i, 2) === -1){
+                        for (let j = i; j < g.numRows(); j++) {
+                            if (g.getValue(j, 2) !== -1){
                                 canvas.fillStyle = "rgb(197,255,197)";
                                 highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                i = j-1
                                 break;
                             }
                         }
                     }
-                    else if (g.getValue(i, 10) === 2){
-                        for (let j = i+1; j < g.numRows()-1; j++) {
-                            console.log("high : (" + i + ", " + j + ")")
-                            if (g.getValue(j, 10) !== 2){
+                    else if (g.getValue(i, 2) === 1){
+                        for (let j = i+1; j < g.numRows(); j++) {
+                            if (g.getValue(j, 2) !== 1){
                                 canvas.fillStyle =  "rgba(255, 153, 153)";
                                 highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                i = j-1
                                 break;
                             }
                         }
