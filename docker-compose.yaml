@@ -25,6 +25,7 @@ services:
       - "/sys:/sys:ro"
       - "powerdata:/app/data:ro"
       - "./db:/app/db"
+      - "../boaviztapi/boaviztapi:/app/boaviztapi"
 
   scaphandre:
     image: hubblo/scaphandre:dev
@@ -46,6 +47,8 @@ services:
       - "5000:5000"
     networks:
       - boagent-network
+    volumes:
+      - "../boaviztapi/boaviztapi:/app/boaviztapi"
 
 volumes:
   powerdata: {}

@@ -7,28 +7,20 @@ from subprocess import run
 from typing import Dict, Any, Tuple, List
 
 from croniter import croniter
-from crontab import CronTab
 
 import pandas as pd
 import requests
 from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from boaviztapi_sdk import ApiClient, Configuration
-from boaviztapi_sdk.api.component_api import ComponentApi
 from boaviztapi_sdk.api.server_api import ServerApi
-from boaviztapi_sdk.model.cpu import Cpu
-from boaviztapi_sdk.model.ram import Ram
-from boaviztapi_sdk.model.disk import Disk
-from boaviztapi_sdk.model.mother_board import MotherBoard
-from boaviztapi_sdk.model.usage_server import UsageServer
-from boaviztapi_sdk.model.model_server import ModelServer
 from boaviztapi_sdk.model.server_dto import ServerDTO
 
 from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, \
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
-from database import create_database, get_session, get_engine, insert_metric, select_metric
+from database import create_database, get_session, get_engine, insert_metric, select_metric, power_to_csv, \
+    highlight_spikes
 
 
 def configure_static(app):
@@ -70,9 +62,14 @@ async def web():
 
 @app.get('/csv')
 async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
-    session = get_session(settings.db_path)
     start_date, stop_date = parse_date_info(since, until)
-    df = select_metric(session, data, start_date, stop_date)
+    if data == "power":
+        df = highlight_spikes(power_to_csv(start_date, stop_date), "consumption")
+    else:
+        session = get_session(settings.db_path)
+        df = select_metric(session, data, start_date, stop_date)
+    from pprint import pprint
+    pprint(df)
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
@@ -110,6 +107,7 @@ async def update():
     info = parse_electricity_carbon_intensity(response)
     session = get_session(settings.db_path)
     insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
+    highlight_spikes(session=session, metric_name='')
     session.commit()
     session.close()
     session.close()
@@ -127,10 +125,31 @@ async def carbon_intensity_forecast(since: str = "now", until: str = "24h") -> R
         media_type="text/csv"
     )
 
+
 @app.get("/recommendation")
 async def info():
-    pass
+    return get_reco()
 
+
+@app.get("/carbon_intensity")
+async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
+    _, stop_date = parse_date_info(since, until, forecast=True)
+    start_date, now = parse_date_info(since, until, forecast=False)
+
+    session = get_session(settings.db_path)
+    df_history = select_metric(session, 'carbonintensity', start_date, now)
+    df_history['forecast'] = False
+
+    now = upper_round_date_minutes_with_base(now, base=5)
+    response = query_forecast_electricity_carbon_intensity(now, stop_date)
+    forecasts = parse_forecast_electricity_carbon_intensity(response)
+    df_forecast = pd.DataFrame(forecasts)
+    df_forecast['forecast'] = True
+    df = pd.concat([df_history, df_forecast])
+    return Response(
+        content=df.to_csv(index=False),
+        media_type="text/csv"
+    )
 
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float,
@@ -189,7 +208,8 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
 
     res["calculated_emissions"] = {
         "value": boaviztapi_data["impacts"]["gwp"]["manufacture"] * ratio + boaviztapi_data["impacts"]["gwp"]["use"],
-        "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between start_time and end_time",
+        "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between "
+                       "start_time and end_time",
         "type": "gauge",
         "unit": "kg CO2eq",
         "long_unit": "kilograms CO2 equivalent"
@@ -249,10 +269,12 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
     usage_location_status = boaviztapi_data["verbose"]["USAGE"]["usage_location"]["status"]
     if usage_location_status == "MODIFY":
         res["emissions_calculation_data"]["electricity_carbon_intensity"][
-            "description"] += " WARNING : The provided trigram doesn't match any existing country. So this result is based on average European electricity mix. Be careful with this data."
+            "description"] += "WARNING : The provided trigram doesn't match any existing country. So this result is " \
+                              "based on average European electricity mix. Be careful with this data. "
     elif usage_location_status == "SET":
         res["emissions_calculation_data"]["electricity_carbon_intensity"][
-            "description"] += "WARNING : As no information was provided about your location, this result is based on average European electricity mix. Be careful with this data."
+            "description"] += "WARNING : As no information was provided about your location, this result is based on " \
+                              "average European electricity mix. Be careful with this data. "
 
     if verbose:
         res["emissions_calculation_data"]["raw_data"] = {
@@ -286,7 +308,9 @@ def get_power_data(start_time, end_time):
         power_data['host_avg_consumption'] = compute_average_consumption(res)
         if end_time - start_time <= 3600:
             power_data[
-                'warning'] = "The time window is lower than one hour, but the energy consumption estimate is in Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be careful with this data."
+                'warning'] = "The time window is lower than one hour, but the energy consumption estimate is in " \
+                             "Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be " \
+                             "careful with this data. "
         return power_data
 
 
@@ -373,6 +397,9 @@ def query_electricity_carbon_intensity() -> Dict[str, Any]:
 
 
 def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]):
+    from pprint import pprint
+    print("carbon aware api response : ")
+    pprint(carbon_aware_api_response)
     intensity_dict = carbon_aware_api_response['_value']
     return {
         'timestamp': datetime.fromisoformat(intensity_dict['endTime']),
@@ -495,4 +522,10 @@ def get_cron_info():
 
 
 def get_reco():
-    pass
+    reco = []
+    for cron in get_cron_info():
+        if cron['next']:
+            reco.append({'date': cron['next'], 'mode': 'forcast', 'job': cron['job']})
+        if cron['previous']:
+            reco.append({'date': cron['previous'], 'mode': 'history', 'job': cron['job']})
+    return reco
