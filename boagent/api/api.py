@@ -1,9 +1,13 @@
 import json
 import math
+import os
 import time
 from datetime import datetime, timedelta
 from subprocess import run
 from typing import Dict, Any, Tuple, List
+
+from croniter import croniter
+from crontab import CronTab
 
 import pandas as pd
 import requests
@@ -39,7 +43,6 @@ def configure_app():
 
 app = configure_app()
 items = {}
-
 
 create_database(get_engine(db_path=settings.db_path))
 
@@ -77,7 +80,9 @@ async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
 
 
 @app.get("/metrics")
-async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json", location: str = None, measure_power: bool = True, lifetime: float =settings.default_lifetime, fetch_hardware: bool = False):
+async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json",
+                  location: str = None, measure_power: bool = True, lifetime: float = settings.default_lifetime,
+                  fetch_hardware: bool = False):
     return Response(
         content=format_prometheus_output(
             get_metrics(
@@ -90,7 +95,8 @@ async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool 
 
 
 @app.get("/query")
-async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None, measure_power: bool = True, lifetime: float =settings.default_lifetime, fetch_hardware: bool = False):
+async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None,
+                measure_power: bool = True, lifetime: float = settings.default_lifetime, fetch_hardware: bool = False):
     return get_metrics(
         iso8601_or_timestamp_as_timestamp(start_time),
         iso8601_or_timestamp_as_timestamp(end_time),
@@ -121,11 +127,17 @@ async def carbon_intensity_forecast(since: str = "now", until: str = "24h") -> R
         media_type="text/csv"
     )
 
+@app.get("/recommendation")
+async def info():
+    pass
 
-def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float, fetch_hardware: bool = False):
+
+
+def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float,
+                fetch_hardware: bool = False):
     now: float = time.time()
     if start_time and end_time:
-        ratio = (end_time - start_time) / (lifetime*settings.seconds_in_one_year)
+        ratio = (end_time - start_time) / (lifetime * settings.seconds_in_one_year)
     else:
         ratio = 1.0
     if start_time == 0.0:
@@ -137,7 +149,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
 
     hardware_data = get_hardware_data(fetch_hardware)
 
-    res = {"emissions_calculation_data":{}}
+    res = {"emissions_calculation_data": {}}
 
     host_avg_consumption = None
     if measure_power:
@@ -152,7 +164,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
         usage=format_usage_request(start_time, end_time, host_avg_consumption, location)
     )
 
-    if measure_power :
+    if measure_power:
         res["total_operational_emissions"] = {
             "value": boaviztapi_data["impacts"]["gwp"]["use"],
             "description": "GHG emissions related to usage, from start_time to end_time.",
@@ -175,9 +187,8 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             "long_unit": "Mega Joules"
         }
 
-
     res["calculated_emissions"] = {
-        "value": boaviztapi_data["impacts"]["gwp"]["manufacture"]*ratio+boaviztapi_data["impacts"]["gwp"]["use"],
+        "value": boaviztapi_data["impacts"]["gwp"]["manufacture"] * ratio + boaviztapi_data["impacts"]["gwp"]["use"],
         "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between start_time and end_time",
         "type": "gauge",
         "unit": "kg CO2eq",
@@ -199,21 +210,21 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
         "long_unit": "seconds"
     }
     res["embedded_emissions"] = {
-        "value": boaviztapi_data["impacts"]["gwp"]["manufacture"]*ratio,
+        "value": boaviztapi_data["impacts"]["gwp"]["manufacture"] * ratio,
         "description": "Embedded carbon emissions (manufacturing phase)",
         "type": "gauge",
         "unit": "kg CO2eq",
         "long_unit": "kilograms CO2 equivalent"
     }
     res["embedded_abiotic_resources_depletion"] = {
-        "value": boaviztapi_data["impacts"]["adp"]["manufacture"]*ratio,
+        "value": boaviztapi_data["impacts"]["adp"]["manufacture"] * ratio,
         "description": "Embedded abiotic ressources consumed (manufacturing phase)",
         "type": "gauge",
         "unit": "kg Sbeq",
         "long_unit": "kilograms ADP equivalent"
     }
     res["embedded_primary_energy"] = {
-        "value": boaviztapi_data["impacts"]["pe"]["manufacture"]*ratio,
+        "value": boaviztapi_data["impacts"]["pe"]["manufacture"] * ratio,
         "description": "Embedded primary energy consumed (manufacturing phase)",
         "type": "gauge",
         "unit": "MJ",
@@ -237,9 +248,11 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
     }
     usage_location_status = boaviztapi_data["verbose"]["USAGE"]["usage_location"]["status"]
     if usage_location_status == "MODIFY":
-        res["emissions_calculation_data"]["electricity_carbon_intensity"]["description"] += " WARNING : The provided trigram doesn't match any existing country. So this result is based on average European electricity mix. Be careful with this data."
+        res["emissions_calculation_data"]["electricity_carbon_intensity"][
+            "description"] += " WARNING : The provided trigram doesn't match any existing country. So this result is based on average European electricity mix. Be careful with this data."
     elif usage_location_status == "SET":
-        res["emissions_calculation_data"]["electricity_carbon_intensity"]["description"] += "WARNING : As no information was provided about your location, this result is based on average European electricity mix. Be careful with this data."
+        res["emissions_calculation_data"]["electricity_carbon_intensity"][
+            "description"] += "WARNING : As no information was provided about your location, this result is based on average European electricity mix. Be careful with this data."
 
     if verbose:
         res["emissions_calculation_data"]["raw_data"] = {
@@ -251,7 +264,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
     return res
 
 
-def format_usage_request(start_time, end_time, host_avg_consumption = None, location = None):
+def format_usage_request(start_time, end_time, host_avg_consumption=None, location=None):
     hours_use_time = (end_time - start_time) / 3600.0
     kwargs_usage = {
         "hours_use_time": hours_use_time
@@ -272,7 +285,8 @@ def get_power_data(start_time, end_time):
         power_data['raw_data'] = res
         power_data['host_avg_consumption'] = compute_average_consumption(res)
         if end_time - start_time <= 3600:
-            power_data['warning'] = "The time window is lower than one hour, but the energy consumption estimate is in Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be careful with this data."
+            power_data[
+                'warning'] = "The time window is lower than one hour, but the energy consumption estimate is in Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be careful with this data."
         return power_data
 
 
@@ -284,7 +298,7 @@ def compute_average_consumption(power_data):
         for r in power_data:
             total_host += float(r['host']['consumption'])
 
-        avg_host = total_host / len(power_data) / 1000000.0 # from microwatts to watts
+        avg_host = total_host / len(power_data) / 1000000.0  # from microwatts to watts
 
     return avg_host
 
@@ -327,7 +341,7 @@ def query_machine_impact_data(model: dict = None, configuration: dict = None, us
 
 
 def generate_machine_configuration(hardware_data):
-    config =  {
+    config = {
         "cpu": {
             "units": len(hardware_data["cpus"]),
             "core_units": hardware_data['cpus'][0]["core_units"],
@@ -335,8 +349,10 @@ def generate_machine_configuration(hardware_data):
         },
         "ram": sort_ram(hardware_data["rams"]),
         "disk": sort_disks(hardware_data["disks"]),
-        "motherboard": hardware_data["mother_board"] if "mother_board" in hardware_data else { "units": 1 }, #TODO: improve once the API provides more detail input
-        "power_supply": hardware_data["power_supply"] if "power_supply" in hardware_data else { "units": 1 } #TODO: if cpu is a small one, guess that power supply is light/average weight of a laptops power supply ?
+        "motherboard": hardware_data["mother_board"] if "mother_board" in hardware_data else {"units": 1},
+        # TODO: improve once the API provides more detail input
+        "power_supply": hardware_data["power_supply"] if "power_supply" in hardware_data else {"units": 1}
+        # TODO: if cpu is a small one, guess that power supply is light/average weight of a laptops power supply ?
     }
     return config
 
@@ -430,3 +446,53 @@ def upper_round_date_minutes_with_base(date: datetime, base: int) -> datetime:
     delta_minutes = base * math.ceil((date.minute + 1) / base) - date.minute
     return date + timedelta(minutes=delta_minutes)
 
+
+def get_cron_per_user():
+    user = []
+    with open("/etc/passwd", "r") as f:
+        for line in f.readlines():
+            user.append(line.split(":")[0])
+        user.sort()
+        for item in user:
+            output = os.popen(f"crontab -u {item} -l").read()
+            for line in output.splitlines():
+                print(line)
+
+
+def get_all_cron():
+    crons = []
+
+    if os.geteuid() == 0:
+        crons.append(get_cron_per_user())
+    else:
+        output = os.popen(f"crontab -l").read()
+        for line in output.splitlines():
+            if line != "" and (line[0].isdigit() or line[0] == "*"):
+                crons.append(line)
+
+    with open("/etc/crontab", "r") as f:
+        for line in f.readlines():
+            if line != "" and (line[0].isdigit() or line[0] == "*"):
+                crons.append(line)
+    return crons
+
+
+def get_cron_info():
+    crons_info = []
+    base = datetime.today()
+    cron_lines = get_all_cron()
+    for cron in cron_lines:
+        info = {}
+        sched = ""
+        for char in cron:
+            if char.isdigit() or char == "*" or char == " " or char == "\t":
+                sched += char
+        info["next"] = croniter(sched, base).get_next(datetime)
+        info["previous"] = croniter(sched, base).get_prev(datetime)
+        info["job"] = cron_lines
+        crons_info.append(info)
+    return crons_info
+
+
+def get_reco():
+    pass
