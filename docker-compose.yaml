@@ -26,6 +26,7 @@ services:
       - "powerdata:/app/data:ro"
       - "./db:/app/db"
       - "../boaviztapi/boaviztapi:/app/boaviztapi"
+      - "/etc/crontab:/etc/crontab"
 
   scaphandre:
     image: hubblo/scaphandre:dev
