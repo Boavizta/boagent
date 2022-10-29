@@ -20,7 +20,7 @@ from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, f
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 from database import create_database, get_session, get_engine, insert_metric, select_metric, power_to_csv, \
-    highlight_spikes
+    highlight_spikes, CarbonIntensity
 
 
 def configure_static(app):
@@ -151,6 +151,25 @@ async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
         content=df.to_csv(index=False),
         media_type="text/csv"
     )
+
+
+@app.get("/init_carbon_intensity")
+async def init_carbon_intensity():
+    engine = get_engine(settings.db_path)
+    CarbonIntensity.__table__.drop(engine)
+    create_database(engine)
+
+    session = get_session(settings.db_path)
+    now = datetime.utcnow()
+    curr_date = now - timedelta(hours=24)
+
+    while curr_date < now:
+        # TODO: make bulk select in boaviztapi
+        response = query_electricity_carbon_intensity(curr_date, curr_date + timedelta(minutes=5))
+        info = parse_electricity_carbon_intensity(response)
+        insert_metric(session, 'carbonintensity', info['timestamp'], info['value'])
+        curr_date += timedelta(minutes=5)
+    session.commit()
 
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float,
