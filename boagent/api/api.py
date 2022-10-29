@@ -147,6 +147,7 @@ async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
     df_forecast = pd.DataFrame(forecasts)
     df_forecast['forecast'] = True
     df = pd.concat([df_history, df_forecast])
+    df = df[['timestamp', 'value', 'forecast']]
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
