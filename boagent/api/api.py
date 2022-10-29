@@ -67,8 +67,8 @@ async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
     session = get_session(settings.db_path)
     df = new_highlight_spikes(select_metric(session, data, start_date, stop_date), 'value')
     df['timestamp'] = df['timestamp'].apply(lambda x: x + timedelta(hours=2))
-    df = df[df['timestamp'] <= datetime(2022, 10, 29, 19, 0, 0)]
-    df = df[df['timestamp'] >= datetime(2022, 10, 29, 18, 30, 0)]
+    # df = df[df['timestamp'] >= datetime(2022, 10, 29, 19, 30, 0)]
+    # df = df[df['timestamp'] <= datetime(2022, 10, 29, 20, 0, 0)]
     df['timestamp'] = df['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
     session.close()
     return Response(
@@ -151,8 +151,8 @@ async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
     df = new_highlight_spikes(pd.DataFrame(forecasts), "value")
 
     df['timestamp'] = df['timestamp'].apply(lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ'))
-    df = df[df['timestamp'] <= datetime(2022, 10, 29, 19, 0, 0)]
-    df = df[df['timestamp'] >= datetime(2022, 10, 29, 18, 30, 0)]
+    # df = df[df['timestamp'] >= datetime(2022, 10, 29, 19, 30, 0)]
+    # df = df[df['timestamp'] <= datetime(2022, 10, 29, 20, 0, 0)]
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
