@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Any, Optional
+from click import option
 
 import pandas as pd
 import numpy as np
@@ -29,9 +30,20 @@ class TimeSeriesRecord(Base):
 class CarbonIntensity(TimeSeriesRecord):
     pass
 
+class Power(TimeSeriesRecord):
+    pass
+
+class CpuUsage(TimeSeriesRecord):
+    pass
+
+class RamCurrentUsage(TimeSeriesRecord):
+    pass
 
 metrics = {
     'carbonintensity': CarbonIntensity,
+    'power': Power,
+#    'cpuusage': CpuUsage,
+#    'ram': RamCurrentUsage,
 }
 
 
@@ -55,8 +67,13 @@ def insert_metric(session: Session, metric_name: str, timestamp: datetime, value
     model = metrics[metric_name]
     statement = insert(model).values(timestamp=timestamp, value=value)
     session.execute(statement)
-    session.commit()
 
+
+def insert_metric_and_commit(session: Session, metric_name: str, timestamp: datetime, value: Any):
+    model = metrics[metric_name]
+    statement = insert(model).values(timestamp=timestamp, value=value)
+    session.execute(statement)
+    session.commit()
 
 def select_metric(session: Session,
                   metric_name: str,
@@ -77,12 +94,6 @@ def select_metric(session: Session,
     return pd.DataFrame(results)
 
 
-def get_columns_names(session: Session,
-                      table: str) -> pd.DataFrame:
-    model = metrics[table]
-    model.__table__(cls)
-
-
 def power_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame:
     with open(settings.power_file_path, 'r') as f:  # if scaphandre is writing in the json -> KABOUM
         data = json.loads(f.read())
@@ -91,13 +102,13 @@ def power_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame:
         wanted_data = filter_date_range(lst, start_date, stop_date)
         for d in wanted_data:
             # d["timestamp"] = datetime.fromtimestamp(d["timestamp"]).isoformat()
-            d["timestamp"] = datetime.fromisoformat(datetime.fromtimestamp(d["timestamp"]).isoformat()).strftime(
-                "%Y-%m-%dT%H:%M:%SZ")
+            d["timestamp"] = datetime.fromtimestamp(d["timestamp"])
+            # datetime.fromisoformat(d["timestamp"]).strftime("%Y-%m-%dT%H:%M:%SZ") #
             d["consumption"] = float("{:.4f}".format(d["consumption"] * 10 ** -3))
         return pd.DataFrame(wanted_data, columns=["timestamp", "consumption"])
 
 
-def get_full_peak(start: int, diffs: list) -> []:
+def get_full_peak(start: int, diffs: list) -> list:
     val = diffs[start]
     sign = -1 if val < 0 else 0 if val == 0 else 1
     res = []
@@ -140,3 +151,44 @@ def highlight_spikes(data: pd.DataFrame, colname: str = None) -> pd.DataFrame:
         data["peak"][data[[colname]].idxmax()] = 1
 
     return data
+
+
+def new_highlight_spikes(df: pd.DataFrame, col: str = 'value') -> pd.DataFrame:
+    rol_col = f'_rolling_{col}'
+    quant_max = df[col].quantile(q=0.70)
+    quant_min = df[col].quantile(q=0.20)
+    window = 3
+    df[rol_col] = df[col].ewm(span=window).mean()
+    df['peak'] = 0
+    indexes_max = df[df[rol_col] >= quant_max].index
+    indexes_min = df[df[rol_col] <= quant_min].index
+    df.loc[indexes_max, 'peak'] = 1
+    df.loc[indexes_min, 'peak'] = -1
+
+    for row in df.itertuples():
+        if row.peak != 0 and row.Index > window + 2:
+            for i in range(window+1):
+                df.loc[row.Index - i, 'peak'] = row.peak
+
+    df = df.drop(columns=[rol_col])
+    return df
+
+def get_most_recent_timestamp(session, table):
+    """ Get a single row from the table which has the most recent timestamp"""
+    toto = session.query(table).order_by(table.timestamp.desc()).first()
+    return toto.timestamp if toto != None else None
+
+
+def add_from_scaphandre(session, table):
+    last_timestamp = get_most_recent_timestamp(session, table=Power)
+    last_timestamp = last_timestamp + timedelta(seconds=5) if last_timestamp != None else datetime.now() - timedelta(hours=24)
+    print("\n\n\n" + str(last_timestamp) + "\n\n\n")
+    if table == Power:
+        df = power_to_csv(start_date=last_timestamp,stop_date=datetime.now())
+    else:
+        pass
+    if df.empty:
+        return
+    else:
+        for row in df.itertuples():
+            insert_metric(session, metric_name='power' , timestamp=row.timestamp, value=row.consumption)

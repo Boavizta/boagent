@@ -16,6 +16,7 @@ dataclasses='0.8'
 requests = "*"
 sqlalchemy = "*"
 pydantic = {extras = ["dotenv"], version = "*"}
+croniter = "*"
 
 [dev-packages]
 mkdocs = '*'

@@ -1,11 +1,12 @@
+from inspect import _void
 import json
 import math
 import os
 import time
 from datetime import datetime, timedelta
 from subprocess import run
-from typing import Dict, Any, Tuple, List
-
+from typing import Dict, Any, Tuple, List, Optional
+from urllib import response
 from croniter import croniter
 
 import pandas as pd
@@ -19,8 +20,8 @@ from boaviztapi_sdk.model.server_dto import ServerDTO
 from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, \
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
-from database import create_database, get_session, get_engine, insert_metric, select_metric, power_to_csv, \
-    highlight_spikes
+from database import create_database, get_session, get_engine, insert_metric, select_metric, \
+    new_highlight_spikes, CarbonIntensity, Power, add_from_scaphandre
 
 
 def configure_static(app):
@@ -62,16 +63,11 @@ async def web():
 
 @app.get('/csv')
 async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
-    if data == "power": 
-        print("in csv since={}, until={}".format(since,until))
     start_date, stop_date = parse_date_info(since, until)
-    if data == "power": 
-        print("in csv start_date={}, stop_date={}".format(start_date,stop_date))
-    if data == "power":
-        df = highlight_spikes(power_to_csv(start_date, stop_date), "consumption")
-    else:
-        session = get_session(settings.db_path)
-        df = highlight_spikes(select_metric(session, data, start_date, stop_date))
+    session = get_session(settings.db_path)
+    df = new_highlight_spikes(select_metric(session, data, start_date, stop_date), 'value')
+    df['timestamp'] = df['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
+    session.close()
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
@@ -108,10 +104,11 @@ async def update():
     response = query_electricity_carbon_intensity()
     info = parse_electricity_carbon_intensity(response)
     session = get_session(settings.db_path)
+    add_from_scaphandre(session, table=Power)
     insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
     session.commit()
     session.close()
-    session.close()
+    return Response(status_code=200)
 
 
 @app.get("/carbon_intensity_forecast")
@@ -120,14 +117,14 @@ async def carbon_intensity_forecast(since: str = "now", until: str = "24h") -> R
     start_date = upper_round_date_minutes_with_base(start_date, base=5)
     response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
     forecasts = parse_forecast_electricity_carbon_intensity(response)
-    df = highlight_spikes(pd.DataFrame(forecasts),"value")
+    df = new_highlight_spikes(pd.DataFrame(forecasts), "value")
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
     )
 
 
-@app.get("/recommendation")
+@app.get("/reco")
 async def info():
     return get_reco()
 
@@ -147,10 +144,31 @@ async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
     df_forecast = pd.DataFrame(forecasts)
     df_forecast['forecast'] = True
     df = pd.concat([df_history, df_forecast])
+    df = df[['timestamp', 'value', 'forecast']]
+    df = new_highlight_spikes(pd.DataFrame(forecasts), "value")
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
     )
+
+
+@app.get("/init_carbon_intensity")
+async def init_carbon_intensity():
+    engine = get_engine(settings.db_path)
+    CarbonIntensity.__table__.drop(engine)
+    create_database(engine)
+
+    session = get_session(settings.db_path)
+    now = datetime.utcnow()
+    curr_date = now - timedelta(hours=24)
+
+    while curr_date < now:
+        # TODO: make bulk select in boaviztapi
+        response = query_electricity_carbon_intensity(curr_date, curr_date + timedelta(minutes=5))
+        info = parse_electricity_carbon_intensity(response)
+        insert_metric(session, 'carbonintensity', info['timestamp'], info['value'])
+        curr_date += timedelta(minutes=5)
+    session.commit()
 
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float,
@@ -382,25 +400,22 @@ def generate_machine_configuration(hardware_data):
     return config
 
 
-def query_electricity_carbon_intensity() -> Dict[str, Any]:
+def query_electricity_carbon_intensity(start_date: Optional[datetime] = None,
+                                       stop_date: Optional[datetime] = None) -> Dict[str, Any]:
     url = settings.boaviztapi_endpoint + f'/v1/usage_router/gwp/current_intensity?location={settings.azure_location}'
-    today = datetime.now()
-    start_date = (today - timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    stop_date = today.strftime("%Y-%m-%dT%H:%M:%SZ")
+    start_date = start_date or (datetime.now() - timedelta(minutes=5))
+    stop_date = stop_date or datetime.now()
     response = requests.post(url, json={
         "source": "carbon_aware_api",
         "url": settings.carbon_aware_api_endpoint,
         "token": settings.carbon_aware_api_token,
-        "start_date": start_date,
-        "stop_date": stop_date
+        "start_date": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "stop_date": stop_date.strftime("%Y-%m-%dT%H:%M:%SZ")
     })
     return response.json()
 
 
 def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]):
-    from pprint import pprint
-    print("carbon aware api response : ")
-    pprint(carbon_aware_api_response)
     intensity_dict = carbon_aware_api_response['_value']
     return {
         'timestamp': datetime.fromisoformat(intensity_dict['endTime']),
@@ -481,17 +496,24 @@ def get_cron_per_user():
         for line in f.readlines():
             user.append(line.split(":")[0])
         user.sort()
+        cron_user = []
         for item in user:
             output = os.popen(f"crontab -u {item} -l").read()
             for line in output.splitlines():
-                print(line)
+                if line == f"no crontab for {item}":
+                    break
+                else:
+                    cron_user.append(line)
+        return cron_user
 
 
 def get_all_cron():
     crons = []
 
     if os.geteuid() == 0:
-        crons.append(get_cron_per_user())
+        cron_user = get_cron_per_user()
+        if cron_user:
+            crons.append(cron_user)
     else:
         output = os.popen(f"crontab -l").read()
         for line in output.splitlines():
@@ -517,16 +539,52 @@ def get_cron_info():
                 sched += char
         info["next"] = croniter(sched, base).get_next(datetime)
         info["previous"] = croniter(sched, base).get_prev(datetime)
-        info["job"] = cron_lines
+        info["job"] = cron
         crons_info.append(info)
     return crons_info
 
 
-def get_reco():
+def event_is_in_bad_time(event, since="now", until="24h"):
+    start_date, stop_date = parse_date_info(since, until, forecast=True)
+    start_date = upper_round_date_minutes_with_base(start_date, base=5)
+    response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
+    forecasts = parse_forecast_electricity_carbon_intensity(response)
+    df = new_highlight_spikes(pd.DataFrame(forecasts), "value")
+    index = df.timestamp.searchsorted(f"{event}")
+
+    if index == 0 or index == len(df.index):
+        return False
+
+    if df['peak'][index] == 1:
+        return True
+
+    return False
+
+
+def get_reco(since="now", until="24h"):
     reco = []
-    for cron in get_cron_info():
-        if cron['next']:
-            reco.append({'date': cron['next'], 'mode': 'forcast', 'job': cron['job']})
-        if cron['previous']:
-            reco.append({'date': cron['previous'], 'mode': 'history', 'job': cron['job']})
+    cron_list = get_cron_info()
+    for cron in cron_list:
+        if event_is_in_bad_time(event=cron['next'], since=since, until=until):
+            reco.append({'type': 'CRON', 'date': cron['next'], 'mode': 'forcast', 'job': cron['job']})
+        if event_is_in_bad_time(event=cron['previous'], since=since, until=until):
+            reco.append({'type': 'CRON', 'date': cron['previous'], 'mode': 'history', 'job': cron['job']})
     return reco
+
+
+@app.get("/toto")
+def toto():
+    session = get_session(settings.db_path)
+    add_from_scaphandre(session, table=Power)
+    session.close()
+    session.close()
+
+    return Response(status_code=200)
+
+
+
+
+
+@app.get("/recommendation")
+async def info():
+    return get_reco()

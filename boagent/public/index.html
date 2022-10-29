@@ -1,4 +1,4 @@
-<html>
+<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 
 <head>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
@@ -50,7 +50,7 @@
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum. Sed volutpat ligula vestibulum dapibus ultrices. Aliquam erat volutpat. Suspendisse non diam in nulla volutpat tincidunt id nec orci. Cras eu semper nunc. Proin molestie dictum volutpat. Donec et dapibus ipsum. Integer iaculis rhoncus odio, vitae volutpat justo mollis iaculis.</p>
     </div>
     <div class="box">
-        <div id="graphforcast" style="width:100%;height:200px;"></div>
+        <div id="graphintensity" style="width:100%;height:200px;"></div>
     </div>
 
     <div class="box-legend">
@@ -77,45 +77,21 @@
     </div>
     <table>
         <thead>
-        <tr>
-            <th></th>
-            <th>Time</th>
-            <th>Type</th>
-            <th>Recommendation</th>
-        </tr>
+            <tr>
+                <th></th>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Recommendation</th>
+            </tr>
         <thead>
-        <tbody>
-        <tr>
-            <td>🕝</td>
-            <td>2022/10/21 00:05:00</td>
-            <td>CRON</td>
-            <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum.</td>
-        </tr>
-        <tr>
-            <td>🕝</td>
-            <td>2022/10/21 00:05:00</td>
-            <td>CRON</td>
-            <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum.</td>
-        </tr>
-        <tr>
-            <td>⚠️</td>
-            <td>2022/10/21 00:05:00</td>
-            <td>PICK</td>
-            <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum.</td>
-        </tr>
-        <tr>
-            <td>⛔</td>
-            <td>2022/10/21 00:05:00</td>
-            <td>IDLE</td>
-            <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum.</td>
-        </tr>
+        <tbody  id="reco-table">
         </tbody>
     </table>
 
 <script>
-    var graphforcast = new Dygraph(
-        document.getElementById("graphforcast"),
-        "/carbon_intensity_forecast?since=now&until=24h", // path to CSV file
+    var graphintensity = new Dygraph(
+        document.getElementById("graphintensity"),
+        "/carbon_intensity?since=now&until=24h", // path to CSV file
         {
             fillGraph: true,
             visibility: [true, false],
@@ -154,7 +130,7 @@
 
     var graphimpact = new Dygraph(
         document.getElementById("graphimpact"),
-        "/csv?data=ram_load&since=now&until=24h", // path to CSV file
+        "/csv?data=ram_load&since=now&until=1h", // path to CSV file
         {
             fillGraph: true,
             stackedGraph: true,
@@ -194,7 +170,7 @@
 
     var graphload = new Dygraph(
         document.getElementById("graphload"),
-        "/csv?data=ram_load&since=now&until=24h", // path to CSV file
+        "/csv?data=ram_load&since=now&until=1h", // path to CSV file
         {
             fillGraph: true,
             visibility: [false, true, true, false, false, false, false, false, false, false, false],
@@ -233,7 +209,7 @@
 
         var graphconso = new Dygraph(
         document.getElementById("graphconso"),
-        "/csv?data=power&since=24h&until=now", // path to CSV file
+        "/csv?data=power&since=1h&until=now", // path to CSV file
         {
             fillGraph: true,
             visibility: [true, false],
@@ -270,7 +246,7 @@
             }
         });
 
-    Dygraph.synchronize([graphforcast, graphimpact, graphload, graphconso], {
+    Dygraph.synchronize([graphintensity, graphimpact, graphload, graphconso], {
         zoom: true,
         selection: true,
         range: false
@@ -332,7 +308,36 @@
         .then((data) => {
             embodied.setValue(data.embedded_emissions.value);
         })
+</script>
 
+<script>
+    fetch("/reco")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            console.log(data)
+            loadTableData(data);
+        })
+
+    function loadTableData(items) {
+        const table = document.getElementById("reco-table");
+        items.forEach( item => {
+            let row = table.insertRow();
+
+            let picto = row.insertCell(0);
+            picto.innerHTML = "🕝";
+
+            let time = row.insertCell(1);
+            time.innerHTML = item.date;
+
+            let type = row.insertCell(2);
+            type.innerHTML = item.type;
+
+            let reco = row.insertCell(3);
+            reco.innerHTML = "Schedule your CRON during less carbonate hours"
+        });
+    }
 </script>
 
 
