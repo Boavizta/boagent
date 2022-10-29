@@ -62,6 +62,8 @@ def select_metric(session: Session,
                   metric_name: str,
                   start_date: Optional[datetime] = None,
                   stop_date: Optional[datetime] = None) -> pd.DataFrame:
+    if metric_name not in metrics:
+        return pd.DataFrame()
     model = metrics[metric_name]
     if stop_date is None:
         stop_date = datetime.now()
@@ -85,6 +87,7 @@ def power_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame:
     with open(settings.power_file_path, 'r') as f:  # if scaphandre is writing in the json -> KABOUM
         data = json.loads(f.read())
         lst = [d["host"] for d in data]
+        print("in power_to_csv start_date: {} stop_date: {}".format(start_date, stop_date))
         wanted_data = filter_date_range(lst, start_date, stop_date)
         for d in wanted_data:
             # d["timestamp"] = datetime.fromtimestamp(d["timestamp"]).isoformat()
@@ -112,20 +115,24 @@ def get_full_peak(start: int, diffs: list) -> []:
     return res, sign
 
 
-def highlight_spikes(data: pd.DataFrame, colname: str) -> pd.DataFrame:
-    diffs = np.diff(data[colname])
+def highlight_spikes(data: pd.DataFrame, colname: str = None) -> pd.DataFrame:
+    if len(data.keys()) > 0:
+        if colname is None:
+            colname = data.keys()[1]
 
-    factor = 3
+        diffs = np.diff(data[colname])
 
-    avg_diff = sum([abs(d) for d in diffs]) / len(diffs)
+        factor = 3
 
-    peaks_ids = np.where(abs(diffs) > avg_diff * factor)
+        avg_diff = sum([abs(d) for d in diffs]) / len(diffs)
 
-    data["peak"] = 0
+        peaks_ids = np.where(abs(diffs) > avg_diff * factor)
 
-    for i in peaks_ids[0].tolist():
-        full_peak = get_full_peak(i, diffs.tolist())
-        data["peak"][full_peak[0]] = full_peak[1]
-        # data.loc[:, ("peak", full_peak[0])] = full_peak[1]
+        data["peak"] = 0
+
+        for i in peaks_ids[0].tolist():
+            full_peak = get_full_peak(i, diffs.tolist())
+            data["peak"][full_peak[0]] = full_peak[1]
+            # data.loc[:, ("peak", full_peak[0])] = full_peak[1]
 
     return data

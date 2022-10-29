@@ -62,14 +62,16 @@ async def web():
 
 @app.get('/csv')
 async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
+    if data == "power": 
+        print("in csv since={}, until={}".format(since,until))
     start_date, stop_date = parse_date_info(since, until)
+    if data == "power": 
+        print("in csv start_date={}, stop_date={}".format(start_date,stop_date))
     if data == "power":
         df = highlight_spikes(power_to_csv(start_date, stop_date), "consumption")
     else:
         session = get_session(settings.db_path)
-        df = select_metric(session, data, start_date, stop_date)
-    from pprint import pprint
-    pprint(df)
+        df = highlight_spikes(select_metric(session, data, start_date, stop_date))
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
@@ -107,7 +109,6 @@ async def update():
     info = parse_electricity_carbon_intensity(response)
     session = get_session(settings.db_path)
     insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
-    highlight_spikes(session=session, metric_name='')
     session.commit()
     session.close()
     session.close()
@@ -119,7 +120,7 @@ async def carbon_intensity_forecast(since: str = "now", until: str = "24h") -> R
     start_date = upper_round_date_minutes_with_base(start_date, base=5)
     response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
     forecasts = parse_forecast_electricity_carbon_intensity(response)
-    df = pd.DataFrame(forecasts)
+    df = highlight_spikes(pd.DataFrame(forecasts),"value")
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
