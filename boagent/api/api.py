@@ -62,11 +62,7 @@ async def web():
 
 @app.get('/csv')
 async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
-    if data == "power":
-        print("in csv since={}, until={}".format(since, until))
     start_date, stop_date = parse_date_info(since, until)
-    if data == "power":
-        print("in csv start_date={}, stop_date={}".format(start_date, stop_date))
     if data == "power":
         df = highlight_spikes(power_to_csv(start_date, stop_date), "consumption")
     else:
@@ -441,7 +437,7 @@ def parse_forecast_electricity_carbon_intensity(response: Dict[str, Any]) -> Lis
     results = []
     for item in forecasts:
         results.append({
-            'timestamp': datetime.fromisoformat(item['timestamp']).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'timestamp': datetime.fromisoformat(item['timestamp']).strftime("%Y-%m-%d %H:%M:%S"),
             'value': item['value']
         })
     return results
