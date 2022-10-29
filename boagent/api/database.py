@@ -101,14 +101,15 @@ def get_full_peak(start: int, diffs: list) -> []:
     val = diffs[start]
     sign = -1 if val < 0 else 0 if val == 0 else 1
     res = []
+    recover = 0.25
     i = 1
     if sign > 0:
-        while val > 0 and start + i < len(diffs):
+        while val > recover * val and start + i < len(diffs):
             val += diffs[start + i]
             res.append(start + i)
             i = i + 1
     else:
-        while val < 0 and start + i < len(diffs):
+        while val < (- 3 * recover * val) and start + i < len(diffs):
             val += diffs[start + i]
             res.append(start + i)
             i = i + 1
@@ -122,7 +123,7 @@ def highlight_spikes(data: pd.DataFrame, colname: str = None) -> pd.DataFrame:
 
         diffs = np.diff(data[colname])
 
-        factor = 1.5
+        factor = 1.2
 
         avg_diff = sum([abs(d) for d in diffs]) / len(diffs)
 
@@ -134,5 +135,8 @@ def highlight_spikes(data: pd.DataFrame, colname: str = None) -> pd.DataFrame:
             full_peak = get_full_peak(i, diffs.tolist())
             data["peak"][full_peak[0]] = full_peak[1]
             # data.loc[:, ("peak", full_peak[0])] = full_peak[1]
+        
+        data["peak"][data[[colname]].idxmin()] = -1
+        data["peak"][data[[colname]].idxmax()] = 1
 
     return data
