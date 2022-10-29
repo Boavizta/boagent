@@ -4,7 +4,7 @@ import os
 import time
 from datetime import datetime, timedelta
 from subprocess import run
-from typing import Dict, Any, Tuple, List
+from typing import Dict, Any, Tuple, List, Optional
 
 from croniter import croniter
 
@@ -110,7 +110,6 @@ async def update():
     session = get_session(settings.db_path)
     insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
     session.commit()
-    session.close()
     session.close()
 
 
@@ -383,25 +382,22 @@ def generate_machine_configuration(hardware_data):
     return config
 
 
-def query_electricity_carbon_intensity() -> Dict[str, Any]:
+def query_electricity_carbon_intensity(start_date: Optional[datetime] = None,
+                                       stop_date: Optional[datetime] = None) -> Dict[str, Any]:
     url = settings.boaviztapi_endpoint + f'/v1/usage_router/gwp/current_intensity?location={settings.azure_location}'
-    today = datetime.now()
-    start_date = (today - timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    stop_date = today.strftime("%Y-%m-%dT%H:%M:%SZ")
+    start_date = start_date or (datetime.now() - timedelta(minutes=5))
+    stop_date = stop_date or datetime.now()
     response = requests.post(url, json={
         "source": "carbon_aware_api",
         "url": settings.carbon_aware_api_endpoint,
         "token": settings.carbon_aware_api_token,
-        "start_date": start_date,
-        "stop_date": stop_date
+        "start_date": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "stop_date": stop_date.strftime("%Y-%m-%dT%H:%M:%SZ")
     })
     return response.json()
 
 
 def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]):
-    from pprint import pprint
-    print("carbon aware api response : ")
-    pprint(carbon_aware_api_response)
     intensity_dict = carbon_aware_api_response['_value']
     return {
         'timestamp': datetime.fromisoformat(intensity_dict['endTime']),
