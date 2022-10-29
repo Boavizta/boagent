@@ -67,6 +67,7 @@ async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
     start_date, stop_date = parse_date_info(since, until)
     session = get_session(settings.db_path)
     df = highlight_spikes(select_metric(session, data, start_date, stop_date))
+    df['timestamp'] = df['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
     session.close()
     return Response(
         content=df.to_csv(index=False),
