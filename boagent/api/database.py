@@ -122,7 +122,7 @@ def highlight_spikes(data: pd.DataFrame, colname: str = None) -> pd.DataFrame:
 
         diffs = np.diff(data[colname])
 
-        factor = 3
+        factor = 1.5
 
         avg_diff = sum([abs(d) for d in diffs]) / len(diffs)
 
