@@ -64,8 +64,6 @@ async def web():
 async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
     start_date, stop_date = parse_date_info(since, until)
     if data == "power":
-        print("in csv start_date={}, stop_date={}".format(start_date, stop_date))
-    if data == "power":
         df = new_highlight_spikes(power_to_csv(start_date, stop_date), "consumption")
     else:
         session = get_session(settings.db_path)
@@ -145,6 +143,7 @@ async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
     df_forecast['forecast'] = True
     df = pd.concat([df_history, df_forecast])
     df = df[['timestamp', 'value', 'forecast']]
+    df = new_highlight_spikes(pd.DataFrame(forecasts), "value")
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
