@@ -55,7 +55,6 @@ def insert_metric(session: Session, metric_name: str, timestamp: datetime, value
     model = metrics[metric_name]
     statement = insert(model).values(timestamp=timestamp, value=value)
     session.execute(statement)
-    session.commit()
 
 
 def select_metric(session: Session,
@@ -75,12 +74,6 @@ def select_metric(session: Session,
     )
     results = session.execute(statement).all()
     return pd.DataFrame(results)
-
-
-def get_columns_names(session: Session,
-                      table: str) -> pd.DataFrame:
-    model = metrics[table]
-    model.__table__(cls)
 
 
 def power_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame:
