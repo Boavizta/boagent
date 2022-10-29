@@ -133,3 +133,24 @@ def highlight_spikes(data: pd.DataFrame, colname: str = None) -> pd.DataFrame:
         data["peak"][data[[colname]].idxmax()] = 1
 
     return data
+
+
+def new_highlight_spikes(df: pd.DataFrame, col: str = 'value') -> pd.DataFrame:
+    rol_col = f'_rolling_{col}'
+    quant_max = df[col].quantile(q=0.70)
+    quant_min = df[col].quantile(q=0.20)
+    window = 3
+    df[rol_col] = df[col].ewm(span=window).mean()
+    df['peak'] = 0
+    indexes_max = df[df[rol_col] >= quant_max].index
+    indexes_min = df[df[rol_col] <= quant_min].index
+    df.loc[indexes_max, 'peak'] = 1
+    df.loc[indexes_min, 'peak'] = -1
+
+    for row in df.itertuples():
+        if row.peak != 0 and row.Index > window + 2:
+            for i in range(window+1):
+                df.loc[row.Index - i, 'peak'] = row.peak
+
+    df = df.drop(columns=[rol_col])
+    return df

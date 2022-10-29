@@ -20,7 +20,7 @@ from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, f
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 from database import create_database, get_session, get_engine, insert_metric, select_metric, power_to_csv, \
-    highlight_spikes, CarbonIntensity
+    new_highlight_spikes, CarbonIntensity
 
 
 def configure_static(app):
@@ -64,10 +64,12 @@ async def web():
 async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
     start_date, stop_date = parse_date_info(since, until)
     if data == "power":
-        df = highlight_spikes(power_to_csv(start_date, stop_date), "consumption")
+        print("in csv start_date={}, stop_date={}".format(start_date, stop_date))
+    if data == "power":
+        df = new_highlight_spikes(power_to_csv(start_date, stop_date), "consumption")
     else:
         session = get_session(settings.db_path)
-        df = highlight_spikes(select_metric(session, data, start_date, stop_date))
+        df = new_highlight_spikes(select_metric(session, data, start_date, stop_date), 'value')
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
@@ -115,7 +117,7 @@ async def carbon_intensity_forecast(since: str = "now", until: str = "24h") -> R
     start_date = upper_round_date_minutes_with_base(start_date, base=5)
     response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
     forecasts = parse_forecast_electricity_carbon_intensity(response)
-    df = highlight_spikes(pd.DataFrame(forecasts), "value")
+    df = new_highlight_spikes(pd.DataFrame(forecasts), "value")
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
@@ -437,7 +439,7 @@ def parse_forecast_electricity_carbon_intensity(response: Dict[str, Any]) -> Lis
     results = []
     for item in forecasts:
         results.append({
-            'timestamp': datetime.fromisoformat(item['timestamp']).strftime("%Y-%m-%d %H:%M:%S"),
+            'timestamp': datetime.fromisoformat(item['timestamp']).strftime("%Y-%m-%dT%H:%M:%SZ"),
             'value': item['value']
         })
     return results
@@ -546,7 +548,7 @@ def event_is_in_bad_time(event, since="now", until="24h"):
     start_date = upper_round_date_minutes_with_base(start_date, base=5)
     response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
     forecasts = parse_forecast_electricity_carbon_intensity(response)
-    df = highlight_spikes(pd.DataFrame(forecasts), "value")
+    df = new_highlight_spikes(pd.DataFrame(forecasts), "value")
     index = df.timestamp.searchsorted(f"{event}")
 
     if index == 0 or index == len(df.index):
