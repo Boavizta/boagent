@@ -62,11 +62,11 @@ async def web():
 
 @app.get('/csv')
 async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
-    if data == "power": 
-        print("in csv since={}, until={}".format(since,until))
+    if data == "power":
+        print("in csv since={}, until={}".format(since, until))
     start_date, stop_date = parse_date_info(since, until)
-    if data == "power": 
-        print("in csv start_date={}, stop_date={}".format(start_date,stop_date))
+    if data == "power":
+        print("in csv start_date={}, stop_date={}".format(start_date, stop_date))
     if data == "power":
         df = highlight_spikes(power_to_csv(start_date, stop_date), "consumption")
     else:
@@ -120,14 +120,14 @@ async def carbon_intensity_forecast(since: str = "now", until: str = "24h") -> R
     start_date = upper_round_date_minutes_with_base(start_date, base=5)
     response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
     forecasts = parse_forecast_electricity_carbon_intensity(response)
-    df = highlight_spikes(pd.DataFrame(forecasts),"value")
+    df = highlight_spikes(pd.DataFrame(forecasts), "value")
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
     )
 
 
-@app.get("/recommendation")
+@app.get("/reco")
 async def info():
     return get_reco()
 
@@ -482,17 +482,24 @@ def get_cron_per_user():
         for line in f.readlines():
             user.append(line.split(":")[0])
         user.sort()
+        cron_user = []
         for item in user:
             output = os.popen(f"crontab -u {item} -l").read()
             for line in output.splitlines():
-                print(line)
+                if line == f"no crontab for {item}":
+                    break
+                else:
+                    cron_user.append(line)
+        return cron_user
 
 
 def get_all_cron():
     crons = []
 
     if os.geteuid() == 0:
-        crons.append(get_cron_per_user())
+        cron_user = get_cron_per_user()
+        if cron_user:
+            crons.append(cron_user)
     else:
         output = os.popen(f"crontab -l").read()
         for line in output.splitlines():
@@ -518,16 +525,34 @@ def get_cron_info():
                 sched += char
         info["next"] = croniter(sched, base).get_next(datetime)
         info["previous"] = croniter(sched, base).get_prev(datetime)
-        info["job"] = cron_lines
+        info["job"] = cron
         crons_info.append(info)
     return crons_info
 
 
-def get_reco():
+def event_is_in_bad_time(event, since="now", until="24h"):
+    start_date, stop_date = parse_date_info(since, until, forecast=True)
+    start_date = upper_round_date_minutes_with_base(start_date, base=5)
+    response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
+    forecasts = parse_forecast_electricity_carbon_intensity(response)
+    df = highlight_spikes(pd.DataFrame(forecasts), "value")
+    index = df.timestamp.searchsorted(f"{event}")
+
+    if index == 0 or index == len(df.index):
+        return False
+
+    if df['peak'][index] == 1:
+        return True
+
+    return False
+
+
+def get_reco(since="now", until="24h"):
     reco = []
-    for cron in get_cron_info():
-        if cron['next']:
-            reco.append({'date': cron['next'], 'mode': 'forcast', 'job': cron['job']})
-        if cron['previous']:
-            reco.append({'date': cron['previous'], 'mode': 'history', 'job': cron['job']})
+    cron_list = get_cron_info()
+    for cron in cron_list:
+        if event_is_in_bad_time(event=cron['next'], since=since, until=until):
+            reco.append({'type': 'CRON', 'date': cron['next'], 'mode': 'forcast', 'job': cron['job']})
+        if event_is_in_bad_time(event=cron['previous'], since=since, until=until):
+            reco.append({'type': 'CRON', 'date': cron['previous'], 'mode': 'history', 'job': cron['job']})
     return reco
