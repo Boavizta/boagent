@@ -91,7 +91,7 @@
 <script>
     var graphintensity = new Dygraph(
         document.getElementById("graphintensity"),
-        "/carbon_intensity?since=now&until=1h", // path to CSV file
+        "/carbon_intensity?since=now&until=24h", // path to CSV file
         {
             fillGraph: true,
             visibility: [true, false],
@@ -246,7 +246,7 @@
             }
         });
 
-    Dygraph.synchronize([graphintensity, graphimpact, graphload, graphconso], {
+    Dygraph.synchronize([graphintensity, graphconso], {
         zoom: true,
         selection: true,
         range: false
