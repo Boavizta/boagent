@@ -1,4 +1,3 @@
-from inspect import _void
 import json
 import math
 import os
@@ -198,6 +197,45 @@ async def init_carbon_intensity():
         insert_metric(session, 'carbonintensity', info['timestamp'], info['value'])
         curr_date += timedelta(minutes=5)
     session.commit()
+
+
+@app.get("/impact")
+async def impact(since: str = "now", until: str = "24h"):
+    start_date, stop_date = parse_date_info(since, until)
+    session = get_session(settings.db_path)
+
+    df_power = select_metric(session, 'power', start_date, stop_date)
+    df_power['power_watt'] = df_power['value'] / 1000
+    df_power = df_power.drop(columns=['value'])
+    df_power = df_power.set_index('timestamp')
+    df_power = df_power.resample('1s').mean()
+    df_power = df_power.fillna(method='ffill')
+
+    df_carbon_intensity = select_metric(session, 'carbonintensity', start_date, stop_date)
+    df_carbon_intensity['carbon_intensity_g_per_watt_second'] = df_carbon_intensity['value'] / (1000*3600)
+    df_carbon_intensity = df_carbon_intensity.drop(columns=['value'])
+    df_carbon_intensity = df_carbon_intensity.set_index('timestamp')
+    df_carbon_intensity = df_carbon_intensity.resample('1s').mean()
+    df_carbon_intensity = df_carbon_intensity.fillna(method='ffill')
+    df = df_power.merge(df_carbon_intensity, on='timestamp')
+    df['operational'] = df['power_watt'] * df['carbon_intensity_g_per_watt_second']
+
+    metrics = get_metrics(
+        start_time=start_date.timestamp(),
+        end_time=stop_date.timestamp(),
+        verbose=False,
+        location='FRA',
+        measure_power=False,
+        lifetime=4,
+        fetch_hardware=False
+    )
+    embedded_emissions = metrics['embedded_emissions']['value']
+    df['embedded'] = embedded_emissions
+    df = df.drop(columns=['power_watt', 'carbon_intensity_g_per_watt_second']).reset_index()
+    return Response(
+        content=df.to_csv(index=False),
+        media_type="text/csv"
+    )
 
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float,
