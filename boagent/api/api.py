@@ -105,6 +105,11 @@ async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = 
         verbose, location, measure_power, lifetime, fetch_hardware
     )
 
+@app.get("/actual_intensity")
+async def actual_intensity():
+    response = query_electricity_carbon_intensity()
+    info = parse_electricity_carbon_intensity(response)
+    return info['value']
 
 @app.get("/update")
 async def update():

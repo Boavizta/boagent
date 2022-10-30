@@ -27,7 +27,7 @@
             <div id="server-score"></div>
         </div>
         <div class="score-box">
-            <h3>Embodied yearly impact</h3>
+            <h3>Total embodied impact</h3>
             <div id="embodied-score"></div>
         </div>
         <div class="score-box">
@@ -296,9 +296,8 @@
     carbonintensity.setProperty('angleEnd', 0.75 * Math.PI);
     carbonintensity.setProperty('colorFG', '#88ff88');
     carbonintensity.setProperty('valMin', 0);
-    carbonintensity.setProperty('valMax', 100);
+    carbonintensity.setProperty('valMax', 1000);
     carbonintensity.setProperty('readonly', true)
-    carbonintensity.setValue(37);
     document.getElementById('intensity').appendChild(carbonintensity.node());
 
     fetch("/query")
@@ -308,6 +307,16 @@
         .then((data) => {
             embodied.setValue(data.embedded_emissions.value);
         })
+
+    fetch("/actual_intensity")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            carbonintensity.setValue(data);
+        })
+
+
 </script>
 
 <script>
