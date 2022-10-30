@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Optional
+
+import pytz
 from click import option
 
 import pandas as pd
@@ -30,20 +32,24 @@ class TimeSeriesRecord(Base):
 class CarbonIntensity(TimeSeriesRecord):
     pass
 
+
 class Power(TimeSeriesRecord):
     pass
+
 
 class CpuUsage(TimeSeriesRecord):
     pass
 
+
 class RamCurrentUsage(TimeSeriesRecord):
     pass
+
 
 metrics = {
     'carbonintensity': CarbonIntensity,
     'power': Power,
-#    'cpuusage': CpuUsage,
-#    'ram': RamCurrentUsage,
+    #    'cpuusage': CpuUsage,
+    #    'ram': RamCurrentUsage,
 }
 
 
@@ -75,6 +81,7 @@ def insert_metric_and_commit(session: Session, metric_name: str, timestamp: date
     session.execute(statement)
     session.commit()
 
+
 def select_metric(session: Session,
                   metric_name: str,
                   start_date: Optional[datetime] = None,
@@ -83,7 +90,7 @@ def select_metric(session: Session,
         return pd.DataFrame()
     model = metrics[metric_name]
     if stop_date is None:
-        stop_date = datetime.now()
+        stop_date = datetime.utcnow()
     if start_date is None:
         start_date = stop_date - timedelta(hours=1)
     statement = select(model.timestamp, model.value).where(
@@ -98,11 +105,10 @@ def power_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame:
     with open(settings.power_file_path, 'r') as f:  # if scaphandre is writing in the json -> KABOUM
         data = json.loads(f.read())
         lst = [d["host"] for d in data]
-        print("in power_to_csv start_date: {} stop_date: {}".format(start_date, stop_date))
         wanted_data = filter_date_range(lst, start_date, stop_date)
         for d in wanted_data:
             # d["timestamp"] = datetime.fromtimestamp(d["timestamp"]).isoformat()
-            d["timestamp"] = datetime.fromtimestamp(d["timestamp"])
+            d["timestamp"] = datetime.fromtimestamp(d["timestamp"]).astimezone(pytz.UTC)
             # datetime.fromisoformat(d["timestamp"]).strftime("%Y-%m-%dT%H:%M:%SZ") #
             d["consumption"] = float("{:.4f}".format(d["consumption"] * 10 ** -3))
         return pd.DataFrame(wanted_data, columns=["timestamp", "consumption"])
@@ -146,7 +152,7 @@ def highlight_spikes(data: pd.DataFrame, colname: str = None) -> pd.DataFrame:
             full_peak = get_full_peak(i, diffs.tolist())
             data["peak"][full_peak[0]] = full_peak[1]
             # data.loc[:, ("peak", full_peak[0])] = full_peak[1]
-        
+
         data["peak"][data[[colname]].idxmin()] = -1
         data["peak"][data[[colname]].idxmax()] = 1
 
@@ -167,11 +173,12 @@ def new_highlight_spikes(df: pd.DataFrame, col: str = 'value') -> pd.DataFrame:
 
     for row in df.itertuples():
         if row.peak != 0 and row.Index > window + 2:
-            for i in range(window+1):
+            for i in range(window + 1):
                 df.loc[row.Index - i, 'peak'] = row.peak
 
     df = df.drop(columns=[rol_col])
     return df
+
 
 def get_most_recent_timestamp(session, table):
     """ Get a single row from the table which has the most recent timestamp"""
@@ -181,14 +188,14 @@ def get_most_recent_timestamp(session, table):
 
 def add_from_scaphandre(session, table):
     last_timestamp = get_most_recent_timestamp(session, table=Power)
-    last_timestamp = last_timestamp + timedelta(seconds=5) if last_timestamp != None else datetime.now() - timedelta(hours=24)
-    print("\n\n\n" + str(last_timestamp) + "\n\n\n")
+    last_timestamp = last_timestamp + timedelta(seconds=5) if last_timestamp != None else datetime.utcnow() - timedelta(
+        hours=24)
     if table == Power:
-        df = power_to_csv(start_date=last_timestamp,stop_date=datetime.now())
+        df = power_to_csv(start_date=last_timestamp, stop_date=datetime.utcnow())
     else:
         pass
     if df.empty:
         return
     else:
         for row in df.itertuples():
-            insert_metric(session, metric_name='power' , timestamp=row.timestamp, value=row.consumption)
+            insert_metric(session, metric_name='power', timestamp=row.timestamp, value=row.consumption)

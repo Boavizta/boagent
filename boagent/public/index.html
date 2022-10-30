@@ -91,7 +91,7 @@
 <script>
     var graphintensity = new Dygraph(
         document.getElementById("graphintensity"),
-        "/carbon_intensity?since=now&until=24h", // path to CSV file
+        "/carbon_intensity?since=now&until=1h", // path to CSV file
         {
             fillGraph: true,
             visibility: [true, false],
@@ -209,7 +209,7 @@
 
         var graphconso = new Dygraph(
         document.getElementById("graphconso"),
-        "/csv?data=power&since=1h&until=now", // path to CSV file
+        "/csv?data=power&since=now&until=1h", // path to CSV file
         {
             fillGraph: true,
             visibility: [true, false],

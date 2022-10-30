@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 from subprocess import run
 from typing import Dict, Any, Tuple, List, Optional
 from urllib import response
+
+import pytz
 from croniter import croniter
 
 import pandas as pd
@@ -64,13 +66,15 @@ async def web():
 @app.get('/csv')
 async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
     start_date, stop_date = parse_date_info(since, until)
+
     session = get_session(settings.db_path)
     df = new_highlight_spikes(select_metric(session, data, start_date, stop_date), 'value')
-    df['timestamp'] = df['timestamp'].apply(lambda x: x + timedelta(hours=2))
+    # df['timestamp'] = df['timestamp'].apply(lambda x: x + timedelta(hours=2))
     # df = df[df['timestamp'] >= datetime(2022, 10, 29, 19, 30, 0)]
     # df = df[df['timestamp'] <= datetime(2022, 10, 29, 20, 0, 0)]
     df['timestamp'] = df['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
     session.close()
+
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
@@ -117,6 +121,8 @@ async def update():
 @app.get("/carbon_intensity_forecast")
 async def carbon_intensity_forecast(since: str = "now", until: str = "24h") -> Response:
     start_date, stop_date = parse_date_info(since, until, forecast=True)
+    start_date, stop_date = start_date, stop_date
+
     start_date = upper_round_date_minutes_with_base(start_date, base=5)
     response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
     forecasts = parse_forecast_electricity_carbon_intensity(response)
@@ -139,20 +145,18 @@ async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
 
     session = get_session(settings.db_path)
     df_history = select_metric(session, 'carbonintensity', start_date, now)
-    df_history['forecast'] = False
+    df_history['timestamp'] = df_history['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
 
     now = upper_round_date_minutes_with_base(now, base=5)
     response = query_forecast_electricity_carbon_intensity(now, stop_date)
     forecasts = parse_forecast_electricity_carbon_intensity(response)
     df_forecast = pd.DataFrame(forecasts)
-    df_forecast['forecast'] = True
-    df = pd.concat([df_history, df_forecast])
-    df = df[['timestamp', 'value', 'forecast']]
-    df = new_highlight_spikes(pd.DataFrame(forecasts), "value")
+    df_forecast['timestamp'] = df_forecast['timestamp'].apply(lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d %H:%M:%S'))
 
-    df['timestamp'] = df['timestamp'].apply(lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ'))
-    # df = df[df['timestamp'] >= datetime(2022, 10, 29, 19, 30, 0)]
-    # df = df[df['timestamp'] <= datetime(2022, 10, 29, 20, 0, 0)]
+    df = pd.concat([df_history, df_forecast])
+    df = df[['timestamp', 'value']]
+    df = new_highlight_spikes(pd.DataFrame(df), "value")
+
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
@@ -410,8 +414,8 @@ def generate_machine_configuration(hardware_data):
 def query_electricity_carbon_intensity(start_date: Optional[datetime] = None,
                                        stop_date: Optional[datetime] = None) -> Dict[str, Any]:
     url = settings.boaviztapi_endpoint + f'/v1/usage_router/gwp/current_intensity?location={settings.azure_location}'
-    start_date = start_date or (datetime.now() - timedelta(minutes=5))
-    stop_date = stop_date or datetime.now()
+    start_date = start_date or (datetime.utcnow() - timedelta(minutes=5))
+    stop_date = stop_date or datetime.utcnow()
     response = requests.post(url, json={
         "source": "carbon_aware_api",
         "url": settings.carbon_aware_api_endpoint,
@@ -455,16 +459,16 @@ def parse_forecast_electricity_carbon_intensity(response: Dict[str, Any]) -> Lis
 
 def parse_date_info(since: str, until: str, forecast: bool = False) -> Tuple[datetime, datetime]:
     if forecast:
-        start_date = datetime.now()
+        start_date = datetime.utcnow()
         end_date = start_date + timedelta(hours=1)
     else:
-        end_date = datetime.now()
+        end_date = datetime.utcnow()
         start_date = end_date - timedelta(hours=1)
 
     if since == 'now' and not forecast:
-        end_date = datetime.now()
+        end_date = datetime.utcnow()
     elif since == 'now' and forecast:
-        start_date = datetime.now()
+        start_date = datetime.utcnow()
     else:
         ValueError(f'unknown value since={since}')
 
@@ -489,7 +493,7 @@ def parse_date_info(since: str, until: str, forecast: bool = False) -> Tuple[dat
     else:
         ValueError(f'unknown value until={until}')
 
-    return start_date, end_date
+    return start_date.astimezone(pytz.UTC), end_date.astimezone(pytz.UTC)
 
 
 def upper_round_date_minutes_with_base(date: datetime, base: int) -> datetime:
