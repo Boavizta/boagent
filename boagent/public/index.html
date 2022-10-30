@@ -137,11 +137,11 @@
 
     var graphimpact = new Dygraph(
         document.getElementById("graphimpact"),
-        "/csv?data=ram_load&since=now&until=1h", // path to CSV file
+        "/impact?since=now&until=1h", // path to CSV file
         {
             fillGraph: true,
             stackedGraph: true,
-            visibility: [true, false],
+            visibility: [true, true],
             underlayCallback: function(canvas, area, g) {
                 function highlight_period(x_start, x_end) {
                     var canvas_left_x = g.toDomXCoord(x_start);
@@ -292,7 +292,7 @@
             }
         });
 
-    Dygraph.synchronize([graphintensity, graphconso, graphram, graphcpu], {
+    Dygraph.synchronize([graphintensity, graphconso, graphram, graphcpu, graphimpact], {
         zoom: true,
         selection: true,
         range: false
