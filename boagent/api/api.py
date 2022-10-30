@@ -23,7 +23,7 @@ from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, f
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 from database import create_database, get_session, get_engine, insert_metric, select_metric, \
-    new_highlight_spikes, CarbonIntensity, Power, add_from_scaphandre
+    new_highlight_spikes, CarbonIntensity, add_from_scaphandre, get_most_recent_data
 
 
 def configure_static(app):
@@ -80,6 +80,19 @@ async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
         media_type="text/csv"
     )
 
+@app.get('/last_data')
+async def csv(table_name: str) -> Response:
+    data = get_most_recent_data(table_name)
+    if data is None:
+        return Response(status_code=404)
+    else:
+        df =pd.DataFrame([[data.timestamp, data.value]], columns=['timestamp', 'value'])
+        return Response(
+        content=df.to_csv(index=False),
+        media_type="text/csv",
+        status_code=200
+        )
+
 
 @app.get("/metrics")
 async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json",
@@ -116,7 +129,7 @@ async def update():
     response = query_electricity_carbon_intensity()
     info = parse_electricity_carbon_intensity(response)
     session = get_session(settings.db_path)
-    add_from_scaphandre(session, table=Power)
+    add_from_scaphandre(session) # lots lot insert_metric called here
     insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
     session.commit()
     session.close()
@@ -588,13 +601,11 @@ def get_reco(since="now", until="24h"):
     return reco
 
 
-@app.get("/toto")
+@app.get("/toto") # root for clumsy test
 def toto():
-    session = get_session(settings.db_path)
-    add_from_scaphandre(session, table=Power)
-    session.close()
-    session.close()
-
+    # session = get_session(settings.db_path)
+    # session.close()
+    # session.close()
     return Response(status_code=200)
 
 

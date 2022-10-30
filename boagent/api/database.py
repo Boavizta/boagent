@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from distutils.log import error
 from typing import Any, Optional
 
 import pytz
@@ -36,20 +37,18 @@ class CarbonIntensity(TimeSeriesRecord):
 class Power(TimeSeriesRecord):
     pass
 
-
-class CpuUsage(TimeSeriesRecord):
+class Cpu(TimeSeriesRecord):
     pass
 
-
-class RamCurrentUsage(TimeSeriesRecord):
+class Ram(TimeSeriesRecord):
     pass
 
 
 metrics = {
     'carbonintensity': CarbonIntensity,
     'power': Power,
-    #    'cpuusage': CpuUsage,
-    #    'ram': RamCurrentUsage,
+    'cpu': Cpu,
+    'ram': Ram,
 }
 
 
@@ -99,19 +98,6 @@ def select_metric(session: Session,
     )
     results = session.execute(statement).all()
     return pd.DataFrame(results)
-
-
-def power_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame:
-    with open(settings.power_file_path, 'r') as f:  # if scaphandre is writing in the json -> KABOUM
-        data = json.loads(f.read())
-        lst = [d["host"] for d in data]
-        wanted_data = filter_date_range(lst, start_date, stop_date)
-        for d in wanted_data:
-            # d["timestamp"] = datetime.fromtimestamp(d["timestamp"]).isoformat()
-            d["timestamp"] = datetime.fromtimestamp(d["timestamp"]).astimezone(pytz.UTC)
-            # datetime.fromisoformat(d["timestamp"]).strftime("%Y-%m-%dT%H:%M:%SZ") #
-            d["consumption"] = float("{:.4f}".format(d["consumption"] * 10 ** -3))
-        return pd.DataFrame(wanted_data, columns=["timestamp", "consumption"])
 
 
 def get_full_peak(start: int, diffs: list) -> list:
@@ -179,23 +165,53 @@ def new_highlight_spikes(df: pd.DataFrame, col: str = 'value') -> pd.DataFrame:
     df = df.drop(columns=[rol_col])
     return df
 
-
-def get_most_recent_timestamp(session, table):
+def get_most_recent_timestamp(session):
     """ Get a single row from the table which has the most recent timestamp"""
-    toto = session.query(table).order_by(table.timestamp.desc()).first()
-    return toto.timestamp if toto != None else None
+    table_list = [Power, Cpu, Ram]
+    last_timestamp_list = []
+    for table in table_list:
+        data = session.query(table).order_by(table.timestamp.desc()).first()
+        if data != None: last_timestamp_list.append(data.timestamp)
+    return max(last_timestamp_list) if last_timestamp_list else None
 
 
-def add_from_scaphandre(session, table):
-    last_timestamp = get_most_recent_timestamp(session, table=Power)
-    last_timestamp = last_timestamp + timedelta(seconds=5) if last_timestamp != None else datetime.utcnow() - timedelta(
-        hours=24)
-    if table == Power:
-        df = power_to_csv(start_date=last_timestamp, stop_date=datetime.utcnow())
-    else:
-        pass
+def get_most_recent_data(table_name):
+    """ Get a single row from the table which has the most recent timestamp"""
+    session = get_session(settings.db_path)
+    table = metrics[table_name]
+    data = session.query(table).order_by(table.timestamp.desc()).first()
+    return data
+
+
+
+def add_from_scaphandre(session):
+    last_timestamp = get_most_recent_timestamp(session)
+    last_timestamp = last_timestamp + timedelta(seconds=5) if last_timestamp != None else datetime.now() - timedelta(hours=24)
+    df = scaphandre_to_csv(start_date=last_timestamp, stop_date=datetime.utcnow())
     if df.empty:
         return
     else:
         for row in df.itertuples():
-            insert_metric(session, metric_name='power', timestamp=row.timestamp, value=row.consumption)
+            insert_metric(session, metric_name='power' , timestamp=row.timestamp, value=row.consumption)
+            insert_metric(session, metric_name='cpu' , timestamp=row.timestamp, value=row.cpu_total_active)
+            insert_metric(session, metric_name='ram' , timestamp=row.timestamp, value=row.ram_used)
+
+
+def scaphandre_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame:
+    with open(settings.power_file_path, 'r') as f:  # if scaphandre is writing in the json -> KABOUM
+        data = json.loads(f.read())
+    lst = []
+    for d in data:
+        data_point = {}
+        data_point['timestamp'] = d['host']['timestamp']
+        data_point['consumption'] = d['host']['consumption']
+        data_point['cpu_total_active'] = float(d['resources']['cpu']['total_active'])
+        data_point['ram_used'] = d['resources']['ram']['used'].split()[0]
+        lst.append(data_point)
+
+    wanted_data = filter_date_range(lst, start_date, stop_date)
+    for d in wanted_data:
+        d["timestamp"] = datetime.fromtimestamp(d["timestamp"], tz=timezone.utc)
+        d["consumption"] = float("{:.4f}".format(d["consumption"] * 10 ** -3))
+        d["cpu_total_active"] = float("{:.4f}".format(d["cpu_total_active"]))
+    return pd.DataFrame(wanted_data, columns=["timestamp", "consumption","cpu_total_active","ram_used"])
