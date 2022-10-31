@@ -613,7 +613,7 @@ def get_cron_info():
                 sched += char
         info["next"] = croniter(sched, base).get_next(datetime)
         info["previous"] = croniter(sched, base).get_prev(datetime)
-        info["job"] = cron
+        info["job"] = cron.strip()
         crons_info.append(info)
     return crons_info
 
