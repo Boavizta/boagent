@@ -226,11 +226,11 @@ async def impact(since: str = "now", until: str = "24h"):
         verbose=False,
         location='FRA',
         measure_power=False,
-        lifetime=4,
+        lifetime=settings.default_lifetime,
         fetch_hardware=False
     )
     embedded_emissions = metrics['embedded_emissions']['value']
-    df['embedded'] = embedded_emissions
+    df['embedded'] = embedded_emissions / len(df)
     df = df.drop(columns=['power_watt', 'carbon_intensity_g_per_watt_second']).reset_index()
     return Response(
         content=df.to_csv(index=False),
