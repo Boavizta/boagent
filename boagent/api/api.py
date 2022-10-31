@@ -484,10 +484,16 @@ def query_electricity_carbon_intensity(start_date: Optional[datetime] = None,
 
 def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]):
     intensity_dict = carbon_aware_api_response['_value']
-    return {
-        'timestamp': datetime.fromisoformat(intensity_dict['endTime']),
-        'value': round(intensity_dict['carbonIntensity'], 3)
-    }
+    if 'endTime' in intensity_dict and 'carbonIntensity' in intensity_dict:
+        return {
+            'timestamp': datetime.fromisoformat(intensity_dict['endTime']),
+            'value': round(intensity_dict['carbonIntensity'], 3)
+        }
+    else:
+        return {
+            'timestamp': datetime.now(),
+            'value': 0
+        }
 
 
 def query_forecast_electricity_carbon_intensity(start_date: datetime, stop_date: datetime) -> Dict[str, Any]:
