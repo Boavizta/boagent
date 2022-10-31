@@ -79,8 +79,9 @@ async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
         media_type="text/csv"
     )
 
+
 @app.get('/last_data')
-async def csv(table_name: str) -> Response:
+async def last_data(table_name: str) -> Response:
     data = get_most_recent_data(table_name)
     if data is None:
         return Response(status_code=404)
