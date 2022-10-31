@@ -37,8 +37,10 @@ class CarbonIntensity(TimeSeriesRecord):
 class Power(TimeSeriesRecord):
     pass
 
+
 class Cpu(TimeSeriesRecord):
     pass
+
 
 class Ram(TimeSeriesRecord):
     pass
@@ -165,6 +167,7 @@ def new_highlight_spikes(df: pd.DataFrame, col: str = 'value') -> pd.DataFrame:
     df = df.drop(columns=[rol_col])
     return df
 
+
 def get_most_recent_timestamp(session):
     """ Get a single row from the table which has the most recent timestamp"""
     table_list = [Power, Cpu, Ram]
@@ -183,18 +186,26 @@ def get_most_recent_data(table_name):
     return data
 
 
+def get_max(table_name):
+    """ Get a single row from the table which has the most recent timestamp"""
+    session = get_session(settings.db_path)
+    table = metrics[table_name]
+    data = session.query(table).order_by(table.value.desc()).first()
+    return data
+
 
 def add_from_scaphandre(session):
     last_timestamp = get_most_recent_timestamp(session)
-    last_timestamp = last_timestamp + timedelta(seconds=5) if last_timestamp != None else datetime.now() - timedelta(hours=24)
+    last_timestamp = last_timestamp + timedelta(seconds=5) if last_timestamp != None else datetime.now() - timedelta(
+        hours=24)
     df = scaphandre_to_csv(start_date=last_timestamp, stop_date=datetime.utcnow())
     if df.empty:
         return
     else:
         for row in df.itertuples():
-            insert_metric(session, metric_name='power' , timestamp=row.timestamp, value=row.consumption)
-            insert_metric(session, metric_name='cpu' , timestamp=row.timestamp, value=row.cpu_total_active)
-            insert_metric(session, metric_name='ram' , timestamp=row.timestamp, value=row.ram_used)
+            insert_metric(session, metric_name='power', timestamp=row.timestamp, value=row.consumption)
+            insert_metric(session, metric_name='cpu', timestamp=row.timestamp, value=row.cpu_total_active)
+            insert_metric(session, metric_name='ram', timestamp=row.timestamp, value=row.ram_used)
 
 
 def scaphandre_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame:
@@ -214,4 +225,4 @@ def scaphandre_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame
         d["timestamp"] = datetime.fromtimestamp(d["timestamp"], tz=timezone.utc)
         d["consumption"] = float("{:.4f}".format(d["consumption"] * 10 ** -3))
         d["cpu_total_active"] = float("{:.4f}".format(d["cpu_total_active"]))
-    return pd.DataFrame(wanted_data, columns=["timestamp", "consumption","cpu_total_active","ram_used"])
+    return pd.DataFrame(wanted_data, columns=["timestamp", "consumption", "cpu_total_active", "ram_used"])

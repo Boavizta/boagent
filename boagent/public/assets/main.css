@@ -21,7 +21,11 @@ a:hover{
     height:200px;
 }
 
+
 .scores-box{
+    background-color: #364049;
+    border-radius: 6px;
+
     margin-top: 3%;
     display: flex;
     justify-content: space-around;
@@ -38,23 +42,25 @@ a:hover{
     margin-left: auto;
 }
 
-.header{
-    border-radius: 25px;
+.impacts_box{
     display: flex;
-    background-color: #364049;
     justify-content: space-between;
 }
 
-.header-links{
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
+.impact_box{
+    margin-top: 2%;
+    width: 48%;
+    background-color: #364049;
+    border-radius: 6px;
+    text-align: center;
+    padding-bottom: 2%;
+    padding-top: 2%;
+
 }
 
-.header-links a{
-    display: inline;
+.txt_impact{
+    font-size: 1.5em;
 }
-
 
 #forkongithub a
 {

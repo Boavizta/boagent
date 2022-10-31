@@ -22,7 +22,7 @@ from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, f
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 from database import create_database, get_session, get_engine, insert_metric, select_metric, \
-    new_highlight_spikes, CarbonIntensity, add_from_scaphandre, get_most_recent_data
+    new_highlight_spikes, CarbonIntensity, add_from_scaphandre, get_most_recent_data, get_max
 
 
 def configure_static(app):
@@ -79,17 +79,18 @@ async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
         media_type="text/csv"
     )
 
+
 @app.get('/last_data')
 async def csv(table_name: str) -> Response:
     data = get_most_recent_data(table_name)
     if data is None:
         return Response(status_code=404)
     else:
-        df =pd.DataFrame([[data.timestamp, data.value]], columns=['timestamp', 'value'])
+        df = pd.DataFrame([[data.timestamp, data.value]], columns=['timestamp', 'value'])
         return Response(
-        content=df.to_csv(index=False),
-        media_type="text/csv",
-        status_code=200
+            content=df.to_csv(index=False),
+            media_type="text/csv",
+            status_code=200
         )
 
 
@@ -117,18 +118,27 @@ async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = 
         verbose, location, measure_power, lifetime, fetch_hardware
     )
 
-@app.get("/actual_intensity")
+
+@app.get("/last_info")
 async def actual_intensity():
-    response = query_electricity_carbon_intensity()
-    info = parse_electricity_carbon_intensity(response)
-    return info['value']
+    res = {"power": get_most_recent_data("power"), "carbonintensity": get_most_recent_data("carbonintensity"),
+           "cpu": get_most_recent_data("cpu"), "ram": get_most_recent_data("ram")}
+
+    return res
+
+
+@app.get("/max_info")
+async def actual_intensity():
+    res = {"power": get_max("power"), "carbonintensity": get_max("carbonintensity"), "ram": get_max("ram"), "cpu": get_max("cpu")}
+    return res
+
 
 @app.get("/update")
 async def update():
     response = query_electricity_carbon_intensity()
     info = parse_electricity_carbon_intensity(response)
     session = get_session(settings.db_path)
-    add_from_scaphandre(session) # lots lot insert_metric called here
+    add_from_scaphandre(session)  # lots lot insert_metric called here
     insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
     session.commit()
     session.close()
@@ -168,7 +178,8 @@ async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
     response = query_forecast_electricity_carbon_intensity(now, stop_date)
     forecasts = parse_forecast_electricity_carbon_intensity(response)
     df_forecast = pd.DataFrame(forecasts)
-    df_forecast['timestamp'] = df_forecast['timestamp'].apply(lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d %H:%M:%S'))
+    df_forecast['timestamp'] = df_forecast['timestamp'].apply(
+        lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d %H:%M:%S'))
 
     df = pd.concat([df_history, df_forecast])
     df = df[['timestamp', 'value']]
@@ -212,7 +223,7 @@ async def impact(since: str = "now", until: str = "24h"):
     df_power = df_power.fillna(method='ffill')
 
     df_carbon_intensity = select_metric(session, 'carbonintensity', start_date, stop_date)
-    df_carbon_intensity['carbon_intensity_g_per_watt_second'] = df_carbon_intensity['value'] / (1000*3600)
+    df_carbon_intensity['carbon_intensity_g_per_watt_second'] = df_carbon_intensity['value'] / (1000 * 3600)
     df_carbon_intensity = df_carbon_intensity.drop(columns=['value'])
     df_carbon_intensity = df_carbon_intensity.set_index('timestamp')
     df_carbon_intensity = df_carbon_intensity.resample('1s').mean()
@@ -639,15 +650,12 @@ def get_reco(since="now", until="24h"):
     return reco
 
 
-@app.get("/toto") # root for clumsy test
+@app.get("/toto")  # root for clumsy test
 def toto():
     # session = get_session(settings.db_path)
     # session.close()
     # session.close()
     return Response(status_code=200)
-
-
-
 
 
 @app.get("/recommendation")

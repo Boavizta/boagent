@@ -10,52 +10,60 @@
 </head>
 
 <body style="background-color: #262B30; color: white; font-family: Ubuntu, sans-serif">
-
     <span id="forkongithub"><a href="https://github.com/Boavizta/boagent">Fork me on GitHub</a></span>
 
     <div class="scores-box">
         <div class="score-box">
-            <h3>Actual intensity</h3>
-            <div id="intensity"></div>
+            <h3>Actual intensity (CO2eq./kWh)</h3>
+            <div id="actual_intensity"></div>
+        </div>
+
+        <div class="score-box">
+            <h3>Actual RAM consumption</h3>
+            <div id="actual_ram"></div>
         </div>
         <div class="score-box">
-            <h3>Operational Yearly impact</h3>
-            <div id="operational-score"></div>
+            <h3>Actual CPU consumption</h3>
+            <div id="actual_cpu"></div>
         </div>
         <div class="score-box">
-            <h3>Opti-score</h3>
-            <div id="server-score"></div>
-        </div>
-        <div class="score-box">
-            <h3>Total embodied impact</h3>
-            <div id="embodied-score"></div>
-        </div>
-        <div class="score-box">
-            <h3>CPU load</h3>
-            <div id="load-score"></div>
+            <h3>Actual electrical consumption</h3>
+            <div id="actual_elec"></div>
         </div>
     </div>
 
-    <div class="box-legend">
-        <h3>Server impact</h3>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum. Sed volutpat ligula vestibulum dapibus ultrices. Aliquam erat volutpat. Suspendisse non diam in nulla volutpat tincidunt id nec orci. Cras eu semper nunc. Proin molestie dictum volutpat. Donec et dapibus ipsum. Integer iaculis rhoncus odio, vitae volutpat justo mollis iaculis.</p>
+    <div class="impacts_box">
+        <div class="impact_box">
+            <h2>Yearly electrical consumption</h2>
+            <span class="txt_impact">120 kgCO2eq.</span>
+        </div>
+        <div class="impact_box">
+            <h2>Yearly embedded consumption</h2>
+            <span class="txt_impact">120 kgCO2eq.</span>
+        </div>
     </div>
-    <div class="box">
-        <div id="graphimpact" style="width:100%;; height:200px;"></div>
-    </div>
+
 
 
     <div class="box-legend">
         <h3>Carbon intensity</h3>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum. Sed volutpat ligula vestibulum dapibus ultrices. Aliquam erat volutpat. Suspendisse non diam in nulla volutpat tincidunt id nec orci. Cras eu semper nunc. Proin molestie dictum volutpat. Donec et dapibus ipsum. Integer iaculis rhoncus odio, vitae volutpat justo mollis iaculis.</p>
+        <p>Carbon intensity in your region express in gCO2eq./kWh. </p>
     </div>
     <div class="box">
         <div id="graphintensity" style="width:100%;height:200px;"></div>
     </div>
 
     <div class="box-legend">
+        <h3>Server impact</h3>
+        <p>Green gaz emissions express in gCO2eq. Both operational (related to electricity consumption) and embedded (related to manufacture) are reported.</p>
+    </div>
+    <div class="box">
+        <div id="graphimpact" style="width:100%;; height:200px;"></div>
+    </div>
+
+    <div class="box-legend">
         <h3>Server consumption</h3>
-        <p>Consumption of the last 24h of the server in milliwatts</p>
+        <p>Consumption of the server in milliwatts</p>
     </div>
     <div class="box">
         <div id="graphconso" style="width:100%;; height:200px;"></div>
@@ -80,7 +88,6 @@
 
     <div class="box-legend">
         <h3>Recommandations</h3>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ullamcorper at erat id condimentum. Sed volutpat ligula vestibulum dapibus ultrices. Aliquam erat volutpat. Suspendisse non diam in nulla volutpat tincidunt id nec orci. Cras eu semper nunc. Proin molestie dictum volutpat. Donec et dapibus ipsum. Integer iaculis rhoncus odio, vitae volutpat justo mollis iaculis.</p>
     </div>
     <table>
         <thead>
@@ -95,11 +102,91 @@
         </tbody>
     </table>
 
+
 <script>
+    fetch("/update")
+
+    const actual_intensity = pureknob.createKnob(300, 180);
+    actual_intensity.setProperty('angleStart', -0.75 * Math.PI);
+    actual_intensity.setProperty('angleEnd', 0.75 * Math.PI);
+    actual_intensity.setProperty('colorFG', '#ff7800');
+    actual_intensity.setProperty('valMin', 0);
+    actual_intensity.setProperty('valMax', 1000);
+    actual_intensity.setProperty('readonly', true)
+    document.getElementById('actual_intensity').appendChild(actual_intensity.node());
+    actual_intensity.setProperty('fnValueToString', function(value) {
+        let string = value.toString();
+        return string + ' g';
+    });
+
+
+    const actual_ram = pureknob.createKnob(300, 180);
+    actual_ram.setProperty('angleStart', -0.75 * Math.PI);
+    actual_ram.setProperty('angleEnd', 0.75 * Math.PI);
+    actual_ram.setProperty('colorFG', '#0078ff');
+    actual_ram.setProperty('valMin', 0);
+    actual_ram.setProperty('valMax', 100);
+    actual_ram.setProperty('readonly', true)
+    document.getElementById('actual_ram').appendChild(actual_ram.node());
+    actual_ram.setProperty('fnValueToString', function(value) {
+        let string = value.toString();
+        return string + ' GB';
+    });
+
+    const actual_cpu = pureknob.createKnob(300, 180);
+    actual_cpu.setProperty('angleStart', -0.75 * Math.PI);
+    actual_cpu.setProperty('angleEnd', 0.75 * Math.PI);
+    actual_cpu.setProperty('colorFG', '#88ff88');
+    actual_cpu.setProperty('valMin', 0);
+    actual_cpu.setProperty('valMax', 100);
+    actual_cpu.setProperty('readonly', true)
+    actual_cpu.setValue(12);
+    document.getElementById('actual_cpu').appendChild(actual_cpu.node());
+    actual_cpu.setProperty('fnValueToString', function(value) {
+        let string = value.toString();
+        return string + ' %';
+    });
+
+    const actual_elec = pureknob.createKnob(300, 180);
+    actual_elec.setProperty('angleStart', -0.75 * Math.PI);
+    actual_elec.setProperty('angleEnd', 0.75 * Math.PI);
+    actual_elec.setProperty('colorFG', '#faf875');
+    actual_elec.setProperty('valMin', 0);
+    actual_elec.setProperty('valMax', 2000);
+    actual_elec.setProperty('readonly', true)
+    document.getElementById('actual_elec').appendChild(actual_elec.node());
+    actual_elec.setProperty('fnValueToString', function(value) {
+        let string = value.toString();
+        return string + ' W';
+    });
+
+    fetch("/last_info")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            actual_intensity.setValue(data["carbonintensity"]["value"]);
+            actual_ram.setValue(data["ram"]["value"]);
+            actual_cpu.setValue(data["cpu"]["value"]);
+            actual_elec.setValue(data["power"]["value"]*0.001);
+        })
+    fetch("/max_info")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            actual_intensity.setProperty('valMax', data["carbonintensity"]["value"]);
+            actual_ram.setProperty('valMax', Math.ceil(data["ram"]["value"]));
+            actual_elec.setProperty('valMax', data["power"]["value"]*0.001);
+        })
+</script>
+<script>
+    var duration="1"+"h"
     var graphintensity = new Dygraph(
         document.getElementById("graphintensity"),
-        "/carbon_intensity?since=now&until=1h", // path to CSV file
+        "/carbon_intensity?since=now&until="+duration, // path to CSV file
         {
+            colors: ["rgba(0, 120, 255, 1)"],
             fillGraph: true,
             visibility: [true, false],
             underlayCallback: function(canvas, area, g) {
@@ -114,7 +201,7 @@
                     if (g.getValue(i, 2) === -1){
                         for (let j = i; j < g.numRows(); j++) {
                             if (g.getValue(j, 2) !== -1){
-                                canvas.fillStyle = "rgb(197,255,197)";
+                                canvas.fillStyle = "rgba(120,255,120, 0.14)";
                                 highlight_period(g.getValue(i, 0),g.getValue(j, 0));
                                 i = j-1
                                 break;
@@ -124,7 +211,7 @@
                     else if (g.getValue(i, 2) === 1){
                         for (let j = i+1; j < g.numRows(); j++) {
                             if (g.getValue(j, 2) !== 1){
-                                canvas.fillStyle =  "rgba(255, 153, 153)";
+                                canvas.fillStyle =  "rgba(255, 120, 120, 0.15)";
                                 highlight_period(g.getValue(i, 0),g.getValue(j, 0));
                                 i = j-1
                                 break;
@@ -137,159 +224,36 @@
 
     var graphimpact = new Dygraph(
         document.getElementById("graphimpact"),
-        "/impact?since=now&until=1h", // path to CSV file
+        "/impact?since=now&until="+duration,
         {
+            colors: ["rgba(0, 120, 255, 1)", "rgba(255, 120, 0, 1)"],
             fillGraph: true,
-            stackedGraph: true,
-            visibility: [true, true],
-            underlayCallback: function(canvas, area, g) {
-                function highlight_period(x_start, x_end) {
-                    var canvas_left_x = g.toDomXCoord(x_start);
-                    var canvas_right_x = g.toDomXCoord(x_end);
-                    var canvas_width = canvas_right_x - canvas_left_x;
-                    canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
-                }
-
-                for (let i = 0; i < g.numRows(); i++) {
-                    if (g.getValue(i, 2) === -1){
-                        for (let j = i; j < g.numRows(); j++) {
-                            if (g.getValue(j, 2) !== -1){
-                                canvas.fillStyle = "rgb(197,255,197)";
-                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
-                                i = j-1
-                                break;
-                            }
-                        }
-                    }
-                    else if (g.getValue(i, 2) === 1){
-                        for (let j = i+1; j < g.numRows(); j++) {
-                            if (g.getValue(j, 2) !== 1){
-                                canvas.fillStyle =  "rgba(255, 153, 153)";
-                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
-                                i = j-1
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+            visibility: [true, true]
+        }
+    );
 
         var graphconso = new Dygraph(
         document.getElementById("graphconso"),
-        "/csv?data=power&since=now&until=1h", // path to CSV file
+        "/csv?data=power&since=now&until="+duration, // path to CSV file
         {
             fillGraph: true,
-            visibility: [true, false],
-            underlayCallback: function(canvas, area, g) {
-                function highlight_period(x_start, x_end) {
-                    var canvas_left_x = g.toDomXCoord(x_start);
-                    var canvas_right_x = g.toDomXCoord(x_end);
-                    var canvas_width = canvas_right_x - canvas_left_x;
-                    canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
-                }
-
-                for (let i = 0; i < g.numRows(); i++) {
-                    if (g.getValue(i, 2) === -1){
-                        for (let j = i; j < g.numRows(); j++) {
-                            if (g.getValue(j, 2) !== -1){
-                                canvas.fillStyle = "rgb(197,255,197)";
-                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
-                                i = j-1
-                                break;
-                            }
-                        }
-                    }
-                    else if (g.getValue(i, 2) === 1){
-                        for (let j = i+1; j < g.numRows(); j++) {
-                            if (g.getValue(j, 2) !== 1){
-                                canvas.fillStyle =  "rgba(255, 153, 153)";
-                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
-                                i = j-1
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+            visibility: [true, false]});
 
         var graphram = new Dygraph(
         document.getElementById("graphram"),
-        "/csv?data=ram&since=1h&until=now", // path to CSV file
+        "/csv?data=ram&until=now&since="+duration, // path to CSV file
         {
+            colors: ["rgba(255, 120, 0, 1)"],
             fillGraph: true,
-            visibility: [true, false],
-            underlayCallback: function(canvas, area, g) {
-                function highlight_period(x_start, x_end) {
-                    var canvas_left_x = g.toDomXCoord(x_start);
-                    var canvas_right_x = g.toDomXCoord(x_end);
-                    var canvas_width = canvas_right_x - canvas_left_x;
-                    canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
-                }
-
-                for (let i = 0; i < g.numRows(); i++) {
-                    if (g.getValue(i, 2) === -1){
-                        for (let j = i; j < g.numRows(); j++) {
-                            if (g.getValue(j, 2) !== -1){
-                                canvas.fillStyle = "rgb(197,255,197)";
-                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
-                                i = j-1
-                                break;
-                            }
-                        }
-                    }
-                    else if (g.getValue(i, 2) === 1){
-                        for (let j = i+1; j < g.numRows(); j++) {
-                            if (g.getValue(j, 2) !== 1){
-                                canvas.fillStyle =  "rgba(255, 153, 153)";
-                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
-                                i = j-1
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+            visibility: [true, false]});
 
         var graphcpu = new Dygraph(
         document.getElementById("graphcpu"),
-        "/csv?data=cpu&since=1h&until=now", // path to CSV file
+        "/csv?data=cpu&until=now&since="+duration, // path to CSV file
         {
+            colors: ["rgba(0, 120, 255, 1)"],
             fillGraph: true,
-            visibility: [true, false],
-            underlayCallback: function(canvas, area, g) {
-                function highlight_period(x_start, x_end) {
-                    var canvas_left_x = g.toDomXCoord(x_start);
-                    var canvas_right_x = g.toDomXCoord(x_end);
-                    var canvas_width = canvas_right_x - canvas_left_x;
-                    canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
-                }
-
-                for (let i = 0; i < g.numRows(); i++) {
-                    if (g.getValue(i, 2) === -1){
-                        for (let j = i; j < g.numRows(); j++) {
-                            if (g.getValue(j, 2) !== -1){
-                                canvas.fillStyle = "rgb(197,255,197)";
-                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
-                                i = j-1
-                                break;
-                            }
-                        }
-                    }
-                    else if (g.getValue(i, 2) === 1){
-                        for (let j = i+1; j < g.numRows(); j++) {
-                            if (g.getValue(j, 2) !== 1){
-                                canvas.fillStyle =  "rgba(255, 153, 153)";
-                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
-                                i = j-1
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+            visibility: [true, false]
         });
 
     Dygraph.synchronize([graphintensity, graphconso, graphram, graphcpu, graphimpact], {
@@ -297,72 +261,6 @@
         selection: true,
         range: false
     });
-
-    const optiscore = pureknob.createKnob(300, 200);
-    optiscore.setProperty('angleStart', -0.75 * Math.PI);
-    optiscore.setProperty('angleEnd', 0.75 * Math.PI);
-    optiscore.setProperty('colorFG', '#88ff88');
-    optiscore.setProperty('valMin', 0);
-    optiscore.setProperty('valMax', 100);
-    optiscore.setProperty('readonly', true)
-    optiscore.setValue(45);
-    document.getElementById('server-score').appendChild(optiscore.node());
-
-    const operationnal = pureknob.createKnob(300, 150);
-    operationnal.setProperty('angleStart', -0.75 * Math.PI);
-    operationnal.setProperty('angleEnd', 0.75 * Math.PI);
-    operationnal.setProperty('colorFG', '#88ff88');
-    operationnal.setProperty('valMin', 0);
-    operationnal.setProperty('valMax', 100);
-    operationnal.setProperty('readonly', true)
-    operationnal.setValue(12);
-    document.getElementById('operational-score').appendChild(operationnal.node());
-
-    const embodied = pureknob.createKnob(300, 150);
-    embodied.setProperty('angleStart', -0.75 * Math.PI);
-    embodied.setProperty('angleEnd', 0.75 * Math.PI);
-    embodied.setProperty('colorFG', '#88ff88');
-    embodied.setProperty('valMin', 0);
-    embodied.setProperty('valMax', 2000);
-    embodied.setProperty('readonly', true)
-    document.getElementById('embodied-score').appendChild(embodied.node());
-
-    const loadscore = pureknob.createKnob(300, 150);
-    loadscore.setProperty('angleStart', -0.75 * Math.PI);
-    loadscore.setProperty('angleEnd', 0.75 * Math.PI);
-    loadscore.setProperty('colorFG', '#88ff88');
-    loadscore.setProperty('valMin', 0);
-    loadscore.setProperty('valMax', 100);
-    loadscore.setProperty('readonly', true)
-    loadscore.setValue(67);
-    document.getElementById('load-score').appendChild(loadscore.node());
-
-    const carbonintensity = pureknob.createKnob(300, 150);
-    carbonintensity.setProperty('angleStart', -0.75 * Math.PI);
-    carbonintensity.setProperty('angleEnd', 0.75 * Math.PI);
-    carbonintensity.setProperty('colorFG', '#88ff88');
-    carbonintensity.setProperty('valMin', 0);
-    carbonintensity.setProperty('valMax', 1000);
-    carbonintensity.setProperty('readonly', true)
-    document.getElementById('intensity').appendChild(carbonintensity.node());
-
-    fetch("/query")
-        .then((response) => {
-            return response.json();
-        })
-        .then((data) => {
-            embodied.setValue(data.embedded_emissions.value);
-        })
-
-    fetch("/actual_intensity")
-        .then((response) => {
-            return response.json();
-        })
-        .then((data) => {
-            carbonintensity.setValue(data);
-        })
-
-
 </script>
 
 <script>
