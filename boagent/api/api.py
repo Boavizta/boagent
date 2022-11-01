@@ -130,6 +130,9 @@ async def actual_intensity():
     res = {"power": get_max("power"), "carbonintensity": get_max("carbonintensity"), "ram": get_max("ram"), "cpu": get_max("cpu")}
     return res
 
+@app.get("/all_cron")
+async def actual_intensity():
+    return get_cron_info()
 
 
 @app.get("/update")
