@@ -93,9 +93,11 @@
         <thead>
             <tr>
                 <th></th>
+                <th>Mode</th>
                 <th>Time</th>
                 <th>Type</th>
                 <th>Recommendation</th>
+                <th>CMD</th>
             </tr>
         <thead>
         <tbody  id="reco-table">
@@ -181,7 +183,7 @@
         })
 </script>
 <script>
-    var duration="1"+"h"
+    var duration="24"+"h"
     var graphintensity = new Dygraph(
         document.getElementById("graphintensity"),
         "/carbon_intensity?since=now&until="+duration, // path to CSV file
@@ -264,7 +266,7 @@
 </script>
 
 <script>
-    fetch("/reco")
+    fetch("/recommendation")
         .then((response) => {
             return response.json();
         })
@@ -281,14 +283,23 @@
             let picto = row.insertCell(0);
             picto.innerHTML = "🕝";
 
-            let time = row.insertCell(1);
-            time.innerHTML = item.date;
+            let mode = row.insertCell(1);
+            mode.innerHTML = item.mode
 
-            let type = row.insertCell(2);
+            let time = row.insertCell(2);
+            time.innerHTML = item.execution_date;
+
+            let type = row.insertCell(3);
             type.innerHTML = item.type;
 
-            let reco = row.insertCell(3);
-            reco.innerHTML = "Schedule your CRON during less carbonate hours"
+            let reco = row.insertCell(4);
+            reco.innerHTML = "Schedule your CRON during less carbonate hours (" + item.preferred_execution_date + ")"
+
+            length = 45
+            let job = row.insertCell(5);
+            job.innerHTML = item.job.length > length ?
+                item.job.substring(0, length - 3) + "..." :
+                item.job;
         });
     }
 </script>

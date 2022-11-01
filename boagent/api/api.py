@@ -68,9 +68,6 @@ async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
 
     session = get_session(settings.db_path)
     df = new_highlight_spikes(select_metric(session, data, start_date, stop_date), 'value')
-    # df['timestamp'] = df['timestamp'].apply(lambda x: x + timedelta(hours=2))
-    # df = df[df['timestamp'] >= datetime(2022, 10, 29, 19, 30, 0)]
-    # df = df[df['timestamp'] <= datetime(2022, 10, 29, 20, 0, 0)]
     df['timestamp'] = df['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
     session.close()
 
@@ -81,7 +78,7 @@ async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
 
 
 @app.get('/last_data')
-async def csv(table_name: str) -> Response:
+async def last_data(table_name: str) -> Response:
     data = get_most_recent_data(table_name)
     if data is None:
         return Response(status_code=404)
@@ -120,6 +117,7 @@ async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = 
 
 
 @app.get("/last_info")
+
 async def actual_intensity():
     res = {"power": get_most_recent_data("power"), "carbonintensity": get_most_recent_data("carbonintensity"),
            "cpu": get_most_recent_data("cpu"), "ram": get_most_recent_data("ram")}
@@ -133,13 +131,16 @@ async def actual_intensity():
     return res
 
 
+
 @app.get("/update")
 async def update():
     response = query_electricity_carbon_intensity()
     info = parse_electricity_carbon_intensity(response)
     session = get_session(settings.db_path)
-    add_from_scaphandre(session)  # lots lot insert_metric called here
-    insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
+
+    add_from_scaphandre(session)    # lots lot insert_metric called here
+    if info['value'] > 0:
+        insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
     session.commit()
     session.close()
     return Response(status_code=200)
@@ -147,22 +148,22 @@ async def update():
 
 @app.get("/carbon_intensity_forecast")
 async def carbon_intensity_forecast(since: str = "now", until: str = "24h") -> Response:
-    start_date, stop_date = parse_date_info(since, until, forecast=True)
-    start_date, stop_date = start_date, stop_date
-
-    start_date = upper_round_date_minutes_with_base(start_date, base=5)
-    response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
-    forecasts = parse_forecast_electricity_carbon_intensity(response)
-    df = new_highlight_spikes(pd.DataFrame(forecasts), "value")
+    df = carbon_intensity_forecast_data(since, until)
+    df = new_highlight_spikes(df, "value")
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
     )
 
 
-@app.get("/reco")
-async def info():
-    return get_reco()
+def carbon_intensity_forecast_data(since: str, until: str) -> pd.DataFrame:
+    start_date, stop_date = parse_date_info(since, until, forecast=True)
+    start_date, stop_date = start_date, stop_date
+
+    start_date = upper_round_date_minutes_with_base(start_date, base=5)
+    response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
+    forecasts = parse_forecast_electricity_carbon_intensity(response)
+    return pd.DataFrame(forecasts)
 
 
 @app.get("/carbon_intensity")
@@ -495,10 +496,16 @@ def query_electricity_carbon_intensity(start_date: Optional[datetime] = None,
 
 def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]):
     intensity_dict = carbon_aware_api_response['_value']
-    return {
-        'timestamp': datetime.fromisoformat(intensity_dict['endTime']),
-        'value': round(intensity_dict['carbonIntensity'], 3)
-    }
+    if 'endTime' in intensity_dict and 'carbonIntensity' in intensity_dict:
+        return {
+            'timestamp': datetime.fromisoformat(intensity_dict['endTime']),
+            'value': round(intensity_dict['carbonIntensity'], 3)
+        }
+    else:
+        return {
+            'timestamp': datetime.now(),
+            'value': 0
+        }
 
 
 def query_forecast_electricity_carbon_intensity(start_date: datetime, stop_date: datetime) -> Dict[str, Any]:
@@ -615,9 +622,9 @@ def get_cron_info():
         for char in cron:
             if char.isdigit() or char == "*" or char == " " or char == "\t":
                 sched += char
-        info["next"] = croniter(sched, base).get_next(datetime)
-        info["previous"] = croniter(sched, base).get_prev(datetime)
-        info["job"] = cron
+        info["next"] = croniter(sched, base).get_next(datetime).astimezone(pytz.UTC)
+        info["previous"] = croniter(sched, base).get_prev(datetime).astimezone(pytz.UTC)
+        info["job"] = cron.strip()
         crons_info.append(info)
     return crons_info
 
@@ -639,25 +646,60 @@ def event_is_in_bad_time(event, since="now", until="24h"):
     return False
 
 
-def get_reco(since="now", until="24h"):
-    reco = []
-    cron_list = get_cron_info()
-    for cron in cron_list:
+def compute_recommendations(since="now", until="24h"):
+    start_date, stop_date = parse_date_info(since, until)
+    session = get_session(settings.db_path)
+    df_power = select_metric(session, 'power', start_date, stop_date)
+    df_intensity = select_metric(session, 'carbonintensity', start_date, stop_date)
+
+    recommendations = []
+    crons = get_cron_info()
+    for cron in crons:
         if event_is_in_bad_time(event=cron['next'], since=since, until=until):
-            reco.append({'type': 'CRON', 'date': cron['next'], 'mode': 'forcast', 'job': cron['job']})
+            recommendations.append({
+                'type': 'CRON',
+                'execution_date': cron['next'],
+                'preferred_execution_date': find_preferred_execution_date_in_future(since, until),
+                'mode': 'forcast',
+                'job': cron['job']
+            })
         if event_is_in_bad_time(event=cron['previous'], since=since, until=until):
-            reco.append({'type': 'CRON', 'date': cron['previous'], 'mode': 'history', 'job': cron['job']})
-    return reco
+            recommendations.append({
+                'type': 'CRON',
+                'execution_date': cron['previous'],
+                'preferred_execution_date': find_preferred_execution_date_in_history(cron['previous'], df_power, df_intensity),
+                'mode': 'history',
+                'job': cron['job']
+            })
+    return recommendations
 
 
-@app.get("/toto")  # root for clumsy test
-def toto():
-    # session = get_session(settings.db_path)
-    # session.close()
-    # session.close()
-    return Response(status_code=200)
+def find_preferred_execution_date_in_future(since: str, until: str):
+    df = carbon_intensity_forecast_data(since, until)
+    bests = df[df['value'] == df['value'].min()]
+    return datetime.strptime(bests.iloc[0].timestamp, '%Y-%m-%dT%H:%M:%SZ')
+
+
+def find_preferred_execution_date_in_history(execution_date: datetime,
+                                             df_power: pd.DataFrame,
+                                             df_intensity: pd.DataFrame) -> datetime:
+    df_power = df_power.rename(columns={'value': 'power'})
+    df_power = df_power[df_power['timestamp'] >= execution_date]
+    df_power = df_power.set_index('timestamp')
+    df_power = df_power.resample('1s').mean()
+    df_power = df_power.fillna(method='ffill')
+    df_intensity = df_intensity.rename(columns={'value': 'carbon_intensity'})
+    df_intensity = df_intensity[df_intensity['timestamp'] >= execution_date]
+    df_intensity = df_intensity.set_index('timestamp')
+    df_intensity = df_intensity.resample('1s').mean()
+    df_intensity = df_intensity.fillna(method='ffill')
+    df = df_power.merge(df_intensity, on='timestamp')
+
+    df['ratio'] = df['power'] * df['carbon_intensity']
+    bests = df[df['ratio'] == df['ratio'].min()]
+    return bests.iloc[0].name
 
 
 @app.get("/recommendation")
 async def info():
-    return get_reco()
+    return compute_recommendations()
