@@ -4,7 +4,7 @@ LABEL org.opencontainers.image.authors="bpetit@hubblo.org"
 
 RUN apt update && apt install gcc g++ -y
 
-RUN apt-get install -y cron
+RUN apt-get install -y cron sqlite3
 
 RUN useradd -ms /bin/bash boagent
 
