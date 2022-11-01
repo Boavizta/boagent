@@ -11,6 +11,15 @@
 
 <body style="background-color: #262B30; color: white; font-family: Ubuntu, sans-serif">
     <span id="forkongithub"><a href="https://github.com/Boavizta/boagent">Fork me on GitHub</a></span>
+    <div class="scores-box">
+        <h1>PLATYPUS : report, understand and tackle IT impacts</h1>
+    </div>
+    <div class="scores-box navbar">
+        <a href="https://github.com/Green-Software-Foundation/carbon-aware-sdk" target="_blank">Carbon Aware API 🔗</a>
+        <a href="https://github.com/Boavizta/boagent/tree/greenhack22" target="_blank">Boagent 🔗</a>
+        <a href="https://github.com/Boavizta/boaviztapi/tree/greenhack22" target="_blank">BoaviztAPI 🔗</a>
+        <a href="https://github.com/Hubblo-org/scaphandre/tree/greenhack22" target="_blank">Scaphandre 🔗</a>
+    </div>
 
     <div class="scores-box">
         <div class="score-box">
@@ -22,6 +31,9 @@
             <h3>Actual RAM consumption</h3>
             <div id="actual_ram"></div>
         </div>
+
+        <img id="platypus-logo" src="assets/platypus_logo.png" alt="platypus logo">
+
         <div class="score-box">
             <h3>Actual CPU consumption</h3>
             <div id="actual_cpu"></div>
@@ -34,12 +46,14 @@
 
     <div class="impacts_box">
         <div class="impact_box">
-            <h2>Yearly electrical consumption</h2>
-            <span class="txt_impact">120 kgCO2eq.</span>
+            <h2>Yearly operational consumption</h2>
+            <span class="txt_impact">120</span>
+            <span class="txt_unit">kgCO2eq.</span>
         </div>
         <div class="impact_box">
             <h2>Yearly embedded consumption</h2>
-            <span class="txt_impact">120 kgCO2eq.</span>
+            <span class="txt_impact">300</span>
+            <span class="txt_unit">kgCO2eq.</span>
         </div>
     </div>
 
@@ -271,7 +285,6 @@
             return response.json();
         })
         .then((data) => {
-            console.log(data)
             loadTableData(data);
         })
 

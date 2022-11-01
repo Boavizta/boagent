@@ -380,7 +380,6 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             "resources_data": "not implemented yet",
             "boaviztapi_data": boaviztapi_data
         }
-
     return res
 
 

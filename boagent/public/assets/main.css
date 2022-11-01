@@ -9,9 +9,17 @@ a{
     text-decoration: none;
 }
 
+h1{
+    font-size: 2.5em;
+}
 
 a:hover{
     color: gray;
+}
+
+.navbar{
+    font-size: 1.4em;
+    padding: 1%;
 }
 
 .box {
@@ -26,7 +34,7 @@ a:hover{
     background-color: #364049;
     border-radius: 6px;
 
-    margin-top: 3%;
+    margin-bottom: 3%;
     display: flex;
     justify-content: space-around;
 }
@@ -48,18 +56,28 @@ a:hover{
 }
 
 .impact_box{
-    margin-top: 2%;
     width: 48%;
     background-color: #364049;
     border-radius: 6px;
     text-align: center;
-    padding-bottom: 2%;
+    padding-bottom: 3%;
     padding-top: 2%;
 
 }
 
 .txt_impact{
+    font-size: 3em;
+}
+
+.txt_unit{
     font-size: 1.5em;
+}
+
+#platypus-logo{
+    min-width: 10%;
+    max-width: 16%;
+    height: auto;
+    margin-top: 2%;
 }
 
 #forkongithub a
