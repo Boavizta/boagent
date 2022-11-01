@@ -5,7 +5,6 @@ import time
 from datetime import datetime, timedelta
 from subprocess import run
 from typing import Dict, Any, Tuple, List, Optional
-from urllib import response
 
 import pytz
 from croniter import croniter
@@ -650,15 +649,10 @@ def event_is_in_bad_time(event, since="now", until="24h"):
     response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
     forecasts = parse_forecast_electricity_carbon_intensity(response)
     df = new_highlight_spikes(pd.DataFrame(forecasts), "value")
-    index = df.timestamp.searchsorted(f"{event}")
-
-    if index == 0 or index == len(df.index):
-        return False
-
-    if df['peak'][index] == 1:
-        return True
-
-    return False
+    df['timestamp'] = df['timestamp'].apply(lambda x: pytz.utc.localize(datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ')))
+    df = df.set_index('timestamp')
+    index = df.index.get_indexer([event], method='nearest')
+    return df.iloc[index].peak.values[0] == 1
 
 
 def compute_recommendations(since="now", until="24h"):
