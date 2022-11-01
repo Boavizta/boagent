@@ -148,6 +148,7 @@ def highlight_spikes(data: pd.DataFrame, colname: str = None) -> pd.DataFrame:
 
 
 def new_highlight_spikes(df: pd.DataFrame, col: str = 'value') -> pd.DataFrame:
+    df = df.set_index('timestamp').reset_index(names='timestamp')
     rol_col = f'_rolling_{col}'
     quant_max = df[col].quantile(q=0.70)
     quant_min = df[col].quantile(q=0.20)

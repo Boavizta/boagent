@@ -21,7 +21,7 @@ from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, f
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 from database import create_database, get_session, get_engine, insert_metric, select_metric, \
-    new_highlight_spikes, CarbonIntensity, add_from_scaphandre, get_most_recent_data, get_max
+    CarbonIntensity, add_from_scaphandre, get_most_recent_data, get_max, new_highlight_spikes
 
 
 def configure_static(app):
@@ -66,7 +66,8 @@ async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
     start_date, stop_date = parse_date_info(since, until)
 
     session = get_session(settings.db_path)
-    df = new_highlight_spikes(select_metric(session, data, start_date, stop_date), 'value')
+    # df = new_highlight_spikes(select_metric(session, data, start_date, stop_date), 'value')
+    df = select_metric(session, data, start_date, stop_date)
     df['timestamp'] = df['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
     session.close()
 
@@ -188,19 +189,18 @@ async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
 
     session = get_session(settings.db_path)
     df_history = select_metric(session, 'carbonintensity', start_date, now)
-    df_history['timestamp'] = df_history['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
 
     now = upper_round_date_minutes_with_base(now, base=5)
     response = query_forecast_electricity_carbon_intensity(now, stop_date)
     forecasts = parse_forecast_electricity_carbon_intensity(response)
     df_forecast = pd.DataFrame(forecasts)
     df_forecast['timestamp'] = df_forecast['timestamp'].apply(
-        lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d %H:%M:%S'))
+        lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ'))
 
     df = pd.concat([df_history, df_forecast])
     df = df[['timestamp', 'value']]
-    df = new_highlight_spikes(pd.DataFrame(df), "value")
-
+    df = new_highlight_spikes(df, "value")
+    df['timestamp'] = df['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
