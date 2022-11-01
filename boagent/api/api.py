@@ -97,15 +97,15 @@ async def operational_impact_yearly():
 
     df_power = select_metric(session, 'power', start_date, stop_date)
     df_power['power_watt'] = df_power['value'] / 1000
-    df_power = df_power.drop(columns=['value'])
+    #df_power = df_power.drop(columns=['value'])
     df_power = df_power.set_index('timestamp')
 
     df_carbon_intensity = select_metric(session, 'carbonintensity', start_date, stop_date)
     df_carbon_intensity['carbon_intensity_g_per_watt_second'] = df_carbon_intensity['value'] / (1000 * 3600)
+
+    yearly_operational = (df_power['power_watt'].mean()*df_carbon_intensity["carbon_intensity_g_per_watt_second"].mean())*(3600*24*365) # in gCO2eq
     
-    yearly_operational = (df_power['power_watt'].mean()*df_carbon_intensity["carbon_intensity_g_per_watt_second"].mean())*(3600*24*365)
-    
-    return round(yearly_operational/1000.0)
+    return round(yearly_operational/1000.0) # in kgCO2eq
 
 
 @app.get('/last_data')
@@ -266,17 +266,17 @@ async def impact(since: str = "now", until: str = "24h"):
     df = df_power.merge(df_carbon_intensity, on='timestamp')
     df['operational'] = df['power_watt'] * df['carbon_intensity_g_per_watt_second']
 
-    metrics = get_metrics(
-        start_time=start_date.timestamp(),
-        end_time=stop_date.timestamp(),
-        verbose=False,
-        location='FRA',
-        measure_power=False,
-        lifetime=settings.default_lifetime,
-        fetch_hardware=False
+
+    hardware_data = get_hardware_data(False)
+    boaviztapi_data = query_machine_impact_data(
+        model=None,
+        configuration=generate_machine_configuration(hardware_data),
+        usage={}
     )
-    embedded_emissions = metrics['embedded_emissions']['value']
-    df['embedded'] = embedded_emissions / len(df)
+
+    yearly_embedded_emissions = boaviztapi_data["impacts"]["gwp"]["manufacture"] / settings.default_lifetime
+
+    df['embedded'] = yearly_embedded_emissions  / (3.6*24*365) # from kgCO2eq/year to gCO2eq/s
     df = df.drop(columns=['power_watt', 'carbon_intensity_g_per_watt_second']).reset_index()
     return Response(
         content=df.to_csv(index=False),
