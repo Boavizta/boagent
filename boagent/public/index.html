@@ -23,31 +23,31 @@
 
     <div class="scores-box">
         <div class="score-box">
-            <h3>Actual intensity (CO2eq./kWh)</h3>
-            <div id="actual_intensity"></div>
+            <h3>Current intensity (CO2eq./kWh)</h3>
+            <div id="current_intensity"></div>
         </div>
 
         <div class="score-box">
-            <h3>Actual RAM consumption</h3>
-            <div id="actual_ram"></div>
+            <h3>Current RAM consumption</h3>
+            <div id="current_ram"></div>
         </div>
 
         <img id="platypus-logo" src="assets/platypus_logo.png" alt="platypus logo">
 
         <div class="score-box">
-            <h3>Actual CPU consumption</h3>
-            <div id="actual_cpu"></div>
+            <h3>Current CPU consumption</h3>
+            <div id="current_cpu"></div>
         </div>
         <div class="score-box">
-            <h3>Actual electrical consumption</h3>
-            <div id="actual_elec"></div>
+            <h3>Current electrical consumption</h3>
+            <div id="current_elec"></div>
         </div>
     </div>
 
     <div class="impacts_box">
         <div class="impact_box">
             <h2>Yearly operational emissions</h2>
-            <span class="txt_impact">120</span>
+            <span class="txt_impact" id="operational_yearly"></span>
             <span class="txt_unit">kgCO2eq.</span>
         </div>
         <div class="impact_box">
@@ -77,7 +77,7 @@
 
     <div class="box-legend">
         <h3>Server consumption</h3>
-        <p>Consumption of the server in milliwatts</p>
+        <p> Server consumption, in milliWatts</p>
     </div>
     <div class="box">
         <div id="graphconso" style="width:100%;; height:200px;"></div>
@@ -85,7 +85,7 @@
 
     <div class="box-legend">
         <h3>Server Ram Usage</h3>
-        <p>Ram usage of the machine in GigaBytes</p>
+        <p>Server Ram usage, in GigaBytes</p>
     </div>
     <div class="box">
         <div id="graphram" style="width:100%;; height:200px;"></div>
@@ -93,7 +93,7 @@
 
     <div class="box-legend">
         <h3>Server Cpu Usage</h3>
-        <p>Cpu usage of the machine in %</p>
+        <p>Server Cpu load, in %</p>
     </div>
     <div class="box">
         <div id="graphcpu" style="width:100%;; height:200px;"></div>
@@ -122,56 +122,56 @@
 <script>
     fetch("/update")
 
-    const actual_intensity = pureknob.createKnob(300, 180);
-    actual_intensity.setProperty('angleStart', -0.75 * Math.PI);
-    actual_intensity.setProperty('angleEnd', 0.75 * Math.PI);
-    actual_intensity.setProperty('colorFG', '#ff7800');
-    actual_intensity.setProperty('valMin', 0);
-    actual_intensity.setProperty('valMax', 1000);
-    actual_intensity.setProperty('readonly', true)
-    document.getElementById('actual_intensity').appendChild(actual_intensity.node());
-    actual_intensity.setProperty('fnValueToString', function(value) {
+    const current_intensity = pureknob.createKnob(300, 180);
+    current_intensity.setProperty('angleStart', -0.75 * Math.PI);
+    current_intensity.setProperty('angleEnd', 0.75 * Math.PI);
+    current_intensity.setProperty('colorFG', '#ff7800');
+    current_intensity.setProperty('valMin', 0);
+    current_intensity.setProperty('valMax', 1000);
+    current_intensity.setProperty('readonly', true)
+    document.getElementById('current_intensity').appendChild(current_intensity.node());
+    current_intensity.setProperty('fnValueToString', function(value) {
         let string = value.toString();
         return string + ' g';
     });
 
 
-    const actual_ram = pureknob.createKnob(300, 180);
-    actual_ram.setProperty('angleStart', -0.75 * Math.PI);
-    actual_ram.setProperty('angleEnd', 0.75 * Math.PI);
-    actual_ram.setProperty('colorFG', '#0078ff');
-    actual_ram.setProperty('valMin', 0);
-    actual_ram.setProperty('valMax', 100);
-    actual_ram.setProperty('readonly', true)
-    document.getElementById('actual_ram').appendChild(actual_ram.node());
-    actual_ram.setProperty('fnValueToString', function(value) {
+    const current_ram = pureknob.createKnob(300, 180);
+    current_ram.setProperty('angleStart', -0.75 * Math.PI);
+    current_ram.setProperty('angleEnd', 0.75 * Math.PI);
+    current_ram.setProperty('colorFG', '#0078ff');
+    current_ram.setProperty('valMin', 0);
+    current_ram.setProperty('valMax', 100);
+    current_ram.setProperty('readonly', true)
+    document.getElementById('current_ram').appendChild(current_ram.node());
+    current_ram.setProperty('fnValueToString', function(value) {
         let string = value.toString();
         return string + ' GB';
     });
 
-    const actual_cpu = pureknob.createKnob(300, 180);
-    actual_cpu.setProperty('angleStart', -0.75 * Math.PI);
-    actual_cpu.setProperty('angleEnd', 0.75 * Math.PI);
-    actual_cpu.setProperty('colorFG', '#88ff88');
-    actual_cpu.setProperty('valMin', 0);
-    actual_cpu.setProperty('valMax', 100);
-    actual_cpu.setProperty('readonly', true)
-    actual_cpu.setValue(12);
-    document.getElementById('actual_cpu').appendChild(actual_cpu.node());
-    actual_cpu.setProperty('fnValueToString', function(value) {
+    const current_cpu = pureknob.createKnob(300, 180);
+    current_cpu.setProperty('angleStart', -0.75 * Math.PI);
+    current_cpu.setProperty('angleEnd', 0.75 * Math.PI);
+    current_cpu.setProperty('colorFG', '#88ff88');
+    current_cpu.setProperty('valMin', 0);
+    current_cpu.setProperty('valMax', 100);
+    current_cpu.setProperty('readonly', true)
+    current_cpu.setValue(12);
+    document.getElementById('current_cpu').appendChild(current_cpu.node());
+    current_cpu.setProperty('fnValueToString', function(value) {
         let string = value.toString();
         return string + ' %';
     });
 
-    const actual_elec = pureknob.createKnob(300, 180);
-    actual_elec.setProperty('angleStart', -0.75 * Math.PI);
-    actual_elec.setProperty('angleEnd', 0.75 * Math.PI);
-    actual_elec.setProperty('colorFG', '#faf875');
-    actual_elec.setProperty('valMin', 0);
-    actual_elec.setProperty('valMax', 2000);
-    actual_elec.setProperty('readonly', true)
-    document.getElementById('actual_elec').appendChild(actual_elec.node());
-    actual_elec.setProperty('fnValueToString', function(value) {
+    const current_elec = pureknob.createKnob(300, 180);
+    current_elec.setProperty('angleStart', -0.75 * Math.PI);
+    current_elec.setProperty('angleEnd', 0.75 * Math.PI);
+    current_elec.setProperty('colorFG', '#faf875');
+    current_elec.setProperty('valMin', 0);
+    current_elec.setProperty('valMax', 2000);
+    current_elec.setProperty('readonly', true)
+    document.getElementById('current_elec').appendChild(current_elec.node());
+    current_elec.setProperty('fnValueToString', function(value) {
         let string = value.toString();
         return string + ' W';
     });
@@ -181,19 +181,19 @@
             return response.json();
         })
         .then((data) => {
-            actual_intensity.setValue(data["carbonintensity"]["value"]);
-            actual_ram.setValue(data["ram"]["value"]);
-            actual_cpu.setValue(data["cpu"]["value"]);
-            actual_elec.setValue(data["power"]["value"]*0.001);
+            current_intensity.setValue(data["carbonintensity"]["value"]);
+            current_ram.setValue(data["ram"]["value"]);
+            current_cpu.setValue(data["cpu"]["value"]);
+            current_elec.setValue(data["power"]["value"]*0.001);
         })
     fetch("/max_info")
         .then((response) => {
             return response.json();
         })
         .then((data) => {
-            actual_intensity.setProperty('valMax', data["carbonintensity"]["value"]);
-            actual_ram.setProperty('valMax', Math.ceil(data["ram"]["value"]));
-            actual_elec.setProperty('valMax', data["power"]["value"]*0.001);
+            current_intensity.setProperty('valMax', data["carbonintensity"]["value"]);
+            current_ram.setProperty('valMax', Math.ceil(data["ram"]["value"]));
+            current_elec.setProperty('valMax', data["power"]["value"]*0.001);
         })
 
     fetch("/yearly_embedded")
@@ -202,6 +202,13 @@
         })
         .then((data) => {
             document.getElementById('embedded_yearly').textContent = data
+        })
+    fetch("/yearly_operational")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            document.getElementById('operational_yearly').textContent = data
         })
 </script>
 <script>
