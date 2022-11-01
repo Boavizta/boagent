@@ -40,7 +40,6 @@ a:hover{
 .scores-box{
     background-color: #364049;
     border-radius: 6px;
-
     margin-bottom: 3%;
     display: flex;
     justify-content: space-around;
@@ -81,9 +80,7 @@ a:hover{
 }
 
 #platypus-logo{
-    min-width: 10%;
-    max-width: 14%;
-    height: auto;
+    width: 15%;
     margin-top: 2%;
 }
 
