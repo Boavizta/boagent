@@ -88,6 +88,25 @@ async def yearly_embedded():
 
     return boaviztapi_data["impacts"]["gwp"]["manufacture"] / settings.default_lifetime
 
+@app.get("/yearly_operational")
+async def operational_impact_yearly():
+    since = "now"
+    until = "24h"
+    start_date, stop_date = parse_date_info(since, until)
+    session = get_session(settings.db_path)
+
+    df_power = select_metric(session, 'power', start_date, stop_date)
+    df_power['power_watt'] = df_power['value'] / 1000
+    df_power = df_power.drop(columns=['value'])
+    df_power = df_power.set_index('timestamp')
+
+    df_carbon_intensity = select_metric(session, 'carbonintensity', start_date, stop_date)
+    df_carbon_intensity['carbon_intensity_g_per_watt_second'] = df_carbon_intensity['value'] / (1000 * 3600)
+    
+    yearly_operational = (df_power['power_watt'].mean()*df_carbon_intensity["carbon_intensity_g_per_watt_second"].mean())*(3600*24*365)
+    
+    return round(yearly_operational/1000.0)
+
 
 @app.get('/last_data')
 async def last_data(table_name: str) -> Response:
@@ -263,7 +282,6 @@ async def impact(since: str = "now", until: str = "24h"):
         content=df.to_csv(index=False),
         media_type="text/csv"
     )
-
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float,
                 fetch_hardware: bool = False):
