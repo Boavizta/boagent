@@ -77,6 +77,18 @@ async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
     )
 
 
+@app.get("/yearly_embedded")
+async def yearly_embedded():
+    hardware_data = get_hardware_data(False)
+    boaviztapi_data = query_machine_impact_data(
+        model=None,
+        configuration=generate_machine_configuration(hardware_data),
+        usage={}
+    )
+
+    return boaviztapi_data["impacts"]["gwp"]["manufacture"] / settings.default_lifetime
+
+
 @app.get('/last_data')
 async def last_data(table_name: str) -> Response:
     data = get_most_recent_data(table_name)
@@ -117,7 +129,6 @@ async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = 
 
 
 @app.get("/last_info")
-
 async def actual_intensity():
     res = {"power": get_most_recent_data("power"), "carbonintensity": get_most_recent_data("carbonintensity"),
            "cpu": get_most_recent_data("cpu"), "ram": get_most_recent_data("ram")}
@@ -127,8 +138,10 @@ async def actual_intensity():
 
 @app.get("/max_info")
 async def actual_intensity():
-    res = {"power": get_max("power"), "carbonintensity": get_max("carbonintensity"), "ram": get_max("ram"), "cpu": get_max("cpu")}
+    res = {"power": get_max("power"), "carbonintensity": get_max("carbonintensity"), "ram": get_max("ram"),
+           "cpu": get_max("cpu")}
     return res
+
 
 @app.get("/all_cron")
 async def actual_intensity():
@@ -141,7 +154,7 @@ async def update():
     info = parse_electricity_carbon_intensity(response)
     session = get_session(settings.db_path)
 
-    add_from_scaphandre(session)    # lots lot insert_metric called here
+    add_from_scaphandre(session)  # lots lot insert_metric called here
     if info['value'] > 0:
         insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
     session.commit()
@@ -669,7 +682,8 @@ def compute_recommendations(since="now", until="24h"):
             recommendations.append({
                 'type': 'CRON',
                 'execution_date': cron['previous'],
-                'preferred_execution_date': find_preferred_execution_date_in_history(cron['previous'], df_power, df_intensity),
+                'preferred_execution_date': find_preferred_execution_date_in_history(cron['previous'], df_power,
+                                                                                     df_intensity),
                 'mode': 'history',
                 'job': cron['job']
             })

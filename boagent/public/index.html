@@ -11,7 +11,7 @@
 
 <body style="background-color: #262B30; color: white; font-family: Ubuntu, sans-serif">
     <span id="forkongithub"><a href="https://github.com/Boavizta/boagent">Fork me on GitHub</a></span>
-    <div class="scores-box">
+    <div class="title">
         <h1>PLATYPUS : report, understand and tackle IT impacts</h1>
     </div>
     <div class="scores-box navbar">
@@ -46,13 +46,13 @@
 
     <div class="impacts_box">
         <div class="impact_box">
-            <h2>Yearly operational consumption</h2>
+            <h2>Yearly operational emissions</h2>
             <span class="txt_impact">120</span>
             <span class="txt_unit">kgCO2eq.</span>
         </div>
         <div class="impact_box">
-            <h2>Yearly embedded consumption</h2>
-            <span class="txt_impact">300</span>
+            <h2>Yearly embedded emissions</h2>
+            <span class="txt_impact" id="embedded_yearly"></span>
             <span class="txt_unit">kgCO2eq.</span>
         </div>
     </div>
@@ -194,6 +194,14 @@
             actual_intensity.setProperty('valMax', data["carbonintensity"]["value"]);
             actual_ram.setProperty('valMax', Math.ceil(data["ram"]["value"]));
             actual_elec.setProperty('valMax', data["power"]["value"]*0.001);
+        })
+
+    fetch("/yearly_embedded")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            document.getElementById('embedded_yearly').textContent = data
         })
 </script>
 <script>

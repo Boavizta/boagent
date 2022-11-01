@@ -17,6 +17,13 @@ a:hover{
     color: gray;
 }
 
+.title{
+    padding: 1%;
+    background-color: #364049;
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 1%;
+}
 .navbar{
     font-size: 1.4em;
     padding: 1%;
@@ -75,7 +82,7 @@ a:hover{
 
 #platypus-logo{
     min-width: 10%;
-    max-width: 16%;
+    max-width: 14%;
     height: auto;
     margin-top: 2%;
 }
