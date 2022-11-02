@@ -688,7 +688,7 @@ def compute_recommendations(since="now", until="24h"):
                 'type': 'CRON',
                 'execution_date': cron['next'],
                 'preferred_execution_date': find_preferred_execution_date_in_future(df_forecast),
-                'mode': 'forcast',
+                'mode': 'forecast',
                 'job': cron['job']
             })
         if event_is_in_bad_time(cron['previous'], df_carbon_intensity):
