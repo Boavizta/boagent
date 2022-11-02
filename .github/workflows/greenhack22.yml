@@ -26,7 +26,7 @@ jobs:
           python-version: '3.9'
 
       - name: Build  docker image
-        run: docker build . --tag ghcr.io/boavizta/boagent:greenhack22
+        run: docker build . --tag ghcr.io/boavizta/boagent:greenhack22 --cache-from ghcr.io/boavizta/boagent:greenhack22
 
       - name: Push docker image
         run: docker push ghcr.io/boavizta/boagent:greenhack22
