@@ -705,7 +705,7 @@ def compute_recommendations(since="now", until="24h"):
 
 def find_preferred_execution_date_in_future(df_forecast: pd.DataFrame):
     bests = df_forecast[df_forecast['value'] == df_forecast['value'].min()]
-    return datetime.strptime(str(bests.iloc[0].timestamp), '%Y-%m-%dT%H:%M:%SZ')
+    return bests.iloc[0].timestamp
 
 
 def find_preferred_execution_date_in_history(execution_date: datetime,
