@@ -660,13 +660,7 @@ def get_cron_info():
     return crons_info
 
 
-def event_is_in_bad_time(event, since="now", until="24h"):
-    start_date, stop_date = parse_date_info(since, until, forecast=True)
-    start_date = upper_round_date_minutes_with_base(start_date, base=5)
-    response = query_forecast_electricity_carbon_intensity(start_date, stop_date)
-    forecasts = parse_forecast_electricity_carbon_intensity(response)
-    df = new_highlight_spikes(pd.DataFrame(forecasts), "value")
-    df['timestamp'] = df['timestamp'].apply(lambda x: pytz.utc.localize(datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ')))
+def event_is_in_bad_time(event, df: pd.DataFrame):
     df = df.set_index('timestamp')
     index = df.index.get_indexer([event], method='nearest')
     return df.iloc[index].peak.values[0] == 1
@@ -676,55 +670,67 @@ def compute_recommendations(since="now", until="24h"):
     start_date, stop_date = parse_date_info(since, until)
     session = get_session(settings.db_path)
     df_power = select_metric(session, 'power', start_date, stop_date)
-    df_intensity = select_metric(session, 'carbonintensity', start_date, stop_date)
+    # df_power['timestamp'] = pd.to_datetime(df_power['timestamp'])
+    df_history = select_metric(session, 'carbonintensity', start_date, stop_date)
+
+    df_forecast = carbon_intensity_forecast_data(since, until)
+    df_forecast['timestamp'] = df_forecast['timestamp'].apply(lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ'))
+
+    df_carbon_intensity = pd.concat([df_history, df_forecast])
+    df_carbon_intensity['timestamp'] = df_carbon_intensity['timestamp'].apply(pytz.utc.localize)
+    df_carbon_intensity = new_highlight_spikes(df_carbon_intensity, "value")
 
     recommendations = []
     crons = get_cron_info()
     for cron in crons:
-        if event_is_in_bad_time(event=cron['next'], since=since, until=until):
+        if event_is_in_bad_time(cron['next'], df_carbon_intensity):
             recommendations.append({
                 'type': 'CRON',
                 'execution_date': cron['next'],
-                'preferred_execution_date': find_preferred_execution_date_in_future(since, until),
+                'preferred_execution_date': find_preferred_execution_date_in_future(df_forecast),
                 'mode': 'forcast',
                 'job': cron['job']
             })
-        if event_is_in_bad_time(event=cron['previous'], since=since, until=until):
+        if event_is_in_bad_time(cron['previous'], df_carbon_intensity):
             recommendations.append({
                 'type': 'CRON',
-                'execution_date': cron['previous'],
+                'execution_date': datetime.strptime(str(cron['previous'])[:-6], '%Y-%m-%d %H:%M:%S'),
                 'preferred_execution_date': find_preferred_execution_date_in_history(cron['previous'], df_power,
-                                                                                     df_intensity),
+                                                                                     df_history),
                 'mode': 'history',
                 'job': cron['job']
             })
     return recommendations
 
 
-def find_preferred_execution_date_in_future(since: str, until: str):
-    df = carbon_intensity_forecast_data(since, until)
-    bests = df[df['value'] == df['value'].min()]
-    return datetime.strptime(bests.iloc[0].timestamp, '%Y-%m-%dT%H:%M:%SZ')
+def find_preferred_execution_date_in_future(df_forecast: pd.DataFrame):
+    bests = df_forecast[df_forecast['value'] == df_forecast['value'].min()]
+    return datetime.strptime(str(bests.iloc[0].timestamp), '%Y-%m-%dT%H:%M:%SZ')
 
 
 def find_preferred_execution_date_in_history(execution_date: datetime,
                                              df_power: pd.DataFrame,
                                              df_intensity: pd.DataFrame) -> datetime:
     df_power = df_power.rename(columns={'value': 'power'})
-    df_power = df_power[df_power['timestamp'] >= execution_date]
     df_power = df_power.set_index('timestamp')
     df_power = df_power.resample('1s').mean()
     df_power = df_power.fillna(method='ffill')
     df_intensity = df_intensity.rename(columns={'value': 'carbon_intensity'})
-    df_intensity = df_intensity[df_intensity['timestamp'] >= execution_date]
     df_intensity = df_intensity.set_index('timestamp')
     df_intensity = df_intensity.resample('1s').mean()
     df_intensity = df_intensity.fillna(method='ffill')
     df = df_power.merge(df_intensity, on='timestamp')
+    df = df.reset_index(names='timestamp')
 
     df['ratio'] = df['power'] * df['carbon_intensity']
     bests = df[df['ratio'] == df['ratio'].min()]
-    return bests.iloc[0].name
+
+    for row in bests.itertuples():
+        new_execution_date = pytz.utc.localize(datetime.strptime(str(row.timestamp), '%Y-%m-%d %H:%M:%S'))
+        if new_execution_date >= execution_date:
+            return new_execution_date
+
+    return bests.iloc[0].timestamp
 
 
 @app.get("/recommendation")
