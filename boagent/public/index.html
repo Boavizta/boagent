@@ -273,7 +273,7 @@
 
         var graphram = new Dygraph(
         document.getElementById("graphram"),
-        "/csv?data=ram&until=now&since="+duration, // path to CSV file
+        "/csv?data=ram&since=now&until="+duration, // path to CSV file
         {
             colors: ["rgba(255, 120, 0, 1)"],
             fillGraph: true,
@@ -281,7 +281,7 @@
 
         var graphcpu = new Dygraph(
         document.getElementById("graphcpu"),
-        "/csv?data=cpu&until=now&since="+duration, // path to CSV file
+        "/csv?data=cpu&since=now&until="+duration, // path to CSV file
         {
             colors: ["rgba(0, 120, 255, 1)"],
             fillGraph: true,
