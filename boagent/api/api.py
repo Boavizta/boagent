@@ -62,13 +62,16 @@ async def web():
 
 
 @app.get('/csv')
-async def csv(data: str, since: str = "now", until: str = "24h") -> Response:
+async def csv(data: str, since: str = "now", until: str = "24h", inwatt: bool = True) -> Response:
     start_date, stop_date = parse_date_info(since, until)
 
     session = get_session(settings.db_path)
     df = select_metric(session, data, start_date, stop_date)
     df['timestamp'] = df['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
     session.close()
+
+    if data == "power" and inwatt:
+        df['value'] = df['value'] / 1000.0
 
     return Response(
         content=df.to_csv(index=False),
