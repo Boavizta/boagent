@@ -329,10 +329,10 @@
             const div = document.createElement('div');
 
             div.style.display = 'inline-block';
-            div.style.height = heightString + 'px';
+            div.style.height = 'auto';
             div.style.position = 'relative';
             div.style.textAlign = 'center';
-            div.style.width = widthString + 'px';
+            div.style.width = '100%';
             div.appendChild(canvas);
 
             const input = document.createElement('input');
@@ -592,8 +592,8 @@
                     const canvas = this._canvas;
                     const ctx = canvas.getContext('2d');
                     const scale = window.devicePixelRatio;
-                    canvas.style.height = this._height + 'px';
-                    canvas.style.width = this._width + 'px';
+                    canvas.style.height = 'auto';
+                    canvas.style.width = '100%';
                     canvas.height = Math.floor(this._height * scale);
                     canvas.width = Math.floor(this._width * scale);
                     ctx.scale(scale, scale);

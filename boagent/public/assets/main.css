@@ -47,7 +47,13 @@ a:hover{
 }
 
 .score-box {
+    width:18%;
     text-align: center;
+}
+
+#platypus-logo{
+    width: 15%;
+    height: auto;
 }
 
 .box-legend{
@@ -80,10 +86,6 @@ a:hover{
     font-size: 1.5em;
 }
 
-#platypus-logo{
-    width: 250px;
-    margin-top: 2%;
-}
 
 #forkongithub a
 {
