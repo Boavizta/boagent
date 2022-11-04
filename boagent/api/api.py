@@ -544,14 +544,32 @@ def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]
 
 def query_forecast_electricity_carbon_intensity(start_date: datetime, stop_date: datetime) -> Dict[str, Any]:
     url = settings.boaviztapi_endpoint + f'/v1/usage_router/gwp/forecast_intensity?location={settings.azure_location}'
-    response = requests.post(url, json={
-        "source": "carbon_aware_api",
-        "url": settings.carbon_aware_api_endpoint,
-        "token": settings.carbon_aware_api_token,
-        "start_date": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "stop_date": stop_date.strftime("%Y-%m-%dT%H:%M:%SZ")
-    })
-    return response.json()[0]
+    retry = 0
+    while retry < 3:
+        retry += 1
+        try:
+            response = requests.post(url, json={
+                "source": "carbon_aware_api",
+                "url": settings.carbon_aware_api_endpoint,
+                "token": settings.carbon_aware_api_token,
+                "start_date": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "stop_date": stop_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+            })
+            return response.json()[0]
+        except KeyError:
+            response_err = response.json()
+            if response_err['title'] == 'ArgumentException':
+                errors = response_err['errors']
+                if 'dataStartAt' in errors:
+                    if len(errors['dataStartAt']) == 1:
+                        error_msg = errors['dataStartAt'][0].split("'")
+                        start_date = datetime.strptime(error_msg[1][:-10], '%m/%d/%Y %H:%M:%S')
+                        stop_date = datetime.strptime(error_msg[3][:-10], '%m/%d/%Y %H:%M:%S')
+                elif 'dataEndAt' in errors:
+                    if len(errors['dataEndAt']) == 1:
+                        error_msg = errors['dataEndAt'][0].split("'")
+                        start_date = datetime.strptime(error_msg[1][:-10], '%m/%d/%Y %H:%M:%S')
+                        stop_date = datetime.strptime(error_msg[3][:-10], '%m/%d/%Y %H:%M:%S')
 
 
 def parse_forecast_electricity_carbon_intensity(response: Dict[str, Any]) -> List[Dict[str, Any]]:
