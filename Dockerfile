@@ -4,17 +4,21 @@ LABEL org.opencontainers.image.authors="bpetit@hubblo.org"
 
 RUN apt update && apt install gcc g++ -y
 
+RUN apt-get install -y cron sqlite3
+
 RUN useradd -ms /bin/bash boagent
 
-USER boagent
+#USER boagent
 
 WORKDIR /home/boagent
 
-COPY . .
+COPY requirements.txt requirements.txt
 
 RUN pip3 install -r requirements.txt
 
 ENV PATH $PATH:/home/boagent/.local/bin
+
+COPY . .
 
 EXPOSE 8000
 

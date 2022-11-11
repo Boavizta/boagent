@@ -1,0 +1,337 @@
+<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="assets/main.css" />
+    <link rel="stylesheet" href="assets/table-style.css" />
+    <script type="text/javascript" src="assets/dygraph.min.js"></script>
+    <script type="text/javascript" src="assets/synchronizer.js"></script>
+    <script type="text/javascript" src="assets/pureknob.js"></script>
+</head>
+
+<body style="background-color: #262B30; color: white; font-family: Ubuntu, sans-serif">
+    <span id="forkongithub"><a href="https://github.com/Boavizta/boagent">Fork me on GitHub</a></span>
+    <div class="title">
+        <h1>PLATYPUS : report, understand and tackle IT impacts</h1>
+    </div>
+    <div class="scores-box navbar">
+        <a href="https://github.com/Green-Software-Foundation/carbon-aware-sdk" target="_blank">Carbon Aware API 🔗</a>
+        <a href="https://github.com/Boavizta/boagent/tree/greenhack22" target="_blank">Boagent 🔗</a>
+        <a href="https://github.com/Boavizta/boaviztapi/tree/greenhack22" target="_blank">BoaviztAPI 🔗</a>
+        <a href="https://github.com/Hubblo-org/scaphandre/tree/greenhack22" target="_blank">Scaphandre 🔗</a>
+    </div>
+
+    <div class="scores-box">
+        <div class="score-box">
+            <h3>Current intensity (CO2eq./kWh)</h3>
+            <div id="current_intensity"></div>
+        </div>
+
+        <div class="score-box">
+            <h3>Current RAM consumption</h3>
+            <div id="current_ram"></div>
+        </div>
+        
+        <img id='platypus-logo' src="assets/platypus_logo.png">
+
+        <div class="score-box">
+            <h3>Current CPU consumption</h3>
+            <div id="current_cpu"></div>
+        </div>
+        <div class="score-box">
+            <h3>Current electrical consumption</h3>
+            <div id="current_elec"></div>
+        </div>
+    </div>
+
+    <div class="impacts_box">
+        <div class="impact_box">
+            <h2>Yearly operational emissions</h2>
+            <span class="txt_impact" id="operational_yearly"></span>
+            <span class="txt_unit">kgCO2eq.</span>
+        </div>
+        <div class="impact_box">
+            <h2>Yearly embedded emissions</h2>
+            <span class="txt_impact" id="embedded_yearly"></span>
+            <span class="txt_unit">kgCO2eq.</span>
+        </div>
+    </div>
+
+    <div class="box-legend">
+        <h3>Carbon intensity</h3>
+        <p>Carbon intensity of the electricity grid (production and distribution) in your region expressed in gCO2eq./kWh.</p>
+    </div>
+    <div class="box">
+        <div id="graphintensity" style="width:100%;height:200px;"></div>
+    </div>
+
+    <div class="box-legend">
+        <h3>Server impact</h3>
+        <p>Green gaz emissions expressed in gCO2eq. Both operational (related to electricity consumption) and embedded (related to manufacture) are reported.</p>
+    </div>
+    <div class="box">
+        <div id="graphimpact" style="width:100%;; height:200px;"></div>
+    </div>
+
+    <div class="box-legend">
+        <h3>Server consumption</h3>
+        <p> Server consumption, in Watts</p>
+    </div>
+    <div class="box">
+        <div id="graphconso" style="width:100%;; height:200px;"></div>
+    </div>
+
+    <div class="box-legend">
+        <h3>Server Ram Usage</h3>
+        <p>Server Ram usage, in GigaBytes</p>
+    </div>
+    <div class="box">
+        <div id="graphram" style="width:100%;; height:200px;"></div>
+    </div>
+
+    <div class="box-legend">
+        <h3>Server Cpu Usage</h3>
+        <p>Server Cpu load, in %</p>
+    </div>
+    <div class="box">
+        <div id="graphcpu" style="width:100%;; height:200px;"></div>
+    </div>
+
+
+    <div class="box-legend">
+        <h3>Recommandations</h3>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Mode</th>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Recommendation</th>
+                <th>CMD</th>
+            </tr>
+        <thead>
+        <tbody  id="reco-table">
+        </tbody>
+    </table>
+
+
+<script>
+    fetch("/update")
+
+    const current_intensity = pureknob.createKnob(300, 180);
+    current_intensity.setProperty('angleStart', -0.75 * Math.PI);
+    current_intensity.setProperty('angleEnd', 0.75 * Math.PI);
+    current_intensity.setProperty('colorFG', '#ff7800');
+    current_intensity.setProperty('valMin', 0);
+    current_intensity.setProperty('valMax', 1000);
+    current_intensity.setProperty('readonly', true)
+    document.getElementById('current_intensity').appendChild(current_intensity.node());
+    current_intensity.setProperty('fnValueToString', function(value) {
+        let string = value.toString();
+        return string + ' g';
+    });
+
+
+    const current_ram = pureknob.createKnob(300, 180);
+    current_ram.setProperty('angleStart', -0.75 * Math.PI);
+    current_ram.setProperty('angleEnd', 0.75 * Math.PI);
+    current_ram.setProperty('colorFG', '#0078ff');
+    current_ram.setProperty('valMin', 0);
+    current_ram.setProperty('valMax', 100);
+    current_ram.setProperty('readonly', true)
+    document.getElementById('current_ram').appendChild(current_ram.node());
+    current_ram.setProperty('fnValueToString', function(value) {
+        let string = value.toString();
+        return string + ' GB';
+    });
+
+    const current_cpu = pureknob.createKnob(300, 180);
+    current_cpu.setProperty('angleStart', -0.75 * Math.PI);
+    current_cpu.setProperty('angleEnd', 0.75 * Math.PI);
+    current_cpu.setProperty('colorFG', '#88ff88');
+    current_cpu.setProperty('valMin', 0);
+    current_cpu.setProperty('valMax', 100);
+    current_cpu.setProperty('readonly', true)
+    current_cpu.setValue(12);
+    document.getElementById('current_cpu').appendChild(current_cpu.node());
+    current_cpu.setProperty('fnValueToString', function(value) {
+        let string = value.toString();
+        return string + ' %';
+    });
+
+    const current_elec = pureknob.createKnob(300, 180);
+    current_elec.setProperty('angleStart', -0.75 * Math.PI);
+    current_elec.setProperty('angleEnd', 0.75 * Math.PI);
+    current_elec.setProperty('colorFG', '#faf875');
+    current_elec.setProperty('valMin', 0);
+    current_elec.setProperty('valMax', 2000);
+    current_elec.setProperty('readonly', true)
+    document.getElementById('current_elec').appendChild(current_elec.node());
+    current_elec.setProperty('fnValueToString', function(value) {
+        let string = value.toString();
+        return string + ' W';
+    });
+
+    fetch("/last_info")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            current_intensity.setValue(data["carbonintensity"]["value"]);
+            current_ram.setValue(data["ram"]["value"]);
+            current_cpu.setValue(data["cpu"]["value"]);
+            current_elec.setValue(data["power"]["value"]*0.001);
+        })
+    fetch("/max_info")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            current_intensity.setProperty('valMax', data["carbonintensity"]["value"]);
+            current_ram.setProperty('valMax', Math.ceil(data["ram"]["value"]));
+            current_elec.setProperty('valMax', data["power"]["value"]*0.001);
+        })
+
+    fetch("/yearly_embedded")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            document.getElementById('embedded_yearly').textContent = data
+        })
+    fetch("/yearly_operational")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            document.getElementById('operational_yearly').textContent = data
+        })
+</script>
+<script>
+    var duration="24"+"h"
+    var graphintensity = new Dygraph(
+        document.getElementById("graphintensity"),
+        "/carbon_intensity?since=now&until="+duration, // path to CSV file
+        {
+            colors: ["rgba(0, 120, 255, 1)"],
+            fillGraph: true,
+            visibility: [true, false],
+            underlayCallback: function(canvas, area, g) {
+                function highlight_period(x_start, x_end) {
+                    var canvas_left_x = g.toDomXCoord(x_start);
+                    var canvas_right_x = g.toDomXCoord(x_end);
+                    var canvas_width = canvas_right_x - canvas_left_x;
+                    canvas.fillRect(canvas_left_x, area.y, canvas_width, area.h);
+                }
+
+                for (let i = 0; i < g.numRows(); i++) {
+                    if (g.getValue(i, 2) === -1){
+                        for (let j = i; j < g.numRows(); j++) {
+                            if (g.getValue(j, 2) !== -1){
+                                canvas.fillStyle = "rgba(120,255,120, 0.14)";
+                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                i = j-1
+                                break;
+                            }
+                        }
+                    }
+                    else if (g.getValue(i, 2) === 1){
+                        for (let j = i+1; j < g.numRows(); j++) {
+                            if (g.getValue(j, 2) !== 1){
+                                canvas.fillStyle =  "rgba(255, 120, 120, 0.15)";
+                                highlight_period(g.getValue(i, 0),g.getValue(j, 0));
+                                i = j-1
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    var graphimpact = new Dygraph(
+        document.getElementById("graphimpact"),
+        "/impact?since=now&until="+duration,
+        {
+            colors: ["rgba(0, 120, 255, 1)", "rgba(255, 120, 0, 1)"],
+            fillGraph: true,
+            visibility: [true, true],
+            stackedGraph: true
+        }
+    );
+
+        var graphconso = new Dygraph(
+        document.getElementById("graphconso"),
+        "/csv?data=power&since=now&until="+duration, // path to CSV file
+        {
+            fillGraph: true,
+            visibility: [true, false]});
+
+        var graphram = new Dygraph(
+        document.getElementById("graphram"),
+        "/csv?data=ram&since=now&until="+duration, // path to CSV file
+        {
+            colors: ["rgba(255, 120, 0, 1)"],
+            fillGraph: true,
+            visibility: [true, false]});
+
+        var graphcpu = new Dygraph(
+        document.getElementById("graphcpu"),
+        "/csv?data=cpu&since=now&until="+duration, // path to CSV file
+        {
+            colors: ["rgba(0, 120, 255, 1)"],
+            fillGraph: true,
+            visibility: [true, false]
+        });
+
+    Dygraph.synchronize([graphintensity, graphconso, graphram, graphcpu, graphimpact], {
+        zoom: true,
+        selection: true,
+        range: false
+    });
+</script>
+
+<script>
+    fetch("/recommendation")
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            loadTableData(data);
+        })
+
+    function loadTableData(items) {
+        const table = document.getElementById("reco-table");
+        items.forEach( item => {
+            let row = table.insertRow();
+
+            let picto = row.insertCell(0);
+            picto.innerHTML = "🕝";
+
+            let mode = row.insertCell(1);
+            mode.innerHTML = item.mode
+
+            let time = row.insertCell(2);
+            time.innerHTML = item.execution_date;
+
+            let type = row.insertCell(3);
+            type.innerHTML = item.type;
+
+            let reco = row.insertCell(4);
+            reco.innerHTML = "Schedule your CRON during less carbonate hours (" + item.preferred_execution_date + ")"
+
+            length = 45
+            let job = row.insertCell(5);
+            job.innerHTML = item.job.length > length ?
+                item.job.substring(0, length - 3) + "..." :
+                item.job;
+        });
+    }
+</script>
+
+
+</body>
+</html>
+

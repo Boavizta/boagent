@@ -1,6 +1,8 @@
+from datetime import datetime
 from boaviztapi_sdk import ApiClient, Configuration
 from dateutil import parser
 from config import settings
+
 
 def sort_ram(items: list):
     hash_map = {}
@@ -95,3 +97,17 @@ def format_prometheus_metric(metric_name, metric_description, metric_type, metri
 {} {}
 """.format(metric_name, metric_description, metric_name, metric_type, metric_name, metric_value)
     return response
+
+def filter_date_range(data: list, start_date: datetime, stop_date: datetime) -> list:
+
+    lower_index = 0
+    upper_index = 0
+
+    start = datetime.timestamp(start_date)
+    end   = datetime.timestamp(stop_date)
+
+    for d in data:
+        if d["timestamp"] < start: lower_index+=1
+        if d["timestamp"] < end: upper_index+=1
+
+    return data[lower_index : upper_index]

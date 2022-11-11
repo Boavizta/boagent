@@ -12,6 +12,7 @@ services:
       DEFAULT_LIFETIME: 5.0
       HARDWARE_FILE_PATH: "/home/boagent/hardware_data.json"
       POWER_FILE_PATH: "/app/data/power_data.json"
+        #user: boagent
     depends_on:
       - boaviztapi
       - scaphandre
@@ -23,9 +24,12 @@ services:
       - "/proc:/proc"
       - "/sys:/sys:ro"
       - "powerdata:/app/data:ro"
+      - "./db:/app/db"
+      - "../boaviztapi/boaviztapi:/app/boaviztapi"
+      - "/etc/crontab:/etc/crontab"
 
   scaphandre:
-    image: hubblo/scaphandre:dev
+    image: hubblo/scaphandre:greenhack22
     volumes:
       - type: bind
         source: /proc
@@ -34,7 +38,7 @@ services:
         source: /sys/class/powercap
         target: /sys/class/powercap
       - "powerdata:/app/data:rw"
-    command: [ "json", "-s", "10", "-f", "/app/data/power_data.json" ]                         
+    command: [ "--no-header", "json", "-s", "10", "--max-top-consumers", "0",  "-f", "/app/data/power_data.json" ]                         
     networks:
       - boagent-network
     
@@ -44,6 +48,8 @@ services:
       - "5000:5000"
     networks:
       - boagent-network
+    volumes:
+      - "../boaviztapi/boaviztapi:/app/boaviztapi"
 
 volumes:
   powerdata: {}
