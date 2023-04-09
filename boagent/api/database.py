@@ -197,8 +197,7 @@ def get_max(table_name):
 
 def add_from_scaphandre(session):
     last_timestamp = get_most_recent_timestamp(session)
-    last_timestamp = last_timestamp + timedelta(seconds=5) if last_timestamp != None else datetime.now() - timedelta(
-        hours=24)
+    last_timestamp = last_timestamp + timedelta(seconds=5) if last_timestamp != None else datetime.now() - timedelta(hours=24)
     df = scaphandre_to_csv(start_date=last_timestamp, stop_date=datetime.utcnow())
     if df.empty:
         return

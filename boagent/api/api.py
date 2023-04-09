@@ -106,7 +106,7 @@ async def operational_impact_yearly():
     df_carbon_intensity['carbon_intensity_g_per_watt_second'] = df_carbon_intensity['value'] / (1000 * 3600)
 
     yearly_operational = (df_power['power_watt'].mean()*df_carbon_intensity["carbon_intensity_g_per_watt_second"].mean())*(3600*24*365) # in gCO2eq
-    
+
     return round(yearly_operational/1000.0) # in kgCO2eq
 
 
@@ -393,7 +393,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
         },
         "electricity_carbon_intensity": {
             "value": boaviztapi_data["verbose"]["USAGE"]["gwp_factor"]["value"],
-            "description": "Carbon intensity of the elextricity mixed. Mix considered : {}".format(location),
+            "description": "Carbon intensity of the electricity mix. Mix considered : {}".format(location),
             "type": "gauge",
             "unit": "kg CO2eq / kWh",
             "long_unit": "Kilograms CO2 equivalent per KiloWattHour"
@@ -413,7 +413,8 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
         res["emissions_calculation_data"]["raw_data"] = {
             "hardware_data": hardware_data,
             "resources_data": "not implemented yet",
-            "boaviztapi_data": boaviztapi_data
+            "boaviztapi_data": boaviztapi_data,
+            "power_data": power_data
         }
     return res
 
@@ -432,6 +433,20 @@ def format_usage_request(start_time, end_time, host_avg_consumption=None, locati
 
 def get_power_data(start_time, end_time):
     power_data = {}
+    with open(settings.power_file_path, 'r') as fd:
+        # Get all items of the json list where start_time <= host.timestamp <= end_time
+        data = json.load(fd)
+        res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
+        power_data['raw_data'] = res
+        power_data['host_avg_consumption'] = compute_average_consumption(res)
+        if end_time - start_time <= 3600:
+            power_data[
+                'warning'] = "The time window is lower than one hour, but the energy consumption estimate is in " \
+                             "Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be " \
+                             "careful with this data. "
+        return power_data
+
+def get_timeseries_data(start_time, end_time):
     with open(settings.power_file_path, 'r') as fd:
         # Get all items of the json list where start_time <= host.timestamp <= end_time
         data = json.load(fd)
