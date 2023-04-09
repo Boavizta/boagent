@@ -414,7 +414,9 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             "hardware_data": hardware_data,
             "resources_data": "not implemented yet",
             "boaviztapi_data": boaviztapi_data,
-            "power_data": power_data
+            "power_data": power_data,
+            "start_time": start_time,
+            "end_time": end_time
         }
     return res
 
