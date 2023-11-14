@@ -1,13 +1,13 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Boavizta/boaviztapi/dev/boavizta-logo-4.png" width="100">
+    <img src="https://github.com/Boavizta/boagent/blob/main/boagent_color.svg" height="100">
 </p>
-<h1 align="center">
-  Boagent
-</h1>
+<h3 align="center">
+  Local API / sidecar / companion of a running application that computes and gives insights to the application regarding its environmental impacts.
+</h3>
 
 ---
 
-Local API / sidecar / companion of a running application that computes and gives insights to the application regarding its environmental impacts. If no parameters are passed to the API to isolate the application, then the impact of the whole machine is calculated.
+_If no parameters are passed to the API to isolate the application, then the impact of the whole machine is calculated._
 
 ## How to use
 
