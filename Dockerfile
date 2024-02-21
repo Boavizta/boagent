@@ -18,6 +18,12 @@ RUN pip3 install -r requirements.txt
 
 ENV PATH $PATH:/home/boagent/.local/bin
 
+WORKDIR /home/boagent/db
+
+RUN sqlite3 boagent.db
+
+WORKDIR /home/boagent
+
 COPY . .
 
 EXPOSE 8000
