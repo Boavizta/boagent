@@ -5,6 +5,14 @@ import os
 class Settings(BaseSettings):
     PROJECT_NAME: str = "boagent"
     PROJECT_VERSION: str = "0.1.0"
+    PROJECT_DESCRIPTION: str = "Boagent is a local API and monitoring agent to help you estimate the environmental impact of your machine, including software activity and hardware embodied impacts."
+    TAGS_METADATA: list = [
+            { "name": "info", "description": "Returns runtime configuration of Boagent." },
+            { "name": "web", "description": "Web UI to explore Boagent metrics."},
+            { "name": "csv", "description": "Internal route. Generates and returns a CSV-formatted dataset with metrics needed by the webUI" },
+            { "name": "metrics", "description": "Returns metrics as a Prometheus HTTP exporter."},
+            { "name": "query", "description": "This is the main route. Returns metrics in JSON format." }
+    ]
     seconds_in_one_year: int = 31536000
     default_lifetime: float = os.getenv("DEFAULT_LIFETIME", 5.0)
     hardware_file_path: str = os.getenv("HARDWARE_FILE_PATH", "./hardware_data.json")

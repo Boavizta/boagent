@@ -29,7 +29,19 @@ def configure_static(app):
 
 
 def configure_app():
-    app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
+    app = FastAPI(
+        title=settings.PROJECT_NAME,
+        version=settings.PROJECT_VERSION,
+        description = settings.PROJECT_DESCRIPTION,
+        contact = {
+            "name": "Boavizta Members",
+            "url": "https://boavizta.org/en"
+        },
+        license_info = {
+            "name": "Apache-2.0"
+        },
+        openapi_tags = settings.TAGS_METADATA
+    )
     configure_static(app)
     return app
 
@@ -40,7 +52,7 @@ items = {}
 create_database(get_engine(db_path=settings.db_path))
 
 
-@app.get("/info")
+@app.get("/info", tags=["info"])
 async def info():
     return {
         "seconds_in_one_year": settings.seconds_in_one_year,
@@ -52,7 +64,7 @@ async def info():
     }
 
 
-@app.get("/web", response_class=HTMLResponse)
+@app.get("/web", tags=["web"], response_class=HTMLResponse)
 async def web():
     res = ""
     with open("{}/index.html".format(settings.public_path), 'r') as fd:
@@ -61,7 +73,7 @@ async def web():
     return res
 
 
-@app.get('/csv')
+@app.get('/csv', tags=["csv"])
 async def csv(data: str, since: str = "now", until: str = "24h", inwatt: bool = True) -> Response:
     start_date, stop_date = parse_date_info(since, until)
 
@@ -124,7 +136,7 @@ async def last_data(table_name: str) -> Response:
         )
 
 
-@app.get("/metrics")
+@app.get("/metrics", tags=["metrics"])
 async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json",
                   location: str = None, measure_power: bool = True, lifetime: float = settings.default_lifetime,
                   fetch_hardware: bool = False):
@@ -139,9 +151,18 @@ async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool 
     )
 
 
-@app.get("/query")
+@app.get("/query", tags=["query"])
 async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None,
                 measure_power: bool = True, lifetime: float = settings.default_lifetime, fetch_hardware: bool = False):
+    """
+    start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
+    end_time: End time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
+    verbose: Get detailled metrics with extra information.\n
+    location: Country code to configure the local electricity grid to take into account.\n
+    measure_power: Get electricity consumption metrics from Scaphandre or not.\n
+    lifetime: Full lifetime of the machine to consider.\n
+    fetch_hardware: Regenerate hardware.json file with current machine hardware or not.\n
+    """
     return get_metrics(
         iso8601_or_timestamp_as_timestamp(start_time),
         iso8601_or_timestamp_as_timestamp(end_time),
