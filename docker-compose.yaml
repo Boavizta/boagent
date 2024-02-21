@@ -29,7 +29,7 @@ services:
       - "/etc/crontab:/etc/crontab"
 
   scaphandre:
-    image: hubblo/scaphandre:greenhack22
+    image: hubblo/scaphandre:dev
     volumes:
       - type: bind
         source: /proc
@@ -48,8 +48,6 @@ services:
       - "5000:5000"
     networks:
       - boagent-network
-    volumes:
-      - "../boaviztapi/boaviztapi:/app/boaviztapi"
 
 volumes:
   powerdata: {}
