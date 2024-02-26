@@ -27,6 +27,7 @@ services:
       - "./db:/app/db"
       - "../boaviztapi/boaviztapi:/app/boaviztapi"
       - "/etc/crontab:/etc/crontab"
+      - "./boagent:/home/boagent/boagent"
 
   scaphandre:
     image: hubblo/scaphandre:greenhack22
