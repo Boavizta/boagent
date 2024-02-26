@@ -49,7 +49,7 @@ def configure_app():
 app = configure_app()
 items = {}
 
-create_database(get_engine(db_path=settings.db_path))
+# create_database(get_engine(db_path=settings.db_path))
 
 
 @app.get("/info", tags=["info"])
@@ -308,6 +308,7 @@ async def impact(since: str = "now", until: str = "24h"):
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float,
                 fetch_hardware: bool = False):
+
     now: float = time.time()
     if start_time and end_time:
         ratio = (end_time - start_time) / (lifetime * settings.seconds_in_one_year)
@@ -360,66 +361,66 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             "long_unit": "Mega Joules"
         }
 
-    res["calculated_emissions"] = {
-        "value": boaviztapi_data["impacts"]["gwp"]["manufacture"] * ratio + boaviztapi_data["impacts"]["gwp"]["use"],
-        "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between "
-                       "start_time and end_time",
-        "type": "gauge",
-        "unit": "kg CO2eq",
-        "long_unit": "kilograms CO2 equivalent"
-    }
-
-    res["start_time"] = {
-        "value": start_time,
-        "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
-        "type": "counter",
-        "unit": "s",
-        "long_unit": "seconds"
-    }
-    res["end_time"] = {
-        "value": end_time,
-        "description": "End time for the evaluation, in timestamp format (seconds since 1970)",
-        "type": "counter",
-        "unit": "s",
-        "long_unit": "seconds"
-    }
-    res["embedded_emissions"] = {
-        "value": boaviztapi_data["impacts"]["gwp"]["manufacture"] * ratio,
-        "description": "Embedded carbon emissions (manufacturing phase)",
-        "type": "gauge",
-        "unit": "kg CO2eq",
-        "long_unit": "kilograms CO2 equivalent"
-    }
-    res["embedded_abiotic_resources_depletion"] = {
-        "value": boaviztapi_data["impacts"]["adp"]["manufacture"] * ratio,
-        "description": "Embedded abiotic ressources consumed (manufacturing phase)",
-        "type": "gauge",
-        "unit": "kg Sbeq",
-        "long_unit": "kilograms ADP equivalent"
-    }
-    res["embedded_primary_energy"] = {
-        "value": boaviztapi_data["impacts"]["pe"]["manufacture"] * ratio,
-        "description": "Embedded primary energy consumed (manufacturing phase)",
-        "type": "gauge",
-        "unit": "MJ",
-        "long_unit": "Mega Joules"
-    }
-    res["emissions_calculation_data"] = {
-        "average_power_measured": {
-            "value": host_avg_consumption,
-            "description": "Average power measured from start_time to end_time",
+        res["calculated_emissions"] = {
+            "value": boaviztapi_data["impacts"]["gwp"]["manufacture"] * ratio + boaviztapi_data["impacts"]["gwp"]["use"],
+            "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between "
+                           "start_time and end_time",
             "type": "gauge",
-            "unit": "W",
-            "long_unit": "Watts"
-        },
-        "electricity_carbon_intensity": {
-            "value": boaviztapi_data["verbose"]["USAGE"]["gwp_factor"]["value"],
-            "description": "Carbon intensity of the electricity mix. Mix considered : {}".format(location),
-            "type": "gauge",
-            "unit": "kg CO2eq / kWh",
-            "long_unit": "Kilograms CO2 equivalent per KiloWattHour"
+            "unit": "kg CO2eq",
+            "long_unit": "kilograms CO2 equivalent"
         }
-    }
+
+        res["start_time"] = {
+            "value": start_time,
+            "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
+            "type": "counter",
+            "unit": "s",
+            "long_unit": "seconds"
+        }
+        res["end_time"] = {
+            "value": end_time,
+            "description": "End time for the evaluation, in timestamp format (seconds since 1970)",
+            "type": "counter",
+            "unit": "s",
+            "long_unit": "seconds"
+        }
+        res["embedded_emissions"] = {
+            "value": boaviztapi_data["impacts"]["gwp"]["manufacture"] * ratio,
+            "description": "Embedded carbon emissions (manufacturing phase)",
+            "type": "gauge",
+            "unit": "kg CO2eq",
+            "long_unit": "kilograms CO2 equivalent"
+        }
+        res["embedded_abiotic_resources_depletion"] = {
+            "value": boaviztapi_data["impacts"]["adp"]["manufacture"] * ratio,
+            "description": "Embedded abiotic ressources consumed (manufacturing phase)",
+            "type": "gauge",
+            "unit": "kg Sbeq",
+            "long_unit": "kilograms ADP equivalent"
+        }
+        res["embedded_primary_energy"] = {
+            "value": boaviztapi_data["impacts"]["pe"]["manufacture"] * ratio,
+            "description": "Embedded primary energy consumed (manufacturing phase)",
+            "type": "gauge",
+            "unit": "MJ",
+            "long_unit": "Mega Joules"
+        }
+        res["emissions_calculation_data"] = {
+            "average_power_measured": {
+                "value": host_avg_consumption,
+                "description": "Average power measured from start_time to end_time",
+                "type": "gauge",
+                "unit": "W",
+                "long_unit": "Watts"
+            },
+            "electricity_carbon_intensity": {
+                "value": boaviztapi_data["verbose"]["USAGE"]["gwp_factor"]["value"],
+                "description": "Carbon intensity of the electricity mix. Mix considered : {}".format(location),
+                "type": "gauge",
+                "unit": "kg CO2eq / kWh",
+                "long_unit": "Kilograms CO2 equivalent per KiloWattHour"
+            }
+        }
     usage_location_status = boaviztapi_data["verbose"]["USAGE"]["usage_location"]["status"]
     if usage_location_status == "MODIFY":
         res["emissions_calculation_data"]["electricity_carbon_intensity"][
