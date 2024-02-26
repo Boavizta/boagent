@@ -44,7 +44,7 @@ services:
       - boagent-network
     
   boaviztapi:
-    image: ghcr.io/boavizta/boaviztapi:0.2.0a0
+    image: ghcr.io/boavizta/boaviztapi:1.2.2
     ports: 
       - "5000:5000"
     networks:
