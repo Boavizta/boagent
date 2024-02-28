@@ -32,15 +32,15 @@ def configure_app():
     app = FastAPI(
         title=settings.PROJECT_NAME,
         version=settings.PROJECT_VERSION,
-        description = settings.PROJECT_DESCRIPTION,
-        contact = {
+        description=settings.PROJECT_DESCRIPTION,
+        contact={
             "name": "Boavizta Members",
             "url": "https://boavizta.org/en"
         },
-        license_info = {
+        license_info={
             "name": "Apache-2.0"
         },
-        openapi_tags = settings.TAGS_METADATA
+        openapi_tags=settings.TAGS_METADATA
     )
     configure_static(app)
     return app
@@ -49,7 +49,7 @@ def configure_app():
 app = configure_app()
 items = {}
 
-# create_database(get_engine(db_path=settings.db_path))
+create_database(get_engine(db_path=settings.db_path))
 
 
 @app.get("/info", tags=["info"])
