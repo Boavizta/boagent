@@ -800,5 +800,5 @@ def find_preferred_execution_date_in_history(execution_date: datetime,
 
 
 @app.get("/recommendation")
-async def info():
+async def recommendation():
     return compute_recommendations()
