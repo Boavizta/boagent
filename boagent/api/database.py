@@ -10,10 +10,12 @@ import numpy as np
 from sqlalchemy import Column, DateTime, Integer, Float, insert, select, inspect
 from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.orm import Session, declarative_base, declared_attr
+from config import settings
 
 import json
 from utils import filter_date_range
-from config import settings
+
+DB_PATH = settings.db_path
 
 Base = declarative_base()
 
@@ -67,7 +69,12 @@ def get_session(db_path: str) -> Session:
 
 
 def get_engine(db_path: str) -> Engine:
-    return create_engine(f'sqlite:///{db_path}')
+    sqlite_engine = create_engine(f'sqlite:///{db_path}')
+    return sqlite_engine
+
+
+def setup_database():
+    create_database(get_engine(DB_PATH))
 
 
 def insert_metric(session: Session, metric_name: str, timestamp: datetime, value: Any):
