@@ -21,7 +21,9 @@ from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, f
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 from database import create_database, get_session, get_engine, insert_metric, select_metric, \
-    CarbonIntensity, add_from_scaphandre, get_most_recent_data, get_max, new_highlight_spikes
+    CarbonIntensity, add_from_scaphandre, get_most_recent_data, get_max, new_highlight_spikes, \
+    setup_database
+
 
 
 def configure_static(app):
@@ -49,7 +51,7 @@ def configure_app():
 app = configure_app()
 items = {}
 
-create_database(get_engine(db_path=settings.db_path))
+# setup_database()
 
 
 @app.get("/info", tags=["info"])
@@ -105,8 +107,13 @@ async def yearly_embedded():
         configuration=generate_machine_configuration(hardware_data),
         usage={}
     )
-
-    return boaviztapi_data["impacts"]["gwp"]["manufacture"] / settings.default_lifetime
+    if "manufacturer" in boaviztapi_data:
+        return boaviztapi_data["impacts"]["gwp"]["manufacturer"] / settings.default_lifetime
+    else:
+        return Response(
+                status_code=200,
+                content="SSD/HDD manufacturer not recognized by BoaviztAPI yet."
+                )
 
 @app.get("/yearly_operational")
 async def operational_impact_yearly():
@@ -303,14 +310,15 @@ async def impact(since: str = "now", until: str = "24h"):
         usage={}
     )
 
-    yearly_embedded_emissions = boaviztapi_data["impacts"]["gwp"]["manufacture"] / settings.default_lifetime
+    if "manufacturer" in boaviztapi_data:
+        yearly_embedded_emissions = boaviztapi_data["impacts"]["gwp"]["manufacturer"] / settings.default_lifetime
 
-    df['embedded'] = yearly_embedded_emissions  / (3.6*24*365) # from kgCO2eq/year to gCO2eq/s
-    df = df.drop(columns=['power_watt', 'carbon_intensity_g_per_watt_second']).reset_index()
-    return Response(
-        content=df.to_csv(index=False),
-        media_type="text/csv"
-    )
+        df['embedded'] = yearly_embedded_emissions  / (3.6*24*365) # from kgCO2eq/year to gCO2eq/s
+        df = df.drop(columns=['power_watt', 'carbon_intensity_g_per_watt_second']).reset_index()
+        return Response(
+            content=df.to_csv(index=False),
+            media_type="text/csv"
+        )
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float,
                 fetch_hardware: bool = False):
@@ -332,6 +340,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
     res = {"emissions_calculation_data": {}}
 
     host_avg_consumption = None
+
     if measure_power:
         power_data = get_power_data(start_time, end_time)
         host_avg_consumption = power_data["host_avg_consumption"]
@@ -365,17 +374,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             "type": "gauge",
             "unit": "MJ",
             "long_unit": "Mega Joules"
-        }
-
-        res["calculated_emissions"] = {
-            "value": boaviztapi_data["impacts"]["gwp"]["manufacture"] * ratio + boaviztapi_data["impacts"]["gwp"]["use"],
-            "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between "
-                           "start_time and end_time",
-            "type": "gauge",
-            "unit": "kg CO2eq",
-            "long_unit": "kilograms CO2 equivalent"
-        }
-
+        }       
         res["start_time"] = {
             "value": start_time,
             "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
@@ -390,52 +389,64 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             "unit": "s",
             "long_unit": "seconds"
         }
-        res["embedded_emissions"] = {
-            "value": boaviztapi_data["impacts"]["gwp"]["manufacture"] * ratio,
-            "description": "Embedded carbon emissions (manufacturing phase)",
-            "type": "gauge",
-            "unit": "kg CO2eq",
-            "long_unit": "kilograms CO2 equivalent"
-        }
-        res["embedded_abiotic_resources_depletion"] = {
-            "value": boaviztapi_data["impacts"]["adp"]["manufacture"] * ratio,
-            "description": "Embedded abiotic ressources consumed (manufacturing phase)",
-            "type": "gauge",
-            "unit": "kg Sbeq",
-            "long_unit": "kilograms ADP equivalent"
-        }
-        res["embedded_primary_energy"] = {
-            "value": boaviztapi_data["impacts"]["pe"]["manufacture"] * ratio,
-            "description": "Embedded primary energy consumed (manufacturing phase)",
-            "type": "gauge",
-            "unit": "MJ",
-            "long_unit": "Mega Joules"
-        }
-        res["emissions_calculation_data"] = {
-            "average_power_measured": {
-                "value": host_avg_consumption,
-                "description": "Average power measured from start_time to end_time",
+
+        if "manufacturer" in boaviztapi_data:
+            res["calculated_emissions"] = {
+                "value": boaviztapi_data["impacts"]["gwp"]["manufacturer"] * ratio + boaviztapi_data["impacts"]["gwp"]["use"],
+                "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between "
+                               "start_time and end_time",
                 "type": "gauge",
-                "unit": "W",
-                "long_unit": "Watts"
-            },
-            "electricity_carbon_intensity": {
-                "value": boaviztapi_data["verbose"]["USAGE"]["gwp_factor"]["value"],
-                "description": "Carbon intensity of the electricity mix. Mix considered : {}".format(location),
-                "type": "gauge",
-                "unit": "kg CO2eq / kWh",
-                "long_unit": "Kilograms CO2 equivalent per KiloWattHour"
+                "unit": "kg CO2eq",
+                "long_unit": "kilograms CO2 equivalent"
             }
-        }
-    usage_location_status = boaviztapi_data["verbose"]["USAGE"]["usage_location"]["status"]
-    if usage_location_status == "MODIFY":
-        res["emissions_calculation_data"]["electricity_carbon_intensity"][
-            "description"] += "WARNING : The provided trigram doesn't match any existing country. So this result is " \
-                              "based on average European electricity mix. Be careful with this data. "
-    elif usage_location_status == "SET":
-        res["emissions_calculation_data"]["electricity_carbon_intensity"][
-            "description"] += "WARNING : As no information was provided about your location, this result is based on " \
-                              "average European electricity mix. Be careful with this data. "
+            res["embedded_emissions"] = {
+                "value": boaviztapi_data["impacts"]["gwp"]["manufacturer"] * ratio,
+                "description": "Embedded carbon emissions (manufacturing phase)",
+                "type": "gauge",
+                "unit": "kg CO2eq",
+                "long_unit": "kilograms CO2 equivalent"
+            }
+            res["embedded_abiotic_resources_depletion"] = {
+                "value": boaviztapi_data["impacts"]["adp"]["manufacturer"] * ratio,
+                "description": "Embedded abiotic ressources consumed (manufacturing phase)",
+                "type": "gauge",
+                "unit": "kg Sbeq",
+                "long_unit": "kilograms ADP equivalent"
+            }
+            res["embedded_primary_energy"] = {
+                "value": boaviztapi_data["impacts"]["pe"]["manufacturer"] * ratio,
+                "description": "Embedded primary energy consumed (manufacturing phase)",
+                "type": "gauge",
+                "unit": "MJ",
+                "long_unit": "Mega Joules"
+            }
+
+        if "USAGE" in boaviztapi_data:
+            res["emissions_calculation_data"] = {
+                "average_power_measured": {
+                    "value": host_avg_consumption,
+                    "description": "Average power measured from start_time to end_time",
+                    "type": "gauge",
+                    "unit": "W",
+                    "long_unit": "Watts"
+                },
+                "electricity_carbon_intensity": {
+                    "value": boaviztapi_data["verbose"]["USAGE"]["gwp_factor"]["value"],
+                    "description": "Carbon intensity of the electricity mix. Mix considered : {}".format(location),
+                    "type": "gauge",
+                    "unit": "kg CO2eq / kWh",
+                    "long_unit": "Kilograms CO2 equivalent per KiloWattHour"
+                }
+            }
+            usage_location_status = boaviztapi_data["verbose"]["USAGE"]["usage_location"]["status"]
+            if usage_location_status == "MODIFY":
+                res["emissions_calculation_data"]["electricity_carbon_intensity"][
+                    "description"] += "WARNING : The provided trigram doesn't match any existing country. So this result is " \
+                                      "based on average European electricity mix. Be careful with this data. "
+            elif usage_location_status == "SET":
+                res["emissions_calculation_data"]["electricity_carbon_intensity"][
+                    "description"] += "WARNING : As no information was provided about your location, this result is based on " \
+                                      "average European electricity mix. Be careful with this data. "
 
     if verbose:
         res["emissions_calculation_data"]["raw_data"] = {
@@ -547,7 +558,7 @@ def generate_machine_configuration(hardware_data):
             "units": len(hardware_data["cpus"]),
             "core_units": hardware_data['cpus'][0]["core_units"],
             "family": hardware_data['cpus'][0]['family']
-        },
+            },
         "ram": sort_ram(hardware_data["rams"]),
         "disk": sort_disks(hardware_data["disks"]),
         "motherboard": hardware_data["mother_board"] if "mother_board" in hardware_data else {"units": 1},
