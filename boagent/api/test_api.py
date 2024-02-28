@@ -1,11 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from unittest import TestCase
 from .api import app
 
 client = TestClient(app)
 
-TODAY_ISO8601 = datetime.now().isoformat()
+NOW_ISO8601 = datetime.now().isoformat()
+NOW_ISO8601_MINUS_ONE_MINUTE = datetime.fromisoformat(NOW_ISO8601) - timedelta(
+    minutes=1
+)
 
 
 class ApiTest(TestCase):
@@ -21,8 +24,8 @@ class ApiTest(TestCase):
     def test_read_metrics(self):
 
         params = {
-            "start_time": f"{TODAY_ISO8601}",
-            "end_time": f"{TODAY_ISO8601}",
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
             "verbose": "false",
             "location": "FRA",
             "measure_power": "false",
@@ -33,16 +36,62 @@ class ApiTest(TestCase):
         response = client.get("/metrics", params=params)
         assert response.status_code == 200
 
-    def test_read_query(self):
+    def test_read_query_without_measure_power_and_fetch_hardware(self):
 
         params = {
-            "start_time": f"{TODAY_ISO8601}",
-            "end_time": f"{TODAY_ISO8601}",
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
             "verbose": "false",
             "location": "FRA",
             "measure_power": "false",
             "lifetime": 5,
             "fetch_hardware": "false",
+        }
+
+        response = client.get("/query", params=params)
+        assert response.status_code == 200
+
+    def test_read_query_with_measure_power(self):
+
+        # TO IMPLEMENT : mock hardware_data.json with known functional values for Boaviztapi
+        params = {
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
+            "verbose": "false",
+            "location": "FRA",
+            "measure_power": "true",
+            "lifetime": 5,
+            "fetch_hardware": "false",
+        }
+
+        response = client.get("/query", params=params)
+        assert response.status_code == 200
+
+    def test_read_query_with_measure_power_and_fetch_hardware(self):
+
+        params = {
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
+            "verbose": "false",
+            "location": "FRA",
+            "measure_power": "true",
+            "lifetime": 5,
+            "fetch_hardware": "true",
+        }
+
+        response = client.get("/query", params=params)
+        assert response.status_code == 200
+
+    def test_read_query_with_measure_power_and_fetch_hardware_verbose(self):
+
+        params = {
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
+            "verbose": "true",
+            "location": "FRA",
+            "measure_power": "true",
+            "lifetime": 5,
+            "fetch_hardware": "true",
         }
 
         response = client.get("/query", params=params)
@@ -64,7 +113,9 @@ class ApiTest(TestCase):
         response = client.get("/max_info")
         assert response.status_code == 200
 
-    '''ROUTES DEPENDENT ON DATABASE AND / OR BOAVIZTAPI QUERIES'''
+
+class BoaviztapiTest(TestCase):
+    """ROUTES DEPENDENT ON DATABASE AND / OR BOAVIZTAPI QUERIES"""
 
     def test_read_last_data(self):
         response = client.get("/last_data")
