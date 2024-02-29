@@ -54,7 +54,7 @@ class Disk:
 
     @property
     def vendor(self):
-        self._vendor = self.__check_vendor(self._model)
+        self._vendor = self.__check_vendor(self._model).lower()
         return self._vendor
 
     @staticmethod
