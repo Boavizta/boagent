@@ -60,7 +60,7 @@ def configure_app():
 app = configure_app()
 items = {}
 
-# setup_database()
+setup_database()
 
 
 @app.get("/info", tags=["info"])
