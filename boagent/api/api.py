@@ -25,11 +25,13 @@ from database import create_database, get_session, get_engine, insert_metric, se
 
 HARDWARE_FILE_PATH = settings.hardware_file_path
 POWER_DATA_FILE_PATH = settings.power_file_path
+PUBLIC_PATH = settings.public_path
 ASSETS_PATH = settings.assets_path
 DB_PATH = settings.db_path
 DEFAULT_LIFETIME = settings.default_lifetime
 SECONDS_IN_ONE_YEAR = settings.seconds_in_one_year
 HARDWARE_CLI = settings.hardware_cli
+AZURE_LOCATION = settings.azure_location
 BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint
 CARBON_AWARE_API_ENDPOINT = settings.carbon_aware_api_endpoint
 CARBON_AWARE_API_TOKEN = settings.carbon_aware_api_token
@@ -78,7 +80,7 @@ async def info():
 @app.get("/web", tags=["web"], response_class=HTMLResponse)
 async def web():
     res = ""
-    with open("{}/index.html".format(settings.public_path), 'r') as fd:
+    with open("{}/index.html".format(PUBLIC_PATH), 'r') as fd:
         res = fd.read()
     fd.close()
     return res
@@ -580,7 +582,7 @@ def generate_machine_configuration(hardware_data):
 
 def query_electricity_carbon_intensity(start_date: Optional[datetime] = None,
                                        stop_date: Optional[datetime] = None) -> Dict[str, Any]:
-    url = BOAVIZTAPI_ENDPOINT + f'/v1/usage_router/gwp/current_intensity?location={settings.azure_location}'
+    url = BOAVIZTAPI_ENDPOINT + f'/v1/usage_router/gwp/current_intensity?location={AZURE_LOCATION}'
     start_date = start_date or (datetime.utcnow() - timedelta(minutes=5))
     stop_date = stop_date or datetime.utcnow()
     response = requests.post(url, json={
@@ -608,7 +610,7 @@ def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]
 
 
 def query_forecast_electricity_carbon_intensity(start_date: datetime, stop_date: datetime) -> Dict[str, Any]:
-    url = BOAVIZTAPI_ENDPOINT + f'/v1/usage_router/gwp/forecast_intensity?location={settings.azure_location}'
+    url = BOAVIZTAPI_ENDPOINT + f'/v1/usage_router/gwp/forecast_intensity?location={AZURE_LOCATION}'
     retry = 0
     while retry < 3:
         retry += 1
