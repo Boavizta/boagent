@@ -1,21 +1,18 @@
-from datetime import datetime, timedelta, timezone
-from distutils.log import error
-from typing import Any, Optional
-
-import pytz
-from click import option
-
+import json
 import pandas as pd
 import numpy as np
+
+from typing import Any, Optional
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import Column, DateTime, Integer, Float, insert, select, inspect
 from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.orm import Session, declarative_base, declared_attr
 from config import settings
-
-import json
 from utils import filter_date_range
 
+
 DB_PATH = settings.db_path
+POWER_DATA_FILE_PATH = settings.power_file_path
 
 Base = declarative_base()
 
@@ -188,7 +185,7 @@ def get_most_recent_timestamp(session):
 
 def get_most_recent_data(table_name):
     """ Get a single row from the table which has the most recent timestamp"""
-    session = get_session(settings.db_path)
+    session = get_session(DB_PATH)
     table = metrics[table_name]
     data = session.query(table).order_by(table.timestamp.desc()).first()
     return data
@@ -196,7 +193,7 @@ def get_most_recent_data(table_name):
 
 def get_max(table_name):
     """ Get a single row from the table which has the most recent timestamp"""
-    session = get_session(settings.db_path)
+    session = get_session(DB_PATH)
     table = metrics[table_name]
     data = session.query(table).order_by(table.value.desc()).first()
     return data
@@ -216,7 +213,7 @@ def add_from_scaphandre(session):
 
 
 def scaphandre_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame:
-    with open(settings.power_file_path, 'r') as f:  # if scaphandre is writing in the json -> KABOUM
+    with open(POWER_DATA_FILE_PATH, 'r') as f:  # if scaphandre is writing in the json -> KABOUM
         data = json.loads(f.read())
     lst = []
     for d in data:
