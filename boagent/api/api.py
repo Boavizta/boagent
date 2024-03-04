@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
 from boaviztapi_sdk.model.server_dto import ServerDTO
-from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, \
+from utils import iso8601_or_timestamp_as_timestamp, format_scaphandre_json, format_prometheus_output, format_prometheus_metric, \
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 from database import create_database, get_session, get_engine, insert_metric, select_metric, \
@@ -483,19 +483,19 @@ def format_usage_request(start_time, end_time, host_avg_consumption=None, locati
 
 
 def get_power_data(start_time, end_time):
+    # Get all items of the json list where start_time <= host.timestamp <= end_time
     power_data = {}
-    with open(POWER_DATA_FILE_PATH, 'r') as fd:
-        # Get all items of the json list where start_time <= host.timestamp <= end_time
-        data = json.load(fd)
-        res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
-        power_data['raw_data'] = res
-        power_data['host_avg_consumption'] = compute_average_consumption(res)
-        if end_time - start_time <= 3600:
-            power_data[
-                'warning'] = "The time window is lower than one hour, but the energy consumption estimate is in " \
-                             "Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be " \
-                             "careful with this data. "
-        return power_data
+    formatted_scaphandre_json = format_scaphandre_json(POWER_DATA_FILE_PATH)
+    data = json.loads(formatted_scaphandre_json)
+    res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
+    power_data['raw_data'] = res
+    power_data['host_avg_consumption'] = compute_average_consumption(res)
+    if end_time - start_time <= 3600:
+        power_data[
+            'warning'] = "The time window is lower than one hour, but the energy consumption estimate is in " \
+                         "Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be " \
+                         "careful with this data. "
+    return power_data
 
 
 def get_timeseries_data(start_time, end_time):

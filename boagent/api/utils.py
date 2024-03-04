@@ -2,6 +2,8 @@ from datetime import datetime
 from boaviztapi_sdk import ApiClient, Configuration
 from dateutil import parser
 from config import settings
+from typing import Union
+from os import PathLike
 
 BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint
 
@@ -112,3 +114,9 @@ def filter_date_range(data: list, start_date: datetime, stop_date: datetime) -> 
         if d["timestamp"] < end: upper_index+=1
 
     return data[lower_index : upper_index]
+
+
+def format_scaphandre_json(file: Union[str, PathLike]) -> str:
+    with open(file, 'r') as fd:
+        formatted_scaphandre_json = f"[{fd.read()}]".replace('{"host"', ',{"host"').replace(',{"host"', '{"host"', 1)
+        return formatted_scaphandre_json
