@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
+
 from cpuinfo import get_cpu_info
-from cpuid import *
-import cpuid_native
-import sys
+from cpuid import cpuid, cpu_microarchitecture, cpu_name, cpu_vendor
 
+CpuInfo = list[dict[str, str | tuple | dict[str, str] | dict]]
 
-def get_socket_number_linux(location="/sys/devices/system/node/possible"):
-    if sys.platform != "linux":
-        return "cannot compute socket number for other OS than linux"
+def get_socket_number_linux(location: str = "/sys/devices/system/node/possible") -> int:
     with open(location, 'r') as f:
         data = f.read()
     return int(data.split('-')[-1])+1
 
 
-def is_set(id, reg_idx, bit):
+def is_set(id: int, reg_idx: int, bit: int) -> str:
     regs = cpuid(id)
 
     if (1 << bit) & regs[reg_idx]:
@@ -21,9 +19,9 @@ def is_set(id, reg_idx, bit):
     else:
         return "--"
 
-def get_cpus():
+def get_cpus() -> CpuInfo:
     cpu_info = []
-    for i in range(get_socket_number_linux()):
+    for cpu_socket in range(get_socket_number_linux()):
         cpu_info.append({
             "vendor": cpu_vendor(),
             "name": cpu_name(),
@@ -44,21 +42,3 @@ def get_cpus():
             "cpu_info": get_cpu_info(),
         })
     return cpu_info
-
-if __name__ =="__main__":
-    print("socket number linux from a file : {}".format(get_socket_number_linux()))
-    print("Info from the library cpuid-py:")
-    cpu_info = get_cpus()
-    for toto in [cpu_info[0], get_cpu_info()]:
-        print("\n\n\n")
-        for key,value in toto.items():
-            if(value is dict):
-                for i,j in value.items():
-                    if(j is dict):
-                        for a,b in value.items():
-                            print("{} : {}\n".format(a ,b))
-
-                    print("{} : {}\n".format(i,j))
-
-            else:
-                print("{} : {}\n".format(key,value))
