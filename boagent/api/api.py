@@ -3,9 +3,9 @@ import math
 import os
 import time
 import requests
-import pytz
 import pandas as pd
 
+from pytz import UTC, utc
 from datetime import datetime, timedelta
 from subprocess import run
 from typing import Dict, Any, Tuple, List, Optional
@@ -686,7 +686,7 @@ def parse_date_info(since: str, until: str, forecast: bool = False) -> Tuple[dat
     else:
         ValueError(f'unknown value until={until}')
 
-    return start_date.astimezone(pytz.UTC), end_date.astimezone(pytz.UTC)
+    return start_date.astimezone(UTC), end_date.astimezone(UTC)
 
 
 def upper_round_date_minutes_with_base(date: datetime, base: int) -> datetime:
@@ -741,8 +741,8 @@ def get_cron_info():
         for char in cron:
             if char.isdigit() or char == "*" or char == " " or char == "\t":
                 sched += char
-        info["next"] = croniter(sched, base).get_next(datetime).astimezone(pytz.UTC)
-        info["previous"] = croniter(sched, base).get_prev(datetime).astimezone(pytz.UTC)
+        info["next"] = croniter(sched, base).get_next(datetime).astimezone(UTC)
+        info["previous"] = croniter(sched, base).get_prev(datetime).astimezone(UTC)
         info["job"] = cron.strip()
         crons_info.append(info)
     return crons_info
@@ -765,7 +765,7 @@ def compute_recommendations(since="now", until="24h"):
     df_forecast['timestamp'] = df_forecast['timestamp'].apply(lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ'))
 
     df_carbon_intensity = pd.concat([df_history, df_forecast])
-    df_carbon_intensity['timestamp'] = df_carbon_intensity['timestamp'].apply(pytz.utc.localize)
+    df_carbon_intensity['timestamp'] = df_carbon_intensity['timestamp'].apply(utc.localize)
     df_carbon_intensity = new_highlight_spikes(df_carbon_intensity, "value")
 
     recommendations = []
@@ -814,7 +814,7 @@ def find_preferred_execution_date_in_history(execution_date: datetime,
     bests = df[df['ratio'] == df['ratio'].min()]
 
     for row in bests.itertuples():
-        new_execution_date = pytz.utc.localize(datetime.strptime(str(row.timestamp), '%Y-%m-%d %H:%M:%S'))
+        new_execution_date = utc.localize(datetime.strptime(str(row.timestamp), '%Y-%m-%d %H:%M:%S'))
         if new_execution_date >= execution_date:
             return new_execution_date
 
