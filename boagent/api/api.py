@@ -105,8 +105,8 @@ async def csv(data: str, since: str = "now", until: str = "24h", inwatt: bool = 
     )'''
 
     return Response(
-            status_code=200,
-            content="not implemented yet"
+            status_code=501,
+            content="Converting data to CSV is not implemented yet."
             )
 
 
@@ -128,7 +128,7 @@ async def yearly_embedded():
 
 @app.get("/yearly_operational")
 async def operational_impact_yearly():
-    since = "now"
+    """ since = "now"
     until = "24h"
     start_date, stop_date = parse_date_info(since, until)
     session = get_session(DB_PATH)
@@ -143,21 +143,29 @@ async def operational_impact_yearly():
 
     yearly_operational = (df_power['power_watt'].mean()*df_carbon_intensity["carbon_intensity_g_per_watt_second"].mean())*(3600*24*365) # in gCO2eq
 
-    return round(yearly_operational/1000.0)  # in kgCO2eq
+    return round(yearly_operational/1000.0)  # in kgCO2eq """
+
+    return Response(
+            status_code=501,
+            content="Getting yearly operational impact is not implemented yet."
+            )
 
 
 @app.get('/last_data')
 async def last_data(table_name: str) -> Response:
-    data = get_most_recent_data(table_name)
+    """ data = get_most_recent_data(table_name)
     if data is None:
         return Response(status_code=404)
     else:
-        df = pd.DataFrame([[data.timestamp, data.value]], columns=['timestamp', 'value'])
-        return Response(
-            content=df.to_csv(index=False),
-            media_type="text/csv",
-            status_code=200
-        )
+        df = pd.DataFrame([[data.timestamp, data.value]], columns=['timestamp', 'value'])     
+    return Response(
+    content=df.to_csv(index=False),
+    media_type="text/csv",
+    status_code=200) """
+    return Response(
+            status_code=501,
+            content="Getting last data is not implemented yet."
+            )
 
 
 @app.get("/metrics", tags=["metrics"])
@@ -195,7 +203,7 @@ async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = 
 
 
 @app.get("/last_info")
-async def actual_intensity():
+async def last_info():
     res = {"power": get_most_recent_data("power"), "carbonintensity": get_most_recent_data("carbonintensity"),
            "cpu": get_most_recent_data("cpu"), "ram": get_most_recent_data("ram")}
 
@@ -203,20 +211,20 @@ async def actual_intensity():
 
 
 @app.get("/max_info")
-async def actual_intensity():
+async def max_info():
     res = {"power": get_max("power"), "carbonintensity": get_max("carbonintensity"), "ram": get_max("ram"),
            "cpu": get_max("cpu")}
     return res
 
 
 @app.get("/all_cron")
-async def actual_intensity():
+async def all_cron():
     return get_cron_info()
 
 
 @app.get("/update")
 async def update():
-    response = query_electricity_carbon_intensity()
+    """ response = query_electricity_carbon_intensity()
     info = parse_electricity_carbon_intensity(response)
     session = get_session(DB_PATH)
 
@@ -224,18 +232,23 @@ async def update():
     if info['value'] > 0:
         insert_metric(session=session, metric_name='carbonintensity', timestamp=info['timestamp'], value=info['value'])
     session.commit()
-    session.close()
-    return Response(status_code=200)
+    session.close() """
+    return Response(status_code=501,
+                    content="Update route is not implemented yet.")
 
 
 @app.get("/carbon_intensity_forecast")
 async def carbon_intensity_forecast(since: str = "now", until: str = "24h") -> Response:
-    df = carbon_intensity_forecast_data(since, until)
+    """ df = carbon_intensity_forecast_data(since, until)
     df = new_highlight_spikes(df, "value")
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
-    )
+    ) """
+    return Response(
+            status_code=501,
+            content="Getting carbon intensity forecast is not implemented yet."
+            )
 
 
 def carbon_intensity_forecast_data(since: str, until: str) -> pd.DataFrame:
@@ -250,7 +263,7 @@ def carbon_intensity_forecast_data(since: str, until: str) -> pd.DataFrame:
 
 @app.get("/carbon_intensity")
 async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
-    _, stop_date = parse_date_info(since, until, forecast=True)
+    """   _, stop_date = parse_date_info(since, until, forecast=True)
     start_date, now = parse_date_info(since, until, forecast=False)
 
     session = get_session(DB_PATH)
@@ -270,12 +283,16 @@ async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
-    )
+    ) """
+    return Response(
+            status_code=501,
+            content="Getting carbon intensity is not implemented yet."
+            )
 
 
 @app.get("/init_carbon_intensity")
 async def init_carbon_intensity():
-    engine = get_engine(DB_PATH)
+    """ engine = get_engine(DB_PATH)
     CarbonIntensity.__table__.drop(engine)
     create_database(engine)
 
@@ -289,12 +306,16 @@ async def init_carbon_intensity():
         info = parse_electricity_carbon_intensity(response)
         insert_metric(session, 'carbonintensity', info['timestamp'], info['value'])
         curr_date += timedelta(minutes=5)
-    session.commit()
+    session.commit() """
+    return Response(
+            status_code=501,
+            content="Init Carbon intensity is not implemented yet."
+            )
 
 
 @app.get("/impact")
-async def impact(since: str = "now", until: str = "24h"):
-    start_date, stop_date = parse_date_info(since, until)
+async def impact(since: str = "now", until: str = "24h") -> Response:
+    """ start_date, stop_date = parse_date_info(since, until)
     session = get_session(DB_PATH)
 
     df_power = select_metric(session, 'power', start_date, stop_date)
@@ -328,7 +349,11 @@ async def impact(since: str = "now", until: str = "24h"):
         return Response(
             content=df.to_csv(index=False),
             media_type="text/csv"
-        )
+        ) """
+    return Response(
+            status_code=501,
+            content="Getting impact is not implemented yet."
+            )
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float,
                 fetch_hardware: bool = False):
@@ -523,7 +548,7 @@ def get_hardware_data(fetch_hardware: bool):
     return data
 
 
-def read_hardware_data():
+def read_hardware_data() -> Dict:
     with open(HARDWARE_FILE_PATH, 'r') as fd:
         data = json.load(fd)
     return data
@@ -548,7 +573,7 @@ def query_machine_impact_data(model: dict = None, configuration: dict = None, us
     return server_impact
 
 
-def generate_machine_configuration(hardware_data):
+def generate_machine_configuration(hardware_data) -> Dict[str, Any]:
     config = {
         "cpu": {
             "units": len(hardware_data["cpus"]),
@@ -567,6 +592,7 @@ def generate_machine_configuration(hardware_data):
 
 def query_electricity_carbon_intensity(start_date: Optional[datetime] = None,
                                        stop_date: Optional[datetime] = None) -> Dict[str, Any]:
+    """DEPRECATED BOAVIZTAPI ROUTE"""
     url = BOAVIZTAPI_ENDPOINT + f'/v1/usage_router/gwp/current_intensity?location={AZURE_LOCATION}'
     start_date = start_date or (datetime.utcnow() - timedelta(minutes=5))
     stop_date = stop_date or datetime.utcnow()
@@ -595,6 +621,7 @@ def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]
 
 
 def query_forecast_electricity_carbon_intensity(start_date: datetime, stop_date: datetime) -> Dict[str, Any]:
+    """DEPRECATED BOAVIZTAPI ROUTE"""
     url = BOAVIZTAPI_ENDPOINT + f'/v1/usage_router/gwp/forecast_intensity?location={AZURE_LOCATION}'
     retry = 0
     while retry < 3:

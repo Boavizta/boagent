@@ -138,34 +138,42 @@ class DatabaseTest(TestCase):
         assert response.status_code == 200
 
     def test_read_yearly_operational(self):
+        """ROUTE NOT IMPLEMENTED YET"""
         response = client.get("/yearly_operational")
-        assert response.status_code == 200
+        assert response.status_code == 501
 
     def test_read_last_data(self):
-        response = client.get("/last_data")
-        assert response.status_code == 200
+        """ROUTE NOT IMPLEMENTED YET"""
+
+        params = {"table_name": "cpu"}
+        response = client.get("/last_data", params=params)
+        assert response.status_code == 501
 
     def test_read_update(self):
+        """ROUTE NOT IMPLEMENTED YET"""
         response = client.get("/update")
-        assert response.status_code == 200
+        assert response.status_code == 501
 
     def test_read_carbon_intensity_forecast(self):
+        """ROUTE NOT IMPLEMENTED YET"""
         params = {"since": "now", "until": "24h"}
         response = client.get("/carbon_intensity_forecast", params=params)
-        assert response.status_code == 200
+        assert response.status_code == 501
 
     def test_read_carbon_intensity(self):
+        """ROUTE NOT IMPLEMENTED YET"""
         params = {"since": "now", "until": "24h"}
         response = client.get("/carbon_intensity", params=params)
-        assert response.status_code == 200
+        assert response.status_code == 501
 
     def test_impact(self):
+        """ROUTE NOT IMPLEMENTED YET"""
         response = client.get("/impact")
-        assert response.status_code == 200
+        assert response.status_code == 501
 
     def test_read_csv(self):
         """ROUTE NOT IMPLEMENTED YET"""
         params = {"data": "power"}
 
         response = client.get("/csv", params=params)
-        assert response.status_code == 200
+        assert response.status_code == 501
