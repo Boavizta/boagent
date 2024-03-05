@@ -2,8 +2,9 @@
 
 from cpuinfo import get_cpu_info
 from cpuid import cpuid, cpu_microarchitecture, cpu_name, cpu_vendor
+from typing import TypeAlias
 
-CpuInfo = list[dict[str, str | tuple | dict[str, str] | dict]]
+CpuInfo: TypeAlias = list[dict[str, str | tuple | dict[str, str] | dict]]
 
 def get_socket_number_linux(location: str = "/sys/devices/system/node/possible") -> int:
     with open(location, 'r') as f:
@@ -18,6 +19,7 @@ def is_set(id: int, reg_idx: int, bit: int) -> str:
         return "Yes"
     else:
         return "--"
+
 
 def get_cpus() -> CpuInfo:
     cpu_info = []

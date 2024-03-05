@@ -2,10 +2,10 @@ from datetime import datetime
 from boaviztapi_sdk import ApiClient, Configuration
 from dateutil import parser
 from config import settings
-from typing import Union
 from os import PathLike
 
 BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint
+
 
 def sort_ram(items: list):
     hash_map = {}
@@ -26,6 +26,7 @@ def sort_ram(items: list):
             }
     return [v for k, v in hash_map.items()]
 
+
 def sort_disks(items: list):
     hash_map = {}
     for r in items:
@@ -40,6 +41,7 @@ def sort_disks(items: list):
             }
     return [v for k, v in hash_map.items()]
 
+
 def get_boavizta_api_client():
     config = Configuration(
         host=BOAVIZTAPI_ENDPOINT,
@@ -48,6 +50,7 @@ def get_boavizta_api_client():
         configuration=config, pool_threads=2
     )
     return client
+
 
 def iso8601_or_timestamp_as_timestamp(iso_time: str):
     '''
@@ -77,6 +80,7 @@ def iso8601_or_timestamp_as_timestamp(iso_time: str):
             else:
                 return float(iso_time)
 
+
 def format_prometheus_output(res):
     response = ""
     for k, v in res.items():
@@ -94,6 +98,7 @@ def format_prometheus_output(res):
 
     return response
 
+
 def format_prometheus_metric(metric_name, metric_description, metric_type, metric_value):
     response = """# HELP {} {}
 # TYPE {} {}
@@ -101,22 +106,25 @@ def format_prometheus_metric(metric_name, metric_description, metric_type, metri
 """.format(metric_name, metric_description, metric_name, metric_type, metric_name, metric_value)
     return response
 
+
 def filter_date_range(data: list, start_date: datetime, stop_date: datetime) -> list:
 
     lower_index = 0
     upper_index = 0
 
     start = datetime.timestamp(start_date)
-    end   = datetime.timestamp(stop_date)
+    end = datetime.timestamp(stop_date)
 
     for d in data:
-        if d["timestamp"] < start: lower_index+=1
-        if d["timestamp"] < end: upper_index+=1
+        if d["timestamp"] < start:
+            lower_index += 1
+        if d["timestamp"] < end:
+            upper_index += 1
 
-    return data[lower_index : upper_index]
+    return data[lower_index: upper_index]
 
 
-def format_scaphandre_json(file: Union[str, PathLike]) -> str:
+def format_scaphandre_json(file: str | PathLike) -> str:
     with open(file, 'r') as fd:
         formatted_scaphandre_json = f"[{fd.read()}]".replace('{"host"', ',{"host"').replace(',{"host"', '{"host"', 1)
         return formatted_scaphandre_json

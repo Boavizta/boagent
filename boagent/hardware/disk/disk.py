@@ -9,10 +9,10 @@ class DiskException(Exception):
 
 @dataclass
 class Partition:
-    major: int = None
-    minor: int = None
-    blocks: int = None
-    name: str = None
+    major: int | None = None
+    minor: int | None = None
+    blocks: int | None = None
+    name: str | None = None
 
     @classmethod
     def from_proc(cls, data=None):
@@ -29,16 +29,16 @@ class Partition:
 
 class Disk:
     def __init__(self, sysfs_device_path):
-        self._type = None
-        self._size = None
-        self._blocks = None
-        self._model = None
-        self._vendor = None
-        self._major_minor = None
-        self._partitions = []
-        self._sysfs_path = sysfs_device_path
-        self._name = os.path.basename(sysfs_device_path)
-        self._looked_up = False
+        self._type: str = "type"
+        self._size: int = 0
+        self._blocks: int | str = 0
+        self._model: str = "model"
+        self._vendor: str = "vendor"
+        self._major_minor: str = "major:minor"
+        self._partitions: list = []
+        self._sysfs_path: str = sysfs_device_path
+        self._name: str = os.path.basename(sysfs_device_path)
+        self._looked_up: bool = False
 
     @property
     def type(self):
@@ -58,16 +58,16 @@ class Disk:
         return self._vendor
 
     @staticmethod
-    def __try_to_read_first_line(item_path, default_value):
-        retour = default_value
+    def __try_to_read_first_line(item_path: str, default_value: str) -> str:
+        first_line = default_value
         if os.path.exists(item_path):
             with open(item_path, 'r') as f:
-                retour = f.readline().strip()
-        return retour
+                first_line = f.readline().strip()
+        return first_line
 
     @staticmethod
     # If one of the strings in /sys/block/***/device/model has numbers, it is not a valid vendor
-    def __check_vendor(model_string: str | None) -> str:
+    def __check_vendor(model_string: str) -> str:
         split_model = model_string.split(' ')
         model_first_str = split_model[0]
         model_second_str = split_model[1]
@@ -79,25 +79,22 @@ class Disk:
             return model_first_str
 
     @staticmethod
-    def __safe_int(maybeint):
-        if maybeint is not None:
-            try:
-                return int(maybeint)
-            except ValueError:
-                # on retournera null
-                pass
-        return None
+    def __safe_int(maybeint: str) -> int | str:
+        try:
+            return int(maybeint)
+        except ValueError:
+            return "Unknown"
 
     @staticmethod
     def __rotational_info_to_disk_type(info):
-        retour = "Unknown"
+        disk_type = "Unknown"
         iinfo = Disk.__safe_int(info)
         if iinfo is not None:
             if iinfo == 0:
-                retour = "ssd"
+                disk_type = "ssd"
             elif iinfo == 1:
-                retour = "hdd"
-        return retour
+                disk_type = "hdd"
+        return disk_type
 
     def _populate_partitions(self):
         """
@@ -118,7 +115,6 @@ class Disk:
             index += 1
             part_info_path = f'{part_info_path_base}{index}'
 
-
     def lookup(self):
         """
         Retrieve disk information from /sys/block/xxx where xxx is device logical name.
@@ -133,11 +129,11 @@ class Disk:
             return
 
         self._model = Disk.__try_to_read_first_line(f'{self._sysfs_path}/device/model', 'Unknown model')
-        rotational = Disk.__try_to_read_first_line(f'{self._sysfs_path}/queue/rotational', None)
+        rotational = Disk.__try_to_read_first_line(f'{self._sysfs_path}/queue/rotational', 'Unknown')
         self._type = Disk.__rotational_info_to_disk_type(rotational)
-        self._major_minor = Disk.__try_to_read_first_line(f'{self._sysfs_path}/dev', None)
-        sectors_count = Disk.__safe_int(Disk.__try_to_read_first_line(f'{self._sysfs_path}/size', None))
-        if sectors_count is not None:
+        self._major_minor = Disk.__try_to_read_first_line(f'{self._sysfs_path}/dev', 'Unknown')
+        sectors_count = Disk.__safe_int(Disk.__try_to_read_first_line(f'{self._sysfs_path}/size', 'Unknown'))
+        if type(sectors_count) is int:
             # Linux uses 512 bytes sectors
             self._size = sectors_count // (2 * 1024 * 1024)
             self._blocks = sectors_count
