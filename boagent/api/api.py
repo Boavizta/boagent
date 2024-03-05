@@ -3,9 +3,9 @@ import math
 import os
 import time
 import requests
-import pytz
 import pandas as pd
 
+from pytz import UTC, utc
 from datetime import datetime, timedelta
 from subprocess import run
 from typing import Dict, Any, Tuple, List, Optional
@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
 from boaviztapi_sdk.model.server_dto import ServerDTO
-from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, \
+from utils import iso8601_or_timestamp_as_timestamp, format_scaphandre_json, format_prometheus_output, format_prometheus_metric, \
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 from database import create_database, get_session, get_engine, insert_metric, select_metric, \
@@ -483,34 +483,19 @@ def format_usage_request(start_time, end_time, host_avg_consumption=None, locati
 
 
 def get_power_data(start_time, end_time):
+    # Get all items of the json list where start_time <= host.timestamp <= end_time
     power_data = {}
-    with open(POWER_DATA_FILE_PATH, 'r') as fd:
-        # Get all items of the json list where start_time <= host.timestamp <= end_time
-        data = json.load(fd)
-        res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
-        power_data['raw_data'] = res
-        power_data['host_avg_consumption'] = compute_average_consumption(res)
-        if end_time - start_time <= 3600:
-            power_data[
-                'warning'] = "The time window is lower than one hour, but the energy consumption estimate is in " \
-                             "Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be " \
-                             "careful with this data. "
-        return power_data
-
-
-def get_timeseries_data(start_time, end_time):
-    with open(POWER_DATA_FILE_PATH, 'r') as fd:
-        # Get all items of the json list where start_time <= host.timestamp <= end_time
-        data = json.load(fd)
-        res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
-        power_data['raw_data'] = res
-        power_data['host_avg_consumption'] = compute_average_consumption(res)
-        if end_time - start_time <= 3600:
-            power_data[
-                'warning'] = "The time window is lower than one hour, but the energy consumption estimate is in " \
-                             "Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be " \
-                             "careful with this data. "
-        return power_data
+    formatted_scaphandre_json = format_scaphandre_json(POWER_DATA_FILE_PATH)
+    data = json.loads(formatted_scaphandre_json)
+    res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
+    power_data['raw_data'] = res
+    power_data['host_avg_consumption'] = compute_average_consumption(res)
+    if end_time - start_time <= 3600:
+        power_data[
+            'warning'] = "The time window is lower than one hour, but the energy consumption estimate is in " \
+                         "Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be " \
+                         "careful with this data. "
+    return power_data
 
 
 def compute_average_consumption(power_data):
@@ -686,7 +671,7 @@ def parse_date_info(since: str, until: str, forecast: bool = False) -> Tuple[dat
     else:
         ValueError(f'unknown value until={until}')
 
-    return start_date.astimezone(pytz.UTC), end_date.astimezone(pytz.UTC)
+    return start_date.astimezone(UTC), end_date.astimezone(UTC)
 
 
 def upper_round_date_minutes_with_base(date: datetime, base: int) -> datetime:
@@ -741,8 +726,8 @@ def get_cron_info():
         for char in cron:
             if char.isdigit() or char == "*" or char == " " or char == "\t":
                 sched += char
-        info["next"] = croniter(sched, base).get_next(datetime).astimezone(pytz.UTC)
-        info["previous"] = croniter(sched, base).get_prev(datetime).astimezone(pytz.UTC)
+        info["next"] = croniter(sched, base).get_next(datetime).astimezone(UTC)
+        info["previous"] = croniter(sched, base).get_prev(datetime).astimezone(UTC)
         info["job"] = cron.strip()
         crons_info.append(info)
     return crons_info
@@ -765,7 +750,7 @@ def compute_recommendations(since="now", until="24h"):
     df_forecast['timestamp'] = df_forecast['timestamp'].apply(lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ'))
 
     df_carbon_intensity = pd.concat([df_history, df_forecast])
-    df_carbon_intensity['timestamp'] = df_carbon_intensity['timestamp'].apply(pytz.utc.localize)
+    df_carbon_intensity['timestamp'] = df_carbon_intensity['timestamp'].apply(utc.localize)
     df_carbon_intensity = new_highlight_spikes(df_carbon_intensity, "value")
 
     recommendations = []
@@ -814,7 +799,7 @@ def find_preferred_execution_date_in_history(execution_date: datetime,
     bests = df[df['ratio'] == df['ratio'].min()]
 
     for row in bests.itertuples():
-        new_execution_date = pytz.utc.localize(datetime.strptime(str(row.timestamp), '%Y-%m-%d %H:%M:%S'))
+        new_execution_date = utc.localize(datetime.strptime(str(row.timestamp), '%Y-%m-%d %H:%M:%S'))
         if new_execution_date >= execution_date:
             return new_execution_date
 
