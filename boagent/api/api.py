@@ -498,21 +498,6 @@ def get_power_data(start_time, end_time):
     return power_data
 
 
-def get_timeseries_data(start_time, end_time):
-    with open(POWER_DATA_FILE_PATH, 'r') as fd:
-        # Get all items of the json list where start_time <= host.timestamp <= end_time
-        data = json.load(fd)
-        res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
-        power_data['raw_data'] = res
-        power_data['host_avg_consumption'] = compute_average_consumption(res)
-        if end_time - start_time <= 3600:
-            power_data[
-                'warning'] = "The time window is lower than one hour, but the energy consumption estimate is in " \
-                             "Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be " \
-                             "careful with this data. "
-        return power_data
-
-
 def compute_average_consumption(power_data):
     # Host energy consumption
     total_host = 0.0
