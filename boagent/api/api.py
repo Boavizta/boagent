@@ -383,7 +383,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             res["emissions_calculation_data"]["energy_consumption_warning"] = power_data["warning"]
 
     boaviztapi_data = query_machine_impact_data(
-        model=None,
+        model={},
         configuration=generate_machine_configuration(hardware_data),
         usage=format_usage_request(start_time, end_time, host_avg_consumption, location)
     )
@@ -409,7 +409,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             "type": "gauge",
             "unit": "MJ",
             "long_unit": "Mega Joules"
-        }       
+        }
         res["start_time"] = {
             "value": start_time,
             "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
@@ -558,7 +558,9 @@ def build_hardware_data():
     p = run([HARDWARE_CLI, "--output-file", HARDWARE_FILE_PATH])
 
 
-def query_machine_impact_data(model: dict = None, configuration: dict = None, usage: dict = None):
+def query_machine_impact_data(model: dict[str, str],
+                              configuration: dict[str, dict[str, int]],
+                              usage: dict[str, Any]) -> dict:
     server_api = ServerApi(get_boavizta_api_client())
 
     server_impact = None
