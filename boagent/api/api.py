@@ -2,45 +2,58 @@ import json
 import math
 import os
 import time
+import requests
+import pytz
+import pandas as pd
+
 from datetime import datetime, timedelta
 from subprocess import run
 from typing import Dict, Any, Tuple, List, Optional
-
-import pytz
 from croniter import croniter
-
-import pandas as pd
-import requests
 from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
 from boaviztapi_sdk.model.server_dto import ServerDTO
-
 from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_output, format_prometheus_metric, \
     get_boavizta_api_client, sort_ram, sort_disks
 from config import settings
 from database import create_database, get_session, get_engine, insert_metric, select_metric, \
-    CarbonIntensity, add_from_scaphandre, get_most_recent_data, get_max, new_highlight_spikes
+    CarbonIntensity, add_from_scaphandre, get_most_recent_data, get_max, new_highlight_spikes, \
+    setup_database
+
+
+HARDWARE_FILE_PATH = settings.hardware_file_path
+POWER_DATA_FILE_PATH = settings.power_file_path
+PUBLIC_PATH = settings.public_path
+ASSETS_PATH = settings.assets_path
+DB_PATH = settings.db_path
+DEFAULT_LIFETIME = settings.default_lifetime
+SECONDS_IN_ONE_YEAR = settings.seconds_in_one_year
+HARDWARE_CLI = settings.hardware_cli
+AZURE_LOCATION = settings.azure_location
+BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint
+CARBON_AWARE_API_ENDPOINT = settings.carbon_aware_api_endpoint
+CARBON_AWARE_API_TOKEN = settings.carbon_aware_api_token
 
 
 def configure_static(app):
-    app.mount("/assets", StaticFiles(directory=settings.assets_path), name="assets")
+    app.mount("/assets", StaticFiles(directory=ASSETS_PATH), name="assets")
 
 
 def configure_app():
     app = FastAPI(
         title=settings.PROJECT_NAME,
         version=settings.PROJECT_VERSION,
-        description = settings.PROJECT_DESCRIPTION,
-        contact = {
+        description=settings.PROJECT_DESCRIPTION,
+        contact={
             "name": "Boavizta Members",
             "url": "https://boavizta.org/en"
         },
-        license_info = {
+        license_info={
             "name": "Apache-2.0"
         },
-        openapi_tags = settings.TAGS_METADATA
+        openapi_tags=settings.TAGS_METADATA
     )
     configure_static(app)
     return app
@@ -49,25 +62,25 @@ def configure_app():
 app = configure_app()
 items = {}
 
-create_database(get_engine(db_path=settings.db_path))
+setup_database()
 
 
 @app.get("/info", tags=["info"])
 async def info():
     return {
-        "seconds_in_one_year": settings.seconds_in_one_year,
-        "default_lifetime": settings.default_lifetime,
-        "hardware_file_path": settings.hardware_file_path,
-        "power_file_path": settings.power_file_path,
-        "hardware_cli": settings.hardware_cli,
-        "boaviztapi_endpoint": settings.boaviztapi_endpoint
+        "seconds_in_one_year": SECONDS_IN_ONE_YEAR,
+        "default_lifetime": DEFAULT_LIFETIME,
+        "hardware_file_path": HARDWARE_FILE_PATH,
+        "power_file_path": POWER_DATA_FILE_PATH,
+        "hardware_cli": HARDWARE_CLI,
+        "boaviztapi_endpoint": BOAVIZTAPI_ENDPOINT
     }
 
 
 @app.get("/web", tags=["web"], response_class=HTMLResponse)
 async def web():
     res = ""
-    with open("{}/index.html".format(settings.public_path), 'r') as fd:
+    with open("{}/index.html".format(PUBLIC_PATH), 'r') as fd:
         res = fd.read()
     fd.close()
     return res
@@ -77,7 +90,8 @@ async def web():
 async def csv(data: str, since: str = "now", until: str = "24h", inwatt: bool = True) -> Response:
     start_date, stop_date = parse_date_info(since, until)
 
-    session = get_session(settings.db_path)
+
+    '''session = get_session(DB_PATH)
     df = select_metric(session, data, start_date, stop_date)
     df['timestamp'] = df['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
     session.close()
@@ -88,7 +102,12 @@ async def csv(data: str, since: str = "now", until: str = "24h", inwatt: bool = 
     return Response(
         content=df.to_csv(index=False),
         media_type="text/csv"
-    )
+    )'''
+
+    return Response(
+            status_code=200,
+            content="not implemented yet"
+            )
 
 
 @app.get("/yearly_embedded")
@@ -99,19 +118,24 @@ async def yearly_embedded():
         configuration=generate_machine_configuration(hardware_data),
         usage={}
     )
-
-    return boaviztapi_data["impacts"]["gwp"]["manufacture"] / settings.default_lifetime
+    if "manufacturer" in boaviztapi_data:
+        return boaviztapi_data["impacts"]["gwp"]["manufacturer"] / DEFAULT_LIFETIME
+    else:
+        return Response(
+                status_code=200,
+                content="SSD/HDD manufacturer not recognized by BoaviztAPI yet."
+                )
 
 @app.get("/yearly_operational")
 async def operational_impact_yearly():
     since = "now"
     until = "24h"
     start_date, stop_date = parse_date_info(since, until)
-    session = get_session(settings.db_path)
+    session = get_session(DB_PATH)
 
     df_power = select_metric(session, 'power', start_date, stop_date)
     df_power['power_watt'] = df_power['value'] / 1000
-    #df_power = df_power.drop(columns=['value'])
+    # df_power = df_power.drop(columns=['value'])
     df_power = df_power.set_index('timestamp')
 
     df_carbon_intensity = select_metric(session, 'carbonintensity', start_date, stop_date)
@@ -119,7 +143,7 @@ async def operational_impact_yearly():
 
     yearly_operational = (df_power['power_watt'].mean()*df_carbon_intensity["carbon_intensity_g_per_watt_second"].mean())*(3600*24*365) # in gCO2eq
 
-    return round(yearly_operational/1000.0) # in kgCO2eq
+    return round(yearly_operational/1000.0)  # in kgCO2eq
 
 
 @app.get('/last_data')
@@ -138,7 +162,7 @@ async def last_data(table_name: str) -> Response:
 
 @app.get("/metrics", tags=["metrics"])
 async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, output: str = "json",
-                  location: str = None, measure_power: bool = True, lifetime: float = settings.default_lifetime,
+                  location: str = None, measure_power: bool = True, lifetime: float = DEFAULT_LIFETIME,
                   fetch_hardware: bool = False):
     return Response(
         content=format_prometheus_output(
@@ -153,7 +177,7 @@ async def metrics(start_time: str = "0.0", end_time: str = "0.0", verbose: bool 
 
 @app.get("/query", tags=["query"])
 async def query(start_time: str = "0.0", end_time: str = "0.0", verbose: bool = False, location: str = None,
-                measure_power: bool = True, lifetime: float = settings.default_lifetime, fetch_hardware: bool = False):
+                measure_power: bool = True, lifetime: float = DEFAULT_LIFETIME, fetch_hardware: bool = False):
     """
     start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
     end_time: End time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
@@ -194,7 +218,7 @@ async def actual_intensity():
 async def update():
     response = query_electricity_carbon_intensity()
     info = parse_electricity_carbon_intensity(response)
-    session = get_session(settings.db_path)
+    session = get_session(DB_PATH)
 
     add_from_scaphandre(session)  # lots lot insert_metric called here
     if info['value'] > 0:
@@ -229,7 +253,7 @@ async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
     _, stop_date = parse_date_info(since, until, forecast=True)
     start_date, now = parse_date_info(since, until, forecast=False)
 
-    session = get_session(settings.db_path)
+    session = get_session(DB_PATH)
     df_history = select_metric(session, 'carbonintensity', start_date, now)
 
     now = upper_round_date_minutes_with_base(now, base=5)
@@ -251,11 +275,11 @@ async def carbon_intensity(since: str = "now", until: str = "24h") -> Response:
 
 @app.get("/init_carbon_intensity")
 async def init_carbon_intensity():
-    engine = get_engine(settings.db_path)
+    engine = get_engine(DB_PATH)
     CarbonIntensity.__table__.drop(engine)
     create_database(engine)
 
-    session = get_session(settings.db_path)
+    session = get_session(DB_PATH)
     now = datetime.utcnow()
     curr_date = now - timedelta(hours=24)
 
@@ -271,7 +295,7 @@ async def init_carbon_intensity():
 @app.get("/impact")
 async def impact(since: str = "now", until: str = "24h"):
     start_date, stop_date = parse_date_info(since, until)
-    session = get_session(settings.db_path)
+    session = get_session(DB_PATH)
 
     df_power = select_metric(session, 'power', start_date, stop_date)
     df_power['power_watt'] = df_power['value'] / 1000
@@ -289,7 +313,6 @@ async def impact(since: str = "now", until: str = "24h"):
     df = df_power.merge(df_carbon_intensity, on='timestamp')
     df['operational'] = df['power_watt'] * df['carbon_intensity_g_per_watt_second']
 
-
     hardware_data = get_hardware_data(False)
     boaviztapi_data = query_machine_impact_data(
         model=None,
@@ -297,34 +320,37 @@ async def impact(since: str = "now", until: str = "24h"):
         usage={}
     )
 
-    yearly_embedded_emissions = boaviztapi_data["impacts"]["gwp"]["manufacture"] / settings.default_lifetime
+    if "manufacturer" in boaviztapi_data:
+        yearly_embedded_emissions = boaviztapi_data["impacts"]["gwp"]["manufacturer"] / DEFAULT_LIFETIME
 
-    df['embedded'] = yearly_embedded_emissions  / (3.6*24*365) # from kgCO2eq/year to gCO2eq/s
-    df = df.drop(columns=['power_watt', 'carbon_intensity_g_per_watt_second']).reset_index()
-    return Response(
-        content=df.to_csv(index=False),
-        media_type="text/csv"
-    )
+        df['embedded'] = yearly_embedded_emissions  / (3.6*24*365) # from kgCO2eq/year to gCO2eq/s
+        df = df.drop(columns=['power_watt', 'carbon_intensity_g_per_watt_second']).reset_index()
+        return Response(
+            content=df.to_csv(index=False),
+            media_type="text/csv"
+        )
 
 def get_metrics(start_time: float, end_time: float, verbose: bool, location: str, measure_power: bool, lifetime: float,
                 fetch_hardware: bool = False):
+
     now: float = time.time()
     if start_time and end_time:
-        ratio = (end_time - start_time) / (lifetime * settings.seconds_in_one_year)
+        ratio = (end_time - start_time) / (lifetime * SECONDS_IN_ONE_YEAR)
     else:
         ratio = 1.0
     if start_time == 0.0:
         start_time = now - 3600
     if end_time == 0.0:
         end_time = now
-    if end_time - start_time >= lifetime * settings.seconds_in_one_year:
-        lifetime = (end_time - start_time) / float(settings.seconds_in_one_year)
+    if end_time - start_time >= lifetime * SECONDS_IN_ONE_YEAR:
+        lifetime = (end_time - start_time) / float(SECONDS_IN_ONE_YEAR)
 
     hardware_data = get_hardware_data(fetch_hardware)
 
     res = {"emissions_calculation_data": {}}
 
     host_avg_consumption = None
+
     if measure_power:
         power_data = get_power_data(start_time, end_time)
         host_avg_consumption = power_data["host_avg_consumption"]
@@ -358,77 +384,79 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
             "type": "gauge",
             "unit": "MJ",
             "long_unit": "Mega Joules"
+        }       
+        res["start_time"] = {
+            "value": start_time,
+            "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
+            "type": "counter",
+            "unit": "s",
+            "long_unit": "seconds"
+        }
+        res["end_time"] = {
+            "value": end_time,
+            "description": "End time for the evaluation, in timestamp format (seconds since 1970)",
+            "type": "counter",
+            "unit": "s",
+            "long_unit": "seconds"
         }
 
-    res["calculated_emissions"] = {
-        "value": boaviztapi_data["impacts"]["gwp"]["manufacture"] * ratio + boaviztapi_data["impacts"]["gwp"]["use"],
-        "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between "
-                       "start_time and end_time",
-        "type": "gauge",
-        "unit": "kg CO2eq",
-        "long_unit": "kilograms CO2 equivalent"
-    }
+        if "manufacturer" in boaviztapi_data:
+            res["calculated_emissions"] = {
+                "value": boaviztapi_data["impacts"]["gwp"]["manufacturer"] * ratio + boaviztapi_data["impacts"]["gwp"]["use"],
+                "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between "
+                               "start_time and end_time",
+                "type": "gauge",
+                "unit": "kg CO2eq",
+                "long_unit": "kilograms CO2 equivalent"
+            }
+            res["embedded_emissions"] = {
+                "value": boaviztapi_data["impacts"]["gwp"]["manufacturer"] * ratio,
+                "description": "Embedded carbon emissions (manufacturing phase)",
+                "type": "gauge",
+                "unit": "kg CO2eq",
+                "long_unit": "kilograms CO2 equivalent"
+            }
+            res["embedded_abiotic_resources_depletion"] = {
+                "value": boaviztapi_data["impacts"]["adp"]["manufacturer"] * ratio,
+                "description": "Embedded abiotic ressources consumed (manufacturing phase)",
+                "type": "gauge",
+                "unit": "kg Sbeq",
+                "long_unit": "kilograms ADP equivalent"
+            }
+            res["embedded_primary_energy"] = {
+                "value": boaviztapi_data["impacts"]["pe"]["manufacturer"] * ratio,
+                "description": "Embedded primary energy consumed (manufacturing phase)",
+                "type": "gauge",
+                "unit": "MJ",
+                "long_unit": "Mega Joules"
+            }
 
-    res["start_time"] = {
-        "value": start_time,
-        "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
-        "type": "counter",
-        "unit": "s",
-        "long_unit": "seconds"
-    }
-    res["end_time"] = {
-        "value": end_time,
-        "description": "End time for the evaluation, in timestamp format (seconds since 1970)",
-        "type": "counter",
-        "unit": "s",
-        "long_unit": "seconds"
-    }
-    res["embedded_emissions"] = {
-        "value": boaviztapi_data["impacts"]["gwp"]["manufacture"] * ratio,
-        "description": "Embedded carbon emissions (manufacturing phase)",
-        "type": "gauge",
-        "unit": "kg CO2eq",
-        "long_unit": "kilograms CO2 equivalent"
-    }
-    res["embedded_abiotic_resources_depletion"] = {
-        "value": boaviztapi_data["impacts"]["adp"]["manufacture"] * ratio,
-        "description": "Embedded abiotic ressources consumed (manufacturing phase)",
-        "type": "gauge",
-        "unit": "kg Sbeq",
-        "long_unit": "kilograms ADP equivalent"
-    }
-    res["embedded_primary_energy"] = {
-        "value": boaviztapi_data["impacts"]["pe"]["manufacture"] * ratio,
-        "description": "Embedded primary energy consumed (manufacturing phase)",
-        "type": "gauge",
-        "unit": "MJ",
-        "long_unit": "Mega Joules"
-    }
-    res["emissions_calculation_data"] = {
-        "average_power_measured": {
-            "value": host_avg_consumption,
-            "description": "Average power measured from start_time to end_time",
-            "type": "gauge",
-            "unit": "W",
-            "long_unit": "Watts"
-        },
-        "electricity_carbon_intensity": {
-            "value": boaviztapi_data["verbose"]["USAGE"]["gwp_factor"]["value"],
-            "description": "Carbon intensity of the electricity mix. Mix considered : {}".format(location),
-            "type": "gauge",
-            "unit": "kg CO2eq / kWh",
-            "long_unit": "Kilograms CO2 equivalent per KiloWattHour"
-        }
-    }
-    usage_location_status = boaviztapi_data["verbose"]["USAGE"]["usage_location"]["status"]
-    if usage_location_status == "MODIFY":
-        res["emissions_calculation_data"]["electricity_carbon_intensity"][
-            "description"] += "WARNING : The provided trigram doesn't match any existing country. So this result is " \
-                              "based on average European electricity mix. Be careful with this data. "
-    elif usage_location_status == "SET":
-        res["emissions_calculation_data"]["electricity_carbon_intensity"][
-            "description"] += "WARNING : As no information was provided about your location, this result is based on " \
-                              "average European electricity mix. Be careful with this data. "
+        if "USAGE" in boaviztapi_data:
+            res["emissions_calculation_data"] = {
+                "average_power_measured": {
+                    "value": host_avg_consumption,
+                    "description": "Average power measured from start_time to end_time",
+                    "type": "gauge",
+                    "unit": "W",
+                    "long_unit": "Watts"
+                },
+                "electricity_carbon_intensity": {
+                    "value": boaviztapi_data["verbose"]["USAGE"]["gwp_factor"]["value"],
+                    "description": "Carbon intensity of the electricity mix. Mix considered : {}".format(location),
+                    "type": "gauge",
+                    "unit": "kg CO2eq / kWh",
+                    "long_unit": "Kilograms CO2 equivalent per KiloWattHour"
+                }
+            }
+            usage_location_status = boaviztapi_data["verbose"]["USAGE"]["usage_location"]["status"]
+            if usage_location_status == "MODIFY":
+                res["emissions_calculation_data"]["electricity_carbon_intensity"][
+                    "description"] += "WARNING : The provided trigram doesn't match any existing country. So this result is " \
+                                      "based on average European electricity mix. Be careful with this data. "
+            elif usage_location_status == "SET":
+                res["emissions_calculation_data"]["electricity_carbon_intensity"][
+                    "description"] += "WARNING : As no information was provided about your location, this result is based on " \
+                                      "average European electricity mix. Be careful with this data. "
 
     if verbose:
         res["emissions_calculation_data"]["raw_data"] = {
@@ -456,7 +484,7 @@ def format_usage_request(start_time, end_time, host_avg_consumption=None, locati
 
 def get_power_data(start_time, end_time):
     power_data = {}
-    with open(settings.power_file_path, 'r') as fd:
+    with open(POWER_DATA_FILE_PATH, 'r') as fd:
         # Get all items of the json list where start_time <= host.timestamp <= end_time
         data = json.load(fd)
         res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
@@ -469,8 +497,9 @@ def get_power_data(start_time, end_time):
                              "careful with this data. "
         return power_data
 
+
 def get_timeseries_data(start_time, end_time):
-    with open(settings.power_file_path, 'r') as fd:
+    with open(POWER_DATA_FILE_PATH, 'r') as fd:
         # Get all items of the json list where start_time <= host.timestamp <= end_time
         data = json.load(fd)
         res = [e for e in data if start_time <= float(e['host']['timestamp']) <= end_time]
@@ -510,13 +539,13 @@ def get_hardware_data(fetch_hardware: bool):
 
 
 def read_hardware_data():
-    with open(settings.hardware_file_path, 'r') as fd:
+    with open(HARDWARE_FILE_PATH, 'r') as fd:
         data = json.load(fd)
     return data
 
 
 def build_hardware_data():
-    p = run([settings.hardware_cli, "--output-file", settings.hardware_file_path])
+    p = run([HARDWARE_CLI, "--output-file", HARDWARE_FILE_PATH])
 
 
 def query_machine_impact_data(model: dict = None, configuration: dict = None, usage: dict = None):
@@ -540,7 +569,7 @@ def generate_machine_configuration(hardware_data):
             "units": len(hardware_data["cpus"]),
             "core_units": hardware_data['cpus'][0]["core_units"],
             "family": hardware_data['cpus'][0]['family']
-        },
+            },
         "ram": sort_ram(hardware_data["rams"]),
         "disk": sort_disks(hardware_data["disks"]),
         "motherboard": hardware_data["mother_board"] if "mother_board" in hardware_data else {"units": 1},
@@ -553,13 +582,13 @@ def generate_machine_configuration(hardware_data):
 
 def query_electricity_carbon_intensity(start_date: Optional[datetime] = None,
                                        stop_date: Optional[datetime] = None) -> Dict[str, Any]:
-    url = settings.boaviztapi_endpoint + f'/v1/usage_router/gwp/current_intensity?location={settings.azure_location}'
+    url = BOAVIZTAPI_ENDPOINT + f'/v1/usage_router/gwp/current_intensity?location={AZURE_LOCATION}'
     start_date = start_date or (datetime.utcnow() - timedelta(minutes=5))
     stop_date = stop_date or datetime.utcnow()
     response = requests.post(url, json={
         "source": "carbon_aware_api",
-        "url": settings.carbon_aware_api_endpoint,
-        "token": settings.carbon_aware_api_token,
+        "url": CARBON_AWARE_API_ENDPOINT,
+        "token": CARBON_AWARE_API_TOKEN,
         "start_date": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "stop_date": stop_date.strftime("%Y-%m-%dT%H:%M:%SZ")
     })
@@ -581,15 +610,15 @@ def parse_electricity_carbon_intensity(carbon_aware_api_response: Dict[str, Any]
 
 
 def query_forecast_electricity_carbon_intensity(start_date: datetime, stop_date: datetime) -> Dict[str, Any]:
-    url = settings.boaviztapi_endpoint + f'/v1/usage_router/gwp/forecast_intensity?location={settings.azure_location}'
+    url = BOAVIZTAPI_ENDPOINT + f'/v1/usage_router/gwp/forecast_intensity?location={AZURE_LOCATION}'
     retry = 0
     while retry < 3:
         retry += 1
         try:
             response = requests.post(url, json={
                 "source": "carbon_aware_api",
-                "url": settings.carbon_aware_api_endpoint,
-                "token": settings.carbon_aware_api_token,
+                "url": CARBON_AWARE_API_ENDPOINT,
+                "token": CARBON_AWARE_API_TOKEN,
                 "start_date": start_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "stop_date": stop_date.strftime("%Y-%m-%dT%H:%M:%SZ")
             })
@@ -727,7 +756,7 @@ def event_is_in_bad_time(event, df: pd.DataFrame):
 
 def compute_recommendations(since="now", until="24h"):
     start_date, stop_date = parse_date_info(since, until)
-    session = get_session(settings.db_path)
+    session = get_session(DB_PATH)
     df_power = select_metric(session, 'power', start_date, stop_date)
     # df_power['timestamp'] = pd.to_datetime(df_power['timestamp'])
     df_history = select_metric(session, 'carbonintensity', start_date, stop_date)
@@ -793,5 +822,5 @@ def find_preferred_execution_date_in_history(execution_date: datetime,
 
 
 @app.get("/recommendation")
-async def info():
+async def recommendation():
     return compute_recommendations()

@@ -33,7 +33,7 @@ def format_disks(disks):
     for disk in disks:
         res.append({
             "capacity": disk.size,
-            "manufacturer": disk.vendor(),
+            "manufacturer": disk.vendor,
             "type": disk.type
         })
     return res

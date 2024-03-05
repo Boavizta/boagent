@@ -28,4 +28,4 @@ COPY . .
 
 EXPOSE 8000
 
-ENTRYPOINT [ "/bin/bash", "-c", "cd boagent/api && uvicorn api:app --host 0.0.0.0" ]
+ENTRYPOINT [ "/bin/bash", "-c", "cd boagent/api && uvicorn --reload api:app --host 0.0.0.0" ]

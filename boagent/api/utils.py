@@ -3,6 +3,7 @@ from boaviztapi_sdk import ApiClient, Configuration
 from dateutil import parser
 from config import settings
 
+BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint
 
 def sort_ram(items: list):
     hash_map = {}
@@ -39,7 +40,7 @@ def sort_disks(items: list):
 
 def get_boavizta_api_client():
     config = Configuration(
-        host=settings.boaviztapi_endpoint,
+        host=BOAVIZTAPI_ENDPOINT,
     )
     client = ApiClient(
         configuration=config, pool_threads=2

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import os
 import re
 
+
 class DiskException(Exception):
     pass
 
@@ -32,6 +33,7 @@ class Disk:
         self._size = None
         self._blocks = None
         self._model = None
+        self._vendor = None
         self._major_minor = None
         self._partitions = []
         self._sysfs_path = sysfs_device_path
@@ -46,12 +48,14 @@ class Disk:
     def size(self):
         return self._size
 
-    def vendor(self):
-        return self._model.split(' ')[0]
-
     @property
     def model(self):
         return self._model
+
+    @property
+    def vendor(self):
+        self._vendor = self.__check_vendor(self._model).lower()
+        return self._vendor
 
     @staticmethod
     def __try_to_read_first_line(item_path, default_value):
@@ -60,6 +64,19 @@ class Disk:
             with open(item_path, 'r') as f:
                 retour = f.readline().strip()
         return retour
+
+    @staticmethod
+    # If one of the strings in /sys/block/***/device/model has numbers, it is not a valid vendor
+    def __check_vendor(model_string: str | None) -> str:
+        split_model = model_string.split(' ')
+        model_first_str = split_model[0]
+        model_second_str = split_model[1]
+        check_first_string_for_numbers = re.search("\\d", model_first_str)
+        result = bool(check_first_string_for_numbers)
+        if result:
+            return model_second_str
+        else:
+            return model_first_str
 
     @staticmethod
     def __safe_int(maybeint):
@@ -111,7 +128,6 @@ class Disk:
         * disk size, computed from sectors count
         * partitions
         """
-        device = None
 
         if self._looked_up:
             return
