@@ -7,12 +7,12 @@ from config import Settings
 
 # Mocks for testing environment
 config.settings = Settings(
-    hardware_file_path="./mocks/hardware_data.json",
-    db_path="./mocks/boagent.db",
-    power_file_path="./mocks/power_data.json",
+    hardware_file_path="./tests/mocks/hardware_data.json",
+    db_path="./tests/mocks/boagent.db",
+    power_file_path="./tests/mocks/power_data.json",
 )
 
-from .api import app  # noqa
+from api import app # noqa
 
 NOW_ISO8601 = datetime.now().isoformat()
 NOW_ISO8601_MINUS_ONE_MINUTE = datetime.fromisoformat(NOW_ISO8601) - timedelta(
