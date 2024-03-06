@@ -22,11 +22,12 @@ def is_set(id: int, reg_idx: int, bit: int) -> str:
 
 
 def get_cpus() -> CpuInfo:
-    cpu_info = []
+    cpu = []
+    cpu_info = get_cpu_info()
     for cpu_socket in range(get_socket_number_linux()):
-        cpu_info.append({
-            "vendor": cpu_vendor(),
-            "name": cpu_name(),
+        cpu.append({
+            "vendor": cpu_info['vendor_id_raw'],
+            "name": cpu_info['brand_raw'],
             "microarch": cpu_microarchitecture(),
             "vector_instructions": {
                 "sse": is_set(1, 3, 25),
@@ -43,4 +44,4 @@ def get_cpus() -> CpuInfo:
             },
             "cpu_info": get_cpu_info(),
         })
-    return cpu_info
+    return cpu
