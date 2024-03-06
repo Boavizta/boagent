@@ -127,4 +127,4 @@ def filter_date_range(data: list, start_date: datetime, stop_date: datetime) -> 
 def format_scaphandre_json(file: str | PathLike) -> str:
     with open(file, 'r') as fd:
         formatted_scaphandre_json = f"[{fd.read()}]".replace('{"host"', ',{"host"').replace(',{"host"', '{"host"', 1)
-        return formatted_scaphandre_json
+    return formatted_scaphandre_json
