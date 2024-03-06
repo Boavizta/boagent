@@ -86,7 +86,7 @@ async def web():
     return res
 
 
-@app.get('/csv', tags=["csv"])
+@app.get("/csv", tags=["csv"])
 async def csv(data: str, since: str = "now", until: str = "24h", inwatt: bool = True) -> Response:
     start_date, stop_date = parse_date_info(since, until)
 
@@ -483,15 +483,15 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
                     "description"] += "WARNING : As no information was provided about your location, this result is based on " \
                                       "average European electricity mix. Be careful with this data. "
 
-    if verbose:
-        res["emissions_calculation_data"]["raw_data"] = {
-            "hardware_data": hardware_data,
-            "resources_data": "not implemented yet",
-            "boaviztapi_data": boaviztapi_data,
-            "power_data": power_data,
-            "start_time": start_time,
-            "end_time": end_time
-        }
+        if verbose:
+            res["emissions_calculation_data"]["raw_data"] = {
+                "hardware_data": hardware_data,
+                "resources_data": "not implemented yet",
+                "boaviztapi_data": boaviztapi_data,
+                "power_data": power_data,
+                "start_time": start_time,
+                "end_time": end_time
+            }
     return res
 
 
@@ -584,8 +584,6 @@ def generate_machine_configuration(hardware_data) -> Dict[str, Any]:
             },
         "ram": sort_ram(hardware_data["rams"]),
         "disk": sort_disks(hardware_data["disks"]),
-        "motherboard": hardware_data["mother_board"] if "mother_board" in hardware_data else {"units": 1},
-        # TODO: improve once the API provides more detail input
         "power_supply": hardware_data["power_supply"] if "power_supply" in hardware_data else {"units": 1}
         # TODO: if cpu is a small one, guess that power supply is light/average weight of a laptops power supply ?
     }
