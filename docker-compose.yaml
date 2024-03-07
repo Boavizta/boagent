@@ -31,6 +31,7 @@ services:
 
   scaphandre:
     image: hubblo/scaphandre:1.0.0
+    privileged: true
     volumes:
       - type: bind
         source: /proc
