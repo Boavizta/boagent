@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     default_lifetime: float = os.getenv("DEFAULT_LIFETIME", 5.0)
     hardware_file_path: str = os.getenv("HARDWARE_FILE_PATH", "./hardware_data.json")
     power_file_path: str = os.getenv("POWER_FILE_PATH", "./power_data.json")
-    hardware_cli: str = os.getenv("HARDWARE_CLI", "../hardware/hardware.py")
+    hardware_cli: str = os.getenv("HARDWARE_CLI", "../hardware/harware_cli.py")
     boaviztapi_endpoint: str = os.getenv("BOAVIZTAPI_ENDPOINT", "http://localhost:5000")
     db_path: str = os.getenv("BOAGENT_DB_PATH", "../../db/boagent.db")
     public_path: str = os.getenv("BOAGENT_PUBLIC_PATH", "../public")
