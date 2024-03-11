@@ -178,13 +178,8 @@ class Lshw:
 
             self.memories.append(
                 {
-                    "slot": dimm.get("slot"),
-                    "description": dimm.get("description"),
-                    "id": dimm.get("id"),
-                    "serial": dimm.get("serial", "N/A"),
-                    "vendor": dimm.get("vendor", "N/A"),
-                    "product": dimm.get("product", "N/A"),
-                    "size": dimm.get("size", 0) / 2**20 / 1024,
+                    "manufacturer": dimm.get("vendor", "N/A"),
+                    "capacity": dimm.get("size", 0) // 2**20 // 1024,
                 }
             )
 
