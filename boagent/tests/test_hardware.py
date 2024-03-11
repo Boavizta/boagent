@@ -1,10 +1,11 @@
 from unittest import TestCase
 
-# import hardware.cpu as cpu
 import hardware.lshw as lshw
-# import hardware.hardware_cli as hwcli
 
 hw = lshw.Lshw()
+
+lshw_cpus_data = hw.cpus
+lshw_disks_data = hw.disks
 
 
 class LshwTest(TestCase):
@@ -23,38 +24,53 @@ class LshwTest(TestCase):
 
         assert type(memory_data) is list
 
-    def test_read_cpus_properties(self):
-        cpu_data = hw.cpus
+    def test_read_cpu_vendor(self):
 
-        for cpu in cpu_data:
+        for cpu in lshw_cpus_data:
             assert "vendor" in cpu
+            assert type(cpu["vendor"]) is str
+
+    def test_read_cpu_name(self):
+
+        for cpu in lshw_cpus_data:
             assert "name" in cpu
+            assert type(cpu["name"]) is str
+
+    def test_read_cpu_core_units(self):
+
+        for cpu in lshw_cpus_data:
             assert "core_units" in cpu
+            assert type(cpu["core_units"]) is str
+
+    def test_read_cpu_units(self):
+
+        for cpu in lshw_cpus_data:
             assert "units" in cpu
-            assert cpu["vendor"] is not None
-            assert cpu["name"] is not None
-            assert cpu["core_units"] is not None
-            assert cpu["units"] is not None
+            assert type(cpu["units"]) is int
 
-    def test_read_disks_properties(self):
-        disks_data = hw.disks
+    def test_read_disks_type(self):
 
-        for disk in disks_data:
+        for disk in lshw_disks_data:
             assert "type" in disk
-            assert "model" in disk
+            assert type(disk["type"]) is str
+            assert (
+                disk["type"] == "ssd"
+                or disk["type"] == "hdd"
+                or disk["type"] == "usb"
+                or disk["type"] == "unknown"
+            )
+
+    def test_read_disks_manufacturer(self):
+
+        for disk in lshw_disks_data:
             assert "manufacturer" in disk
+            assert type(disk["manufacturer"]) is str
+
+    def test_read_disks_capacity(self):
+
+        for disk in lshw_disks_data:
             assert "capacity" in disk
-            assert disk["type"] == "ssd" or disk["type"] == "hdd" or disk["type"] == "unknown"
-
-
-""" class CpuTest(TestCase):
-    def test_read_get_cpus(self):
-        cpu_data = cpu.get_cpus()
-
-        assert type(cpu_data) is list
-        assert "vendor" in cpu_data[0]
-        assert "name" in cpu_data[0]
- """
+            assert type(disk["capacity"]) is int
 
 
 class HardwarecliTest(TestCase):
