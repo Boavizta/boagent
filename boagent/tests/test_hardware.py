@@ -25,33 +25,32 @@ class LshwTest(TestCase):
 
         assert type(memory_data) is list
 
-    def test_read_cpu_vendor(self):
+    def test_read_cpus_vendor(self):
 
-        for cpu in lshw_cpus_data:
+        for cpu in lshw_cpus_data[1:]:
             assert "vendor" in cpu
             assert type(cpu["vendor"]) is str
 
-    def test_read_cpu_name(self):
+    def test_read_cpus_name(self):
 
-        for cpu in lshw_cpus_data:
+        for cpu in lshw_cpus_data[1:]:
             assert "name" in cpu
             assert type(cpu["name"]) is str
 
-    def test_read_cpu_core_units(self):
+    def test_read_cpus_core_units(self):
 
-        for cpu in lshw_cpus_data:
+        for cpu in lshw_cpus_data[1:]:
             assert "core_units" in cpu
             assert type(cpu["core_units"]) is str
 
-    def test_read_cpu_units(self):
+    def test_read_cpus_units(self):
 
-        for cpu in lshw_cpus_data:
-            assert "units" in cpu
-            assert type(cpu["units"]) is int
+        assert "units" in lshw_cpus_data[0]
+        assert type(lshw_cpus_data[0]["units"]) is int
 
     def test_read_disks_type(self):
 
-        for disk in lshw_disks_data:
+        for disk in lshw_disks_data[1:]:
             assert "type" in disk
             assert type(disk["type"]) is str
             assert (
@@ -63,27 +62,39 @@ class LshwTest(TestCase):
 
     def test_read_disks_manufacturer(self):
 
-        for disk in lshw_disks_data:
+        for disk in lshw_disks_data[1:]:
             assert "manufacturer" in disk
             assert type(disk["manufacturer"]) is str
 
     def test_read_disks_capacity(self):
 
-        for disk in lshw_disks_data:
+        for disk in lshw_disks_data[1:]:
             assert "capacity" in disk
             assert type(disk["capacity"]) is int
 
+    def test_read_disks_units(self):
+
+        assert "units" in lshw_disks_data[0]
+        assert type(lshw_disks_data[0]["units"]) is int
+
     def test_read_ram_manufacturer(self):
 
-        for ram in lshw_ram_data:
+        for ram in lshw_ram_data[1:]:
             assert "manufacturer" in ram
             assert type(ram["manufacturer"]) is str
 
     def test_read_ram_capacity(self):
 
-        for ram in lshw_ram_data:
+        print(lshw_ram_data)
+
+        for ram in lshw_ram_data[1:]:
             assert "capacity" in ram
             assert type(ram["capacity"]) is int
+
+    def test_read_ram_units(self):
+
+        assert "units" in lshw_ram_data[0]
+        assert type(lshw_ram_data[0]["units"]) is int
 
 
 class HardwarecliTest(TestCase):
