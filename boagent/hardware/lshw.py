@@ -3,6 +3,7 @@ import subprocess
 import logging
 import json
 import sys
+import re
 
 # Commented elements only available when runnning `lshw` as `sudo`.
 
@@ -11,6 +12,17 @@ def is_tool(name):
     """Check whether `name` is on PATH and marked as executable"""
     return which(name) is not None
 
+
+def check_disk_vendor(model_string: str) -> str:
+    split_model = model_string.split(" ")
+    model_first_str = split_model[0]
+    model_second_str = split_model[1]
+    check_first_string_for_numbers = re.search("\\d", model_first_str)
+    result = bool(check_first_string_for_numbers)
+    if result:
+        return model_second_str
+    else:
+        return model_first_str
 
 class Lshw:
     def __init__(self):
@@ -105,18 +117,20 @@ class Lshw:
     def find_storage(self, obj):
         if "children" in obj:
             for device in obj["children"]:
-                d = {
-                    "model": device.get("product"),
-                    "manufacturer": device.get("vendor"),
-                    "capacity": device.get("size"),
-                }
-                if "type" in device == "SCSI Disk":
-                    d["type"] = "hdd"
-                if "type" in device == "NVMe device":
-                    d["type"] = "ssd"
-                else:
-                    d["type"] = "unknown"
-                self.disks.append(d)
+                if "vendor" in device:
+                    d = {
+                        "manufacturer": check_disk_vendor(device["vendor"]).lower(),
+                        "capacity": device["size"],
+                    }
+                    if "type" in device == "SCSI Disk":
+                        d["type"] = "hdd"
+                    if "type" in device == "NVMe device":
+                        d["type"] = "ssd"
+                    if "type" in device == "Mass storage device":
+                        d["type"] = "usb"
+                    else:
+                        d["type"] = "unknown"
+                    self.disks.append(d)
         if "nvme" in obj["configuration"]["driver"]:
             if not is_tool("nvme"):
                 logging.error("nvme-cli >= 1.0 does not seem to be installed")
@@ -129,14 +143,13 @@ class Lshw:
                 )
                 for device in nvme["Devices"]:
                     d = {
-                        "model": device["ModelNumber"],
-                        "manufacturer": "manufacturer",
+                        "manufacturer": check_disk_vendor(device["ModelNumber"]).lower(),
                         "type": "ssd",
                     }
                     if "UsedSize" in device:
-                        d["capacity"] = device["UsedSize"]
+                        d["capacity"] = (device["UsedSize"] // 1073741824)
                     if "UsedBytes" in device:
-                        d["capacity"] = device["UsedBytes"]
+                        d["capacity"] = (device["UsedBytes"] // 1073741824)
                     self.disks.append(d)
             except Exception:
                 pass
@@ -206,6 +219,5 @@ class Lshw:
 
 
 """
-
 if __name__ == "__main__":
     pass """
