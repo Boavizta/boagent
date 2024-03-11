@@ -6,6 +6,7 @@ hw = lshw.Lshw()
 
 lshw_cpus_data = hw.cpus
 lshw_disks_data = hw.disks
+lshw_ram_data = hw.memories
 
 
 class LshwTest(TestCase):
@@ -71,6 +72,18 @@ class LshwTest(TestCase):
         for disk in lshw_disks_data:
             assert "capacity" in disk
             assert type(disk["capacity"]) is int
+
+    def test_read_ram_manufacturer(self):
+
+        for ram in lshw_ram_data:
+            assert "manufacturer" in ram
+            assert type(ram["manufacturer"]) is str
+
+    def test_read_ram_capacity(self):
+
+        for ram in lshw_ram_data:
+            assert "capacity" in ram
+            assert type(ram["capacity"]) is int
 
 
 class HardwarecliTest(TestCase):
