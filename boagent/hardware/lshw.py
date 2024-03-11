@@ -12,13 +12,13 @@ def is_tool(name):
     return which(name) is not None
 
 
-class LSHW:
+class Lshw:
     def __init__(self):
         if not is_tool("lshw"):
             logging.error("lshw does not seem to be installed")
             sys.exit(1)
 
-        data = subprocess.getoutput("lshw -quiet -json 2> /dev/null")
+        data = subprocess.getoutput("sudo lshw -quiet -json 2> /dev/null")
         json_data = json.loads(data)
         # Starting from version 02.18, `lshw -json` wraps its result in a list
         # rather than returning directly a dictionary
@@ -28,7 +28,7 @@ class LSHW:
             self.hw_info = json_data
         self.info = {}
         self.memories = []
-        self.interfaces = []
+        # self.interfaces = []
         self.cpus = []
         self.power = []
         self.disks = []
@@ -66,8 +66,8 @@ class LSHW:
             return self.cpus
         if hwclass == "gpu":
             return self.gpus
-        if hwclass == "network":
-            return self.interfaces
+        """ if hwclass == "network":
+            return self.interfaces """
         if hwclass == "storage":
             return self.disks
         if hwclass == "memory":
@@ -105,40 +105,38 @@ class LSHW:
     def find_storage(self, obj):
         if "children" in obj:
             for device in obj["children"]:
-                self.disks.append(
-                    {
-                        "logicalname": device.get("logicalname"),
-                        "product": device.get("product"),
-                        "serial": device.get("serial"),
-                        "version": device.get("version"),
-                        "size": device.get("size"),
-                        "description": device.get("description"),
-                        "type": device.get("description"),
-                    }
-                )
-        elif "nvme" in obj["configuration"]["driver"]:
+                d = {
+                    "model": device.get("product"),
+                    "manufacturer": device.get("vendor"),
+                    "capacity": device.get("size"),
+                }
+                if "type" in device == "SCSI Disk":
+                    d["type"] = "hdd"
+                if "type" in device == "NVMe device":
+                    d["type"] = "ssd"
+                else:
+                    d["type"] = "unknown"
+                self.disks.append(d)
+        if "nvme" in obj["configuration"]["driver"]:
             if not is_tool("nvme"):
                 logging.error("nvme-cli >= 1.0 does not seem to be installed")
                 return
             try:
                 nvme = json.loads(
                     subprocess.check_output(
-                        ["nvme", "-list", "-o", "json"], encoding="utf8"
+                        ["sudo", "nvme", "-list", "-o", "json"], encoding="utf8"
                     )
                 )
                 for device in nvme["Devices"]:
                     d = {
-                        "logicalname": device["DevicePath"],
-                        "product": device["ModelNumber"],
-                        "serial": device["SerialNumber"],
-                        "version": device["Firmware"],
-                        "description": "NVME",
-                        "type": "NVME",
+                        "model": device["ModelNumber"],
+                        "manufacturer": "manufacturer",
+                        "type": "ssd",
                     }
                     if "UsedSize" in device:
-                        d["size"] = device["UsedSize"]
+                        d["capacity"] = device["UsedSize"]
                     if "UsedBytes" in device:
-                        d["size"] = device["UsedBytes"]
+                        d["capacity"] = device["UsedBytes"]
                     self.disks.append(d)
             except Exception:
                 pass
@@ -147,8 +145,10 @@ class LSHW:
         if "product" in obj:
             self.cpus.append(
                 {
-                    "product": obj["product"],
+                    "name": obj["product"],
                     "vendor": obj["vendor"],
+                    "core_units": obj["configuration"]["cores"],
+                    "units": +1,
                     # "description": obj["description"],
                     # "location": obj["slot"],
                 }
