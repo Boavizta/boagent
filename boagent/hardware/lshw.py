@@ -39,11 +39,11 @@ class Lshw:
         else:
             self.hw_info = json_data
         self.info = {}
-        self.memories = []
+        self.memories = [{"units": 0}]
         # self.interfaces = []
-        self.cpus = []
+        self.cpus = [{"units": 0}]
         self.power = []
-        self.disks = []
+        self.disks = [{"units": 0}]
         self.gpus = []
         # self.vendor = self.hw_info["vendor"]
         # self.product = self.hw_info["product"]
@@ -131,6 +131,7 @@ class Lshw:
                     else:
                         d["type"] = "unknown"
                     self.disks.append(d)
+                    self.disks[0]["units"] += 1
         if "nvme" in obj["configuration"]["driver"]:
             if not is_tool("nvme"):
                 logging.error("nvme-cli >= 1.0 does not seem to be installed")
@@ -161,11 +162,11 @@ class Lshw:
                     "name": obj["product"],
                     "vendor": obj["vendor"],
                     "core_units": obj["configuration"]["cores"],
-                    "units": +1,
                     # "description": obj["description"],
                     # "location": obj["slot"],
                 }
             )
+            self.cpus[0]["units"] += 1
 
     def find_memories(self, obj):
         if "children" not in obj:
@@ -175,6 +176,8 @@ class Lshw:
         for dimm in obj["children"]:
             if "empty" in dimm["description"]:
                 continue
+
+            self.memories[0]["units"] += 1
 
             self.memories.append(
                 {
