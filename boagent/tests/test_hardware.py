@@ -1,8 +1,8 @@
 from unittest import TestCase
+from hardware.lshw import Lshw, get_disk_type
 
-import hardware.lshw as lshw
 
-hw = lshw.Lshw()
+hw = Lshw()
 
 lshw_cpus_data = hw.cpus
 lshw_disks_data = hw.disks
@@ -59,6 +59,24 @@ class LshwTest(TestCase):
                 or disk["type"] == "usb"
                 or disk["type"] == "unknown"
             )
+
+    def test_read_disk_dev_name(self):
+
+        for disk in lshw_disks_data[1:]:
+            assert "logicalname" in disk
+            assert type(disk["logicalname"]) is str
+
+    def test_check_disk_type_is_ssd(self):
+
+        dev_logicalname = "/dev/nvme0n1"
+        disk_type = get_disk_type(dev_logicalname)
+        assert disk_type == "ssd"
+
+    def test_check_disk_type_is_hdd(self):
+
+        dev_logicalname = "/dev/sda"
+        disk_type = get_disk_type(dev_logicalname)
+        assert disk_type == "hdd"
 
     def test_read_disks_manufacturer(self):
 
