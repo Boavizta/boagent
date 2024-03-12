@@ -4,8 +4,11 @@ import logging
 import json
 import sys
 import re
+import os
 
 # Commented elements only available when runnning `lshw` as `sudo`.
+
+SYS_BLOCK_PATH = "/sys/block"
 
 
 def is_tool(name):
@@ -23,6 +26,23 @@ def check_disk_vendor(model_string: str) -> str:
         return model_second_str
     else:
         return model_first_str
+
+
+def get_disk_type(dev_path: str) -> str:
+
+    device = dev_path.removeprefix("/dev")
+
+    rotational_fp = os.path.realpath(f"{SYS_BLOCK_PATH}{device}/queue/rotational")
+
+    with open(rotational_fp, "r") as file:
+        rotational = int(file.read())
+
+    if rotational == 0:
+        return "ssd"
+    if rotational == 1:
+        return "hdd"
+    return "unknown"
+
 
 class Lshw:
     def __init__(self):
@@ -121,15 +141,9 @@ class Lshw:
                     d = {
                         "manufacturer": check_disk_vendor(device["vendor"]).lower(),
                         "capacity": device["size"],
+                        "logicalname": device["logicalname"],
+                        "type": get_disk_type(device["logicalname"]),
                     }
-                    if "type" in device == "SCSI Disk":
-                        d["type"] = "hdd"
-                    if "type" in device == "NVMe device":
-                        d["type"] = "ssd"
-                    if "type" in device == "Mass storage device":
-                        d["type"] = "usb"
-                    else:
-                        d["type"] = "unknown"
                     self.disks.append(d)
                     self.disks[0]["units"] += 1
         if "nvme" in obj["configuration"]["driver"]:
@@ -144,13 +158,16 @@ class Lshw:
                 )
                 for device in nvme["Devices"]:
                     d = {
-                        "manufacturer": check_disk_vendor(device["ModelNumber"]).lower(),
-                        "type": "ssd",
+                        "logicalname": device["DevicePath"],
+                        "manufacturer": check_disk_vendor(
+                            device["ModelNumber"]
+                        ).lower(),
+                        "type": get_disk_type(device["DevicePath"]),
                     }
                     if "UsedSize" in device:
-                        d["capacity"] = (device["UsedSize"] // 1073741824)
+                        d["capacity"] = device["UsedSize"] // 1073741824
                     if "UsedBytes" in device:
-                        d["capacity"] = (device["UsedBytes"] // 1073741824)
+                        d["capacity"] = device["UsedBytes"] // 1073741824
                     self.disks.append(d)
             except Exception:
                 pass
