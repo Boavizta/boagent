@@ -1,5 +1,6 @@
 from unittest import TestCase
 from hardware.lshw import Lshw, get_disk_type
+from unittest.mock import patch
 
 
 hw = Lshw()
@@ -66,15 +67,21 @@ class LshwTest(TestCase):
             assert "logicalname" in disk
             assert type(disk["logicalname"]) is str
 
-    def test_check_disk_type_is_ssd(self):
+    @patch("hardware.lshw.get_rotational_int")
+    def test_check_disk_type_is_ssd(self, mocked_get_rotational):
 
-        dev_logicalname = "/dev/nvme0n1"
+        dev_logicalname = "/dev/nvmeex"
+        mocked_get_rotational.return_value = 0
+
         disk_type = get_disk_type(dev_logicalname)
         assert disk_type == "ssd"
 
-    def test_check_disk_type_is_hdd(self):
+    @patch("hardware.lshw.get_rotational_int")
+    def test_check_disk_type_is_hdd(self, mocked_get_rotational):
 
-        dev_logicalname = "/dev/sda"
+        dev_logicalname = "/dev/sdaex"
+        mocked_get_rotational.return_value = 1
+
         disk_type = get_disk_type(dev_logicalname)
         assert disk_type == "hdd"
 
