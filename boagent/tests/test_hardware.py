@@ -1,5 +1,5 @@
 from unittest import TestCase
-from hardware.lshw import Lshw, get_disk_type
+from hardware.lshw import Lshw, get_disk_type, get_rotational_int
 from unittest.mock import patch
 
 
@@ -84,6 +84,19 @@ class LshwTest(TestCase):
 
         disk_type = get_disk_type(dev_logicalname)
         assert disk_type == "hdd"
+
+    def test_int_for_get_rotational_int_when_file_not_found(self):
+
+        dev_erroneous_name = "/dev/thisnameleadstonorotational"
+        rotational_int = get_rotational_int(dev_erroneous_name)
+
+        self.assertEqual(rotational_int, 2)
+
+    def test_read_disk_type_when_dev_path_not_found(self):
+
+        dev_erroneous_name = "/dev/thisnamedoesntexist"
+        disk_type = get_disk_type(dev_erroneous_name)
+        assert disk_type == "unknown"
 
     def test_read_disks_manufacturer(self):
 
