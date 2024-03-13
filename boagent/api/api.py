@@ -62,7 +62,7 @@ def configure_app():
 app = configure_app()
 items = {}
 
-setup_database()
+# setup_database()
 
 
 @app.get("/info", tags=["info"])
@@ -384,7 +384,7 @@ def get_metrics(start_time: float, end_time: float, verbose: bool, location: str
 
     boaviztapi_data = query_machine_impact_data(
         model={},
-        configuration=generate_machine_configuration(hardware_data),
+        configuration=hardware_data,
         usage=format_usage_request(start_time, end_time, host_avg_consumption, location)
     )
 
@@ -537,6 +537,7 @@ def compute_average_consumption(power_data):
 
 
 def get_hardware_data(fetch_hardware: bool):
+    print(fetch_hardware)
     data = {}
     if fetch_hardware:
         build_hardware_data()
@@ -555,7 +556,7 @@ def read_hardware_data() -> Dict:
 
 
 def build_hardware_data():
-    p = run([HARDWARE_CLI, "--output-file", HARDWARE_FILE_PATH])
+    run([HARDWARE_CLI, "--output-file", HARDWARE_FILE_PATH])
 
 
 def query_machine_impact_data(model: dict[str, str],
@@ -579,8 +580,8 @@ def generate_machine_configuration(hardware_data) -> Dict[str, Any]:
     config = {
         "cpu": {
             "units": len(hardware_data["cpus"]),
-            "core_units": hardware_data['cpus'][0]["core_units"],
-            "family": hardware_data['cpus'][0]['family']
+            "core_units": hardware_data['cpus'][1]["core_units"],
+            # "family": hardware_data['cpus'][1]['family']
             },
         "ram": sort_ram(hardware_data["rams"]),
         "disk": sort_disks(hardware_data["disks"]),
