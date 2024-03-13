@@ -28,19 +28,33 @@ def check_disk_vendor(model_string: str) -> str:
         return model_first_str
 
 
-def get_disk_type(dev_path: str) -> str:
+def get_rotational_int(dev_path: str) -> int:
 
     device = dev_path.removeprefix("/dev")
 
-    rotational_fp = os.path.realpath(f"{SYS_BLOCK_PATH}{device}/queue/rotational")
+    try:
+        rotational_fp = os.path.realpath(f"{SYS_BLOCK_PATH}{device}/queue/rotational", strict=True)
+        print(rotational_fp)
 
-    with open(rotational_fp, "r") as file:
-        rotational = int(file.read())
+    except OSError:
+        print("Rotational file was not found")
+        return 2
+    else:
+        with open(rotational_fp, "r") as file:
+            rotational_int = int(file.read())
+    return rotational_int
+
+
+def get_disk_type(dev_path: str) -> str:
+
+    rotational = get_rotational_int(dev_path)
 
     if rotational == 0:
         return "ssd"
     if rotational == 1:
         return "hdd"
+    if rotational == 2:
+        return "unknown"
     return "unknown"
 
 
