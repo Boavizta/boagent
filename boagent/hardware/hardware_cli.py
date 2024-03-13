@@ -3,18 +3,26 @@
 import click
 import json
 import sys
-from disk import search_physical_drives
-from cpu import get_cpus
-from ram import get_ram_info
+from lshw import Lshw
+
+# from disk import search_physical_drives
+# from cpu import get_cpus
+# from ram import get_ram_info
+
+lshw = Lshw()
+
+lshw_cpus = lshw.cpus
+lshw_ram = lshw.memories
+lshw_disks = lshw.disks
 
 
 @click.command()
 @click.option("--output-file", help="File to output the hardwate data to")
 def main(output_file):
     res = {}
-    res["disks"] = format_disks(disks())
-    res["cpus"] = format_cpus(get_cpus())
-    res["rams"] = format_rams(rams())
+    res["disks"] = get_disks()
+    res["cpus"] = get_cpus()
+    res["rams"] = get_ram()
     if output_file is not None:
         with open(output_file, "w") as fd:
             json.dump(res, fd, indent=4)
@@ -23,7 +31,7 @@ def main(output_file):
     return 0
 
 
-def disks():
+""" def disks():
     disks = search_physical_drives()
     for disk in disks:
         disk.lookup()
@@ -36,23 +44,25 @@ def format_disks(disks):
         res.append(
             {"capacity": disk.size, "manufacturer": disk.vendor, "type": disk.type}
         )
-    return res
+    return res """
 
 
-def format_cpus(cpus):
-    for cpu in cpus:
-        cpu["core_units"] = cpu["cpu_info"]["count"]
-        print("cpu[microarch][0][0] : {}".format(cpu["microarch"][0][0]))
-        cpu["family"] = cpu["microarch"][0][0].lower() + cpu["microarch"][0][1:]
-        return cpus
+def get_disks():
+    disks = lshw_disks
+    return disks
 
 
-def rams():
-    rams = get_ram_info()
+def get_cpus():
+    cpus = lshw_cpus
+    return cpus
+
+
+def get_ram():
+    rams = lshw_ram
     return rams
 
 
-def format_rams(rams):
+""" def format_rams(rams):
     res = []
     for ram in rams:
         options = {
@@ -62,7 +72,7 @@ def format_rams(rams):
             options["manufacturer"] = ram.manufacturer
         res.append(options)
     return res
-
+ """
 
 if __name__ == "__main__":
     main()
