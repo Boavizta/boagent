@@ -183,6 +183,7 @@ class Lshw:
                     if "UsedBytes" in device:
                         d["capacity"] = device["UsedBytes"] // 1073741824
                     self.disks.append(d)
+                    self.disks[0]["units"] += 1
             except Exception:
                 pass
 
