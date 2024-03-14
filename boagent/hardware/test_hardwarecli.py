@@ -39,6 +39,6 @@ class HardwarecliTest(TestCase):
         result = runner.invoke(main)
 
         assert result.exit_code == 0
-        assert result.output.count("disks") >= 1
-        assert result.output.count("rams") >= 1
+        assert result.output.count("disk") >= 1
+        assert result.output.count("ram") >= 1
         assert result.output.count("cpu") >= 1

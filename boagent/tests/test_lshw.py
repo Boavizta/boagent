@@ -1,7 +1,16 @@
 from unittest import TestCase
-from hardware.lshw.lshw import Lshw, get_disk_type, get_rotational_int
+from hardware.lshw.lshw import (
+    Lshw,
+    get_disk_type,
+    get_rotational_int,
+    check_disk_vendor,
+)
 from unittest.mock import patch
+from json import load
+from os import path
 
+current_dir = path.dirname(__file__)
+mock_lshw_data = path.join(f"{current_dir}", "./mocks/sudo_lshw_data")
 
 hw = Lshw()
 
@@ -28,30 +37,65 @@ class LshwTest(TestCase):
 
     def test_read_cpus_vendor(self):
 
-        for cpu in lshw_cpus_data[1:]:
+        for cpu in lshw_cpus_data:
             assert "vendor" in cpu
             assert type(cpu["vendor"]) is str
 
     def test_read_cpus_name(self):
 
-        for cpu in lshw_cpus_data[1:]:
+        for cpu in lshw_cpus_data:
             assert "name" in cpu
             assert type(cpu["name"]) is str
 
     def test_read_cpus_core_units(self):
 
-        for cpu in lshw_cpus_data[1:]:
+        for cpu in lshw_cpus_data:
             assert "core_units" in cpu
             assert type(cpu["core_units"]) is str
 
     def test_read_cpus_units(self):
 
-        assert "units" in lshw_cpus_data[0]
-        assert type(lshw_cpus_data[0]["units"]) is int
+        for cpu in lshw_cpus_data:
+            assert "units" in cpu
+            assert type(cpu["units"]) is int
+
+    def test_read_check_disk_vendor_with_correct_model(self):
+
+        model = "LENOVO 123456154"
+        result = check_disk_vendor(model)
+
+        assert result == "LENOVO"
+
+    def test_read_check_disk_vendor_with_incorrect_model(self):
+
+        model = "12345121 LENOVO"
+        result = check_disk_vendor(model)
+
+        assert result == "LENOVO"
+
+    def test_read_check_disk_vendor_with_one_correct_string_in_model(self):
+
+        model = "LENOVO"
+        result = check_disk_vendor(model)
+
+        assert result == "LENOVO"
+
+    def test_read_check_disk_vendor_with_one_incorrect_string_in_model(self):
+
+        model = "12345211"
+        with self.assertRaises(Exception):
+            check_disk_vendor(model)
+
+    def test_read_check_disk_vendor_with_multiple_strings_in_model(self):
+
+        model = "LENOVO 123456 MODEL"
+        result = check_disk_vendor(model)
+
+        assert result == "LENOVO"
 
     def test_read_disks_type(self):
 
-        for disk in lshw_disks_data[1:]:
+        for disk in lshw_disks_data:
             assert "type" in disk
             assert type(disk["type"]) is str
             assert (
@@ -63,7 +107,7 @@ class LshwTest(TestCase):
 
     def test_read_disk_dev_name(self):
 
-        for disk in lshw_disks_data[1:]:
+        for disk in lshw_disks_data:
             assert "logicalname" in disk
             assert type(disk["logicalname"]) is str
 
@@ -98,32 +142,41 @@ class LshwTest(TestCase):
         disk_type = get_disk_type(dev_erroneous_name)
         assert disk_type == "unknown"
 
+    @patch("hardware.lshw.lshw.is_tool")
+    def test_check_nvme_cli_is_installed_to_find_storage_and_raises_error_if_not(
+        self, mocked_is_tool
+    ):
+
+        with open(f"{mock_lshw_data}_disks.json", "r") as file:
+            mocked_is_tool.return_value = False
+            data = load(file)
+            self.assertRaises(Exception, hw.find_storage(data))
+
     def test_read_disks_manufacturer(self):
 
-        for disk in lshw_disks_data[1:]:
+        for disk in lshw_disks_data:
             assert "manufacturer" in disk
             assert type(disk["manufacturer"]) is str
 
     def test_read_disks_capacity(self):
 
-        for disk in lshw_disks_data[1:]:
+        for disk in lshw_disks_data:
             assert "capacity" in disk
             assert type(disk["capacity"]) is int
 
     def test_read_disks_units(self):
 
-        assert "units" in lshw_disks_data[0]
-        assert type(lshw_disks_data[0]["units"]) is int
+        for disk in lshw_disks_data:
+            assert "units" in disk
+            assert type(disk["units"]) is int
 
     def test_read_ram_manufacturer(self):
 
-        for ram in lshw_ram_data[1:]:
+        for ram in lshw_ram_data:
             assert "manufacturer" in ram
             assert type(ram["manufacturer"]) is str
 
     def test_read_ram_capacity(self):
-
-        print(lshw_ram_data)
 
         for ram in lshw_ram_data[1:]:
             assert "capacity" in ram
