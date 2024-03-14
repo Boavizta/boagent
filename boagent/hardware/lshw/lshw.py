@@ -18,11 +18,20 @@ def is_tool(name):
 
 def check_disk_vendor(model_string: str) -> str:
     split_model = model_string.split(" ")
+
+    if len(split_model) == 1:
+        check_string_for_numbers = bool(re.search("\\d", model_string))
+        if check_string_for_numbers:
+            raise Exception(
+                "Lshw did not output an acceptable manufacturer name for this device."
+            )
+        else:
+            return model_string
+
     model_first_str = split_model[0]
     model_second_str = split_model[1]
-    check_first_string_for_numbers = re.search("\\d", model_first_str)
-    result = bool(check_first_string_for_numbers)
-    if result:
+    check_first_string_for_numbers = bool(re.search("\\d", model_first_str))
+    if check_first_string_for_numbers:
         return model_second_str
     else:
         return model_first_str
@@ -33,8 +42,9 @@ def get_rotational_int(dev_path: str) -> int:
     device = dev_path.removeprefix("/dev")
 
     try:
-        rotational_fp = os.path.realpath(f"{SYS_BLOCK_PATH}{device}/queue/rotational", strict=True)
-        print(rotational_fp)
+        rotational_fp = os.path.realpath(
+            f"{SYS_BLOCK_PATH}{device}/queue/rotational", strict=True
+        )
 
     except OSError:
         print("Rotational file was not found")
@@ -73,11 +83,11 @@ class Lshw:
         else:
             self.hw_info = json_data
         self.info = {}
-        self.memories = [{"units": 0}]
+        self.memories = []
         # self.interfaces = []
-        self.cpus = [{"units": 0}]
+        self.cpus = []
         self.power = []
-        self.disks = [{"units": 0}]
+        self.disks = []
         self.gpus = []
         # self.vendor = self.hw_info["vendor"]
         # self.product = self.hw_info["product"]
@@ -151,10 +161,11 @@ class Lshw:
     def find_storage(self, obj):
         if "children" in obj:
             for device in obj["children"]:
-                if "vendor" in device:
+                if "vendor" in device and "size" in device:
                     d = {
+                        "units": +1,
                         "manufacturer": check_disk_vendor(device["vendor"]).lower(),
-                        "capacity": device["size"],
+                        "capacity": device["size"] // 1073741824,
                         "logicalname": device["logicalname"],
                         "type": get_disk_type(device["logicalname"]),
                     }
@@ -163,7 +174,7 @@ class Lshw:
         if "nvme" in obj["configuration"]["driver"]:
             if not is_tool("nvme"):
                 logging.error("nvme-cli >= 1.0 does not seem to be installed")
-                return
+                raise Exception("nvme-cli >= 1.0 does not seem to be installed")
             try:
                 nvme = json.loads(
                     subprocess.check_output(
@@ -172,6 +183,7 @@ class Lshw:
                 )
                 for device in nvme["Devices"]:
                     d = {
+                        "units": +1,
                         "logicalname": device["DevicePath"],
                         "manufacturer": check_disk_vendor(
                             device["ModelNumber"]
@@ -183,7 +195,6 @@ class Lshw:
                     if "UsedBytes" in device:
                         d["capacity"] = device["UsedBytes"] // 1073741824
                     self.disks.append(d)
-                    self.disks[0]["units"] += 1
             except Exception:
                 pass
 
@@ -191,6 +202,7 @@ class Lshw:
         if "product" in obj:
             self.cpus.append(
                 {
+                    "units": +1,
                     "name": obj["product"],
                     "vendor": obj["vendor"],
                     "core_units": obj["configuration"]["cores"],
@@ -198,7 +210,6 @@ class Lshw:
                     # "location": obj["slot"],
                 }
             )
-            self.cpus[0]["units"] += 1
 
     def find_memories(self, obj):
         if "children" not in obj:
@@ -209,10 +220,9 @@ class Lshw:
             if "empty" in dimm["description"]:
                 continue
 
-            self.memories[0]["units"] += 1
-
             self.memories.append(
                 {
+                    "units": +1,
                     "manufacturer": dimm.get("vendor", "N/A"),
                     "capacity": dimm.get("size", 0) // 2**20 // 1024,
                 }
