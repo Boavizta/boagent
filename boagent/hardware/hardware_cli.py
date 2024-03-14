@@ -20,9 +20,9 @@ lshw_disks = lshw.disks
 @click.option("--output-file", help="File to output the hardwate data to")
 def main(output_file):
     res = {}
-    res["disks"] = get_disks()
-    res["cpus"] = get_cpus()
-    res["rams"] = get_ram()
+    res["disk"] = get_disks()
+    res["cpu"] = get_cpus()
+    res["ram"] = get_ram()
     if output_file is not None:
         with open(output_file, "w") as fd:
             json.dump(res, fd, indent=4)
