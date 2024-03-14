@@ -537,7 +537,6 @@ def compute_average_consumption(power_data):
 
 
 def get_hardware_data(fetch_hardware: bool):
-    print(fetch_hardware)
     data = {}
     if fetch_hardware:
         build_hardware_data()
