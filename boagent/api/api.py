@@ -542,7 +542,7 @@ def get_hardware_data(fetch_hardware: bool):
         build_hardware_data()
     try:
         data = read_hardware_data()
-    except Exception as e:
+    except Exception:
         build_hardware_data()
         data = read_hardware_data()
     return data
