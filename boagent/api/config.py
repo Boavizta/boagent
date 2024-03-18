@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     carbon_aware_api_endpoint: str = os.getenv(
         "CARBON_AWARE_API_ENDPOINT", "https://carbon-aware-api.azurewebsites.net"
     )
-    carbon_aware_api_token: str = os.getenv("CARBON_AWARE_API_TOKEN")
+    carbon_aware_api_token: str = os.getenv("CARBON_AWARE_API_TOKEN", "token")
     azure_location: str = os.getenv("AZURE_LOCATION", "northeurope")
 
     class Config:
