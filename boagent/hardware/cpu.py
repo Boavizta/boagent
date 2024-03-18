@@ -1,5 +1,5 @@
 from cpuinfo import get_cpu_info
-from cpuid import cpuid, cpu_microarchitecture, cpu_name, cpu_vendor
+from cpuid import cpuid, cpu_microarchitecture
 from typing import TypeAlias
 
 from lshw import LSHW
@@ -27,12 +27,14 @@ def get_cpus():
     cpus = []
     cpu_data = lshw_data.cpus
     for cpu in cpu_data:
-        cpus.append({
-            "vendor": cpu["vendor"],
-            "name": cpu["product"],
-            "microarch": cpu_microarchitecture(),
-            "cpu_info": get_cpu_info(),
-            })
+        cpus.append(
+            {
+                "vendor": cpu["vendor"],
+                "name": cpu["product"],
+                "microarch": cpu_microarchitecture(),
+                "cpu_info": get_cpu_info(),
+            }
+        )
     return cpus
 
 

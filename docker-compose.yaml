@@ -16,7 +16,7 @@ services:
     depends_on:
       - boaviztapi
       - scaphandre
-    ports: 
+    ports:
       - "8000:8000"
     networks:
       - boagent-network
@@ -40,13 +40,13 @@ services:
         source: /sys/class/powercap
         target: /sys/class/powercap
       - "powerdata:/app/data:rw"
-    command: [ "--no-header", "json", "-s", "10", "--max-top-consumers", "0",  "-f", "/app/data/power_data.json" ]                         
+    command: [ "--no-header", "json", "-s", "10", "--max-top-consumers", "0",  "-f", "/app/data/power_data.json" ]
     networks:
       - boagent-network
-    
+
   boaviztapi:
     image: ghcr.io/boavizta/boaviztapi:1.2.2
-    ports: 
+    ports:
       - "5000:5000"
     networks:
       - boagent-network

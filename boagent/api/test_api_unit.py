@@ -6,7 +6,6 @@ import os
 
 
 class ApiUnitTest(TestCase):
-
     def test_read_build_hardware_data(self):
 
         build_hardware_data()

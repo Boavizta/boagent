@@ -4,6 +4,7 @@ from typing import Optional
 
 # TODO: To be replaced by ComponentRAM from openapi client.
 
+
 @dataclass()
 class MemoryDevice:
     manufacturer: Optional[str] = None
@@ -12,4 +13,3 @@ class MemoryDevice:
     type_: Optional[str] = None
     speed_mt_s: Optional[int] = None
     form_factor: Optional[str] = None
-

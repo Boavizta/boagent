@@ -5,7 +5,6 @@ from click.testing import CliRunner
 
 
 class HardwarecliTest(TestCase):
-
     def test_read_hardware_cli_cpus(self):
 
         cpus = get_cpus()

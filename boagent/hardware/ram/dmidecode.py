@@ -15,25 +15,25 @@ def get_dmidecode_info() -> List[MemoryDevice]:
         cmd_output = execute_dmidecode()
         return parse_dmidecode(cmd_output)
     except Exception as e:
-        raise DMIDecodeError('cannot extract ram info from dmidecode.') from e
+        raise DMIDecodeError("cannot extract ram info from dmidecode.") from e
 
 
 def execute_dmidecode() -> Optional[str]:
-    proc = subprocess.Popen(['dmidecode', '-t', '17'], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["dmidecode", "-t", "17"], stdout=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     if proc.returncode > 0:
-        raise RuntimeError(f'failed to run dmidecode command.')
+        raise RuntimeError("failed to run dmidecode command.")
     else:
         return stdout.decode()
 
 
 def parse_dmidecode(dmidecode_dump: str) -> List[MemoryDevice]:
     memory_devices = []
-    for record in dmidecode_dump.split('\n\n'):
+    for record in dmidecode_dump.split("\n\n"):
         if skip_record(record):
             continue
 
-        record_lines = record.split('\n')
+        record_lines = record.split("\n")
         record_map = build_record_map(record_lines)
 
         if not is_record_map_valid(record_map):
@@ -44,7 +44,7 @@ def parse_dmidecode(dmidecode_dump: str) -> List[MemoryDevice]:
 
 
 def skip_record(record) -> bool:
-    if len(record.split('\n')) < 4:
+    if len(record.split("\n")) < 4:
         return True
     return False
 
@@ -54,57 +54,57 @@ def build_record_map(record_lines: List[str]) -> Mapping[str, str]:
     for raw_line in record_lines:
         if skip_record_line(raw_line):
             continue
-        line = raw_line.replace('\t', '')
+        line = raw_line.replace("\t", "")
         line = line.strip()
-        key, value = line.split(':')
+        key, value = line.split(":")
         value = value.strip()
         record_map[key] = value
     return record_map
 
 
 def skip_record_line(line: str) -> bool:
-    if not line.startswith('\t'):
+    if not line.startswith("\t"):
         return True
     return False
 
 
 def is_record_map_valid(record_map: Mapping) -> bool:
-    if re.search(r'empty', record_map['Manufacturer'], re.IGNORECASE):
+    if re.search(r"empty", record_map["Manufacturer"], re.IGNORECASE):
         return False
     return True
 
 
 def parse_record_map_to_memory_device(record_map: Mapping[str, str]):
-    size = record_map.get('Size')
+    size = record_map.get("Size")
     if size:
         size = parse_size_to_gb(size)
 
-    speed = record_map.get('Speed')
+    speed = record_map.get("Speed")
     if speed:
         speed = parse_speed_to_mt_s(speed)
 
     return MemoryDevice(
-        manufacturer=record_map.get('Manufacturer'),
-        model=record_map.get('Part Number'),
+        manufacturer=record_map.get("Manufacturer"),
+        model=record_map.get("Part Number"),
         size_gb=size,
-        type_=record_map.get('Type'),
+        type_=record_map.get("Type"),
         speed_mt_s=speed,
-        form_factor=record_map.get('Form Factor')
+        form_factor=record_map.get("Form Factor"),
     )
 
 
 def parse_size_to_gb(size_str: str) -> int:
-    size = re.search(r'[0-9]+', size_str)
+    size = re.search(r"[0-9]+", size_str)
     if size:
         size = int(size[0])
-        if 'MB' in size_str:
+        if "MB" in size_str:
             size = int(size / 1024)
         return size
     return 0
 
 
 def parse_speed_to_mt_s(speed_str: str) -> int:
-    speed = re.search(r'[0-9]+', speed_str)
+    speed = re.search(r"[0-9]+", speed_str)
     if speed:
         return int(speed[0])
     return 0

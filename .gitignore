@@ -139,3 +139,5 @@ dmypy.json
 
 *.json
 *.db
+*.svg
+*.csv

@@ -46,10 +46,10 @@ class Ram(TimeSeriesRecord):
 
 
 metrics = {
-    'carbonintensity': CarbonIntensity,
-    'power': Power,
-    'cpu': Cpu,
-    'ram': Ram,
+    "carbonintensity": CarbonIntensity,
+    "power": Power,
+    "cpu": Cpu,
+    "ram": Ram,
 }
 
 
@@ -66,7 +66,7 @@ def get_session(db_path: str) -> Session:
 
 
 def get_engine(db_path: str) -> Engine:
-    sqlite_engine = create_engine(f'sqlite:///{db_path}')
+    sqlite_engine = create_engine(f"sqlite:///{db_path}")
     return sqlite_engine
 
 
@@ -80,17 +80,21 @@ def insert_metric(session: Session, metric_name: str, timestamp: datetime, value
     session.execute(statement)
 
 
-def insert_metric_and_commit(session: Session, metric_name: str, timestamp: datetime, value: Any):
+def insert_metric_and_commit(
+    session: Session, metric_name: str, timestamp: datetime, value: Any
+):
     model = metrics[metric_name]
     statement = insert(model).values(timestamp=timestamp, value=value)
     session.execute(statement)
     session.commit()
 
 
-def select_metric(session: Session,
-                  metric_name: str,
-                  start_date: Optional[datetime] = None,
-                  stop_date: Optional[datetime] = None) -> pd.DataFrame:
+def select_metric(
+    session: Session,
+    metric_name: str,
+    start_date: Optional[datetime] = None,
+    stop_date: Optional[datetime] = None,
+) -> pd.DataFrame:
     if metric_name not in metrics:
         return pd.DataFrame()
     model = metrics[metric_name]
@@ -99,8 +103,7 @@ def select_metric(session: Session,
     if start_date is None:
         start_date = stop_date - timedelta(hours=1)
     statement = select(model.timestamp, model.value).where(
-        model.timestamp >= start_date,
-        model.timestamp <= stop_date
+        model.timestamp >= start_date, model.timestamp <= stop_date
     )
     results = session.execute(statement).all()
     return pd.DataFrame(results)
@@ -118,7 +121,7 @@ def get_full_peak(start: int, diffs: list) -> list:
             res.append(start + i)
             i = i + 1
     else:
-        while val < (- 3 * recover * val) and start + i < len(diffs):
+        while val < (-3 * recover * val) and start + i < len(diffs):
             val += diffs[start + i]
             res.append(start + i)
             i = i + 1
@@ -151,40 +154,41 @@ def highlight_spikes(data: pd.DataFrame, colname: str = None) -> pd.DataFrame:
     return data
 
 
-def new_highlight_spikes(df: pd.DataFrame, col: str = 'value') -> pd.DataFrame:
-    df = df.set_index('timestamp').reset_index(names='timestamp')
-    rol_col = f'_rolling_{col}'
+def new_highlight_spikes(df: pd.DataFrame, col: str = "value") -> pd.DataFrame:
+    df = df.set_index("timestamp").reset_index(names="timestamp")
+    rol_col = f"_rolling_{col}"
     quant_max = df[col].quantile(q=0.70)
     quant_min = df[col].quantile(q=0.20)
     window = 3
     df[rol_col] = df[col].ewm(span=window).mean()
-    df['peak'] = 0
+    df["peak"] = 0
     indexes_max = df[df[rol_col] >= quant_max].index
     indexes_min = df[df[rol_col] <= quant_min].index
-    df.loc[indexes_max, 'peak'] = 1
-    df.loc[indexes_min, 'peak'] = -1
+    df.loc[indexes_max, "peak"] = 1
+    df.loc[indexes_min, "peak"] = -1
 
     for row in df.itertuples():
         if row.peak != 0 and row.Index > window + 2:
             for i in range(window + 1):
-                df.loc[row.Index - i, 'peak'] = row.peak
+                df.loc[row.Index - i, "peak"] = row.peak
 
     df = df.drop(columns=[rol_col])
     return df
 
 
 def get_most_recent_timestamp(session):
-    """ Get a single row from the table which has the most recent timestamp"""
+    """Get a single row from the table which has the most recent timestamp"""
     table_list = [Power, Cpu, Ram]
     last_timestamp_list = []
     for table in table_list:
         data = session.query(table).order_by(table.timestamp.desc()).first()
-        if data != None: last_timestamp_list.append(data.timestamp)
+        if data is not None:
+            last_timestamp_list.append(data.timestamp)
     return max(last_timestamp_list) if last_timestamp_list else None
 
 
 def get_most_recent_data(table_name):
-    """ Get a single row from the table which has the most recent timestamp"""
+    """Get a single row from the table which has the most recent timestamp"""
     session = get_session(DB_PATH)
     table = metrics[table_name]
     data = session.query(table).order_by(table.timestamp.desc()).first()
@@ -192,7 +196,7 @@ def get_most_recent_data(table_name):
 
 
 def get_max(table_name):
-    """ Get a single row from the table which has the most recent timestamp"""
+    """Get a single row from the table which has the most recent timestamp"""
     session = get_session(DB_PATH)
     table = metrics[table_name]
     data = session.query(table).order_by(table.value.desc()).first()
@@ -201,32 +205,53 @@ def get_max(table_name):
 
 def add_from_scaphandre(session):
     last_timestamp = get_most_recent_timestamp(session)
-    last_timestamp = last_timestamp + timedelta(seconds=5) if last_timestamp != None else datetime.now() - timedelta(hours=24)
+    last_timestamp = (
+        last_timestamp + timedelta(seconds=5)
+        if last_timestamp is not None
+        else datetime.now() - timedelta(hours=24)
+    )
     df = scaphandre_to_csv(start_date=last_timestamp, stop_date=datetime.utcnow())
     if df.empty:
         return
     else:
         for row in df.itertuples():
-            insert_metric(session, metric_name='power', timestamp=row.timestamp, value=row.consumption)
-            insert_metric(session, metric_name='cpu', timestamp=row.timestamp, value=row.cpu_total_active)
-            insert_metric(session, metric_name='ram', timestamp=row.timestamp, value=row.ram_used)
+            insert_metric(
+                session,
+                metric_name="power",
+                timestamp=row.timestamp,
+                value=row.consumption,
+            )
+            insert_metric(
+                session,
+                metric_name="cpu",
+                timestamp=row.timestamp,
+                value=row.cpu_total_active,
+            )
+            insert_metric(
+                session, metric_name="ram", timestamp=row.timestamp, value=row.ram_used
+            )
 
 
 def scaphandre_to_csv(start_date: datetime, stop_date: datetime) -> pd.DataFrame:
-    with open(POWER_DATA_FILE_PATH, 'r') as f:  # if scaphandre is writing in the json -> KABOUM
+    with open(
+        POWER_DATA_FILE_PATH, "r"
+    ) as f:  # if scaphandre is writing in the json -> KABOUM
         data = json.loads(f.read())
     lst = []
     for d in data:
         data_point = {}
-        data_point['timestamp'] = d['host']['timestamp']
-        data_point['consumption'] = d['host']['consumption']
-        data_point['cpu_total_active'] = float(d['resources']['cpu']['total_active'])
-        data_point['ram_used'] = d['resources']['ram']['used'].split()[0]
+        data_point["timestamp"] = d["host"]["timestamp"]
+        data_point["consumption"] = d["host"]["consumption"]
+        data_point["cpu_total_active"] = float(d["resources"]["cpu"]["total_active"])
+        data_point["ram_used"] = d["resources"]["ram"]["used"].split()[0]
         lst.append(data_point)
 
     wanted_data = filter_date_range(lst, start_date, stop_date)
     for d in wanted_data:
         d["timestamp"] = datetime.fromtimestamp(d["timestamp"], tz=timezone.utc)
-        d["consumption"] = float("{:.4f}".format(d["consumption"] * 10 ** -3))
+        d["consumption"] = float("{:.4f}".format(d["consumption"] * 10**-3))
         d["cpu_total_active"] = float("{:.4f}".format(d["cpu_total_active"]))
-    return pd.DataFrame(wanted_data, columns=["timestamp", "consumption", "cpu_total_active", "ram_used"])
+    return pd.DataFrame(
+        wanted_data,
+        columns=["timestamp", "consumption", "cpu_total_active", "ram_used"],
+    )
