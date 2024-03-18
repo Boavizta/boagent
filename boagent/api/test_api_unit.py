@@ -15,11 +15,9 @@ class ApiUnitTest(TestCase):
 
         build_hardware_data()
         data = read_hardware_data()
-        assert type(data) is dict
-        assert type(data) is dict
-        assert type(data["cpu"]) is list
-        assert type(data["ram"]) is list
-        assert type(data["disk"]) is list
+        assert type(data["cpus"]) is list
+        assert type(data["rams"]) is list
+        assert type(data["disks"]) is list
 
     @patch("api.build_hardware_data")
     def test_read_get_hardware_data_with_fetch_hardware_false(
