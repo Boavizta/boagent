@@ -142,10 +142,12 @@ class LshwTest(TestCase):
         self, mocked_is_tool
     ):
 
-        with open(f"{mock_lshw_data}_disks.json", "r") as file:
+        with open(f"{mock_lshw_data}_disks.json", "r") as file, self.assertRaises(
+            Exception
+        ):
             mocked_is_tool.return_value = False
             data = load(file)
-            self.assertRaises(Exception, hw.find_storage(data))
+            hw.find_storage(data)
 
     def test_read_disks_manufacturer(self):
 
