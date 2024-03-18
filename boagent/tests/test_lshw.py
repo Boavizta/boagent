@@ -1,10 +1,5 @@
 from unittest import TestCase
-from hardware.lshw.lshw import (
-    Lshw,
-    get_disk_type,
-    get_rotational_int,
-    check_disk_vendor,
-)
+from hardware.lshw.lshw import Lshw
 from unittest.mock import patch
 from json import load
 from os import path
@@ -62,21 +57,21 @@ class LshwTest(TestCase):
     def test_read_check_disk_vendor_with_correct_model(self):
 
         model = "LENOVO 123456154"
-        result = check_disk_vendor(model)
+        result = hw.check_disk_vendor(model)
 
         assert result == "LENOVO"
 
     def test_read_check_disk_vendor_with_incorrect_model(self):
 
         model = "12345121 LENOVO"
-        result = check_disk_vendor(model)
+        result = hw.check_disk_vendor(model)
 
         assert result == "LENOVO"
 
     def test_read_check_disk_vendor_with_one_correct_string_in_model(self):
 
         model = "LENOVO"
-        result = check_disk_vendor(model)
+        result = hw.check_disk_vendor(model)
 
         assert result == "LENOVO"
 
@@ -84,12 +79,12 @@ class LshwTest(TestCase):
 
         model = "12345211"
         with self.assertRaises(Exception):
-            check_disk_vendor(model)
+            hw.check_disk_vendor(model)
 
     def test_read_check_disk_vendor_with_multiple_strings_in_model(self):
 
         model = "LENOVO 123456 MODEL"
-        result = check_disk_vendor(model)
+        result = hw.check_disk_vendor(model)
 
         assert result == "LENOVO"
 
@@ -111,35 +106,35 @@ class LshwTest(TestCase):
             assert "logicalname" in disk
             assert type(disk["logicalname"]) is str
 
-    @patch("hardware.lshw.lshw.get_rotational_int")
+    @patch("hardware.lshw.Lshw.get_rotational_int")
     def test_check_disk_type_is_ssd(self, mocked_get_rotational):
 
-        dev_logicalname = "/dev/nvmeex"
+        dev_logicalname = "/dev/ssdonsata"
         mocked_get_rotational.return_value = 0
 
-        disk_type = get_disk_type(dev_logicalname)
+        disk_type = hw.get_disk_type(dev_logicalname)
         assert disk_type == "ssd"
 
-    @patch("hardware.lshw.lshw.get_rotational_int")
+    @patch("hardware.lshw.Lshw.get_rotational_int")
     def test_check_disk_type_is_hdd(self, mocked_get_rotational):
 
         dev_logicalname = "/dev/sdaex"
         mocked_get_rotational.return_value = 1
 
-        disk_type = get_disk_type(dev_logicalname)
+        disk_type = hw.get_disk_type(dev_logicalname)
         assert disk_type == "hdd"
 
     def test_int_for_get_rotational_int_when_file_not_found(self):
 
         dev_erroneous_name = "/dev/thisnameleadstonorotational"
-        rotational_int = get_rotational_int(dev_erroneous_name)
+        rotational_int = hw.get_rotational_int(dev_erroneous_name)
 
         self.assertEqual(rotational_int, 2)
 
     def test_read_disk_type_when_dev_path_not_found(self):
 
         dev_erroneous_name = "/dev/thisnamedoesntexist"
-        disk_type = get_disk_type(dev_erroneous_name)
+        disk_type = hw.get_disk_type(dev_erroneous_name)
         assert disk_type == "unknown"
 
     @patch("hardware.lshw.lshw.is_tool")

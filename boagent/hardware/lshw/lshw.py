@@ -16,58 +16,6 @@ def is_tool(name):
     return which(name) is not None
 
 
-def check_disk_vendor(model_string: str) -> str:
-    split_model = model_string.split(" ")
-
-    if len(split_model) == 1:
-        check_string_for_numbers = bool(re.search("\\d", model_string))
-        if check_string_for_numbers:
-            raise Exception(
-                "Lshw did not output an acceptable manufacturer name for this device."
-            )
-        else:
-            return model_string
-
-    model_first_str = split_model[0]
-    model_second_str = split_model[1]
-    check_first_string_for_numbers = bool(re.search("\\d", model_first_str))
-    if check_first_string_for_numbers:
-        return model_second_str
-    else:
-        return model_first_str
-
-
-def get_rotational_int(dev_path: str) -> int:
-
-    device = dev_path.removeprefix("/dev")
-
-    try:
-        rotational_fp = os.path.realpath(
-            f"{SYS_BLOCK_PATH}{device}/queue/rotational", strict=True
-        )
-
-    except OSError:
-        print("Rotational file was not found")
-        return 2
-    else:
-        with open(rotational_fp, "r") as file:
-            rotational_int = int(file.read())
-    return rotational_int
-
-
-def get_disk_type(dev_path: str) -> str:
-
-    rotational = get_rotational_int(dev_path)
-
-    if rotational == 0:
-        return "ssd"
-    if rotational == 1:
-        return "hdd"
-    if rotational == 2:
-        return "unknown"
-    return "unknown"
-
-
 class Lshw:
     def __init__(self):
         if not is_tool("lshw"):
@@ -164,13 +112,14 @@ class Lshw:
                 if "vendor" in device and "size" in device:
                     d = {
                         "units": +1,
-                        "manufacturer": check_disk_vendor(device["vendor"]).lower(),
-                        "capacity": device["size"] // 1073741824,
+                        "manufacturer": self.check_disk_vendor(
+                            device["vendor"]
+                        ).lower(),
+                        "capacity": device["size"],
                         "logicalname": device["logicalname"],
-                        "type": get_disk_type(device["logicalname"]),
+                        "type": self.get_disk_type(device["logicalname"]),
                     }
                     self.disks.append(d)
-                    self.disks[0]["units"] += 1
         if "nvme" in obj["configuration"]["driver"]:
             if not is_tool("nvme"):
                 logging.error("nvme-cli >= 1.0 does not seem to be installed")
@@ -185,10 +134,10 @@ class Lshw:
                     d = {
                         "units": +1,
                         "logicalname": device["DevicePath"],
-                        "manufacturer": check_disk_vendor(
+                        "manufacturer": self.check_disk_vendor(
                             device["ModelNumber"]
                         ).lower(),
-                        "type": get_disk_type(device["DevicePath"]),
+                        "type": "ssd",
                     }
                     if "UsedSize" in device:
                         d["capacity"] = device["UsedSize"] // 1073741824
@@ -256,6 +205,52 @@ class Lshw:
                     #    self.find_network(b)
                     if b["class"] == "display":
                         self.find_gpus(b)
+
+    def check_disk_vendor(self, model_string: str) -> str:
+        split_model = model_string.split(" ")
+        vendor = ""
+
+        model_first_str = split_model[0]
+        model_second_str = split_model[1]
+        check_first_string_for_numbers = re.search("\\d", model_first_str)
+        result = bool(check_first_string_for_numbers)
+
+        if result:
+            vendor = model_second_str
+            return vendor
+        else:
+            vendor = model_first_str
+            return vendor
+
+    def get_disk_type(self, dev_path: str) -> str:
+
+        rotational = self.get_rotational_int(dev_path)
+
+        if rotational == 0:
+            return "ssd"
+        if rotational == 1:
+            return "hdd"
+        if rotational == 2:
+            return "unknown"
+        return "unknown"
+
+    def get_rotational_int(self, dev_path: str) -> int:
+
+        device = dev_path.removeprefix("/dev")
+
+        try:
+            rotational_fp = os.path.realpath(
+                f"{SYS_BLOCK_PATH}{device}/queue/rotational", strict=True
+            )
+            print(rotational_fp)
+
+        except OSError:
+            print("Rotational file was not found")
+            return 2
+        else:
+            with open(rotational_fp, "r") as file:
+                rotational_int = int(file.read())
+        return rotational_int
 
 
 """
