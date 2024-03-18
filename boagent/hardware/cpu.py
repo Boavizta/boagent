@@ -1,15 +1,17 @@
-#!/usr/bin/env python3
-
 from cpuinfo import get_cpu_info
-from cpuid import cpuid, cpu_microarchitecture, cpu_name, cpu_vendor
+from cpuid import cpuid, cpu_microarchitecture
 from typing import TypeAlias
+
+from lshw import LSHW
 
 CpuInfo: TypeAlias = list[dict[str, str | tuple | dict[str, str] | dict]]
 
-def get_socket_number_linux(location: str = "/sys/devices/system/node/possible") -> int:
+lshw_data = LSHW()
+
+""" def get_socket_number_linux(location: str = "/sys/devices/system/node/possible") -> int:
     with open(location, 'r') as f:
         data = f.read()
-    return int(data.split('-')[-1])+1
+    return int(data.split('-')[-1])+1 """
 
 
 def is_set(id: int, reg_idx: int, bit: int) -> str:
@@ -21,6 +23,22 @@ def is_set(id: int, reg_idx: int, bit: int) -> str:
         return "--"
 
 
+def get_cpus():
+    cpus = []
+    cpu_data = lshw_data.cpus
+    for cpu in cpu_data:
+        cpus.append(
+            {
+                "vendor": cpu["vendor"],
+                "name": cpu["product"],
+                "microarch": cpu_microarchitecture(),
+                "cpu_info": get_cpu_info(),
+            }
+        )
+    return cpus
+
+
+"""
 def get_cpus() -> CpuInfo:
     cpu = []
     cpu_info = get_cpu_info()
@@ -45,3 +63,4 @@ def get_cpus() -> CpuInfo:
             "cpu_info": get_cpu_info(),
         })
     return cpu
+"""

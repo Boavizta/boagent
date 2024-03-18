@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   summary: >-
     The query API allows you to determine the environmental footprint for
-    different types of scenarios (time-baed or machine-based). 
+    different types of scenarios (time-baed or machine-based).
   description: >-
     Use this API to get the environmental footprint for your any operation
     happening on the server.

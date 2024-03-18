@@ -17,13 +17,15 @@ class Partition:
     @classmethod
     def from_proc(cls, data=None):
         if not data:
-            raise DiskException('No data found!')
+            raise DiskException("No data found!")
 
         data = data.strip().split()
-        obj = {'major': int(data[0]),
-               'minor': int(data[1]),
-               'blocks': int(data[2]),
-               'name': data[3]}
+        obj = {
+            "major": int(data[0]),
+            "minor": int(data[1]),
+            "blocks": int(data[2]),
+            "name": data[3],
+        }
         return cls(**obj)
 
 
@@ -61,14 +63,14 @@ class Disk:
     def __try_to_read_first_line(item_path: str, default_value: str) -> str:
         first_line = default_value
         if os.path.exists(item_path):
-            with open(item_path, 'r') as f:
+            with open(item_path, "r") as f:
                 first_line = f.readline().strip()
         return first_line
 
     @staticmethod
     # If one of the strings in /sys/block/***/device/model has numbers, it is not a valid vendor
     def __check_vendor(model_string: str) -> str:
-        split_model = model_string.split(' ')
+        split_model = model_string.split(" ")
         model_first_str = split_model[0]
         model_second_str = split_model[1]
         check_first_string_for_numbers = re.search("\\d", model_first_str)
@@ -100,20 +102,26 @@ class Disk:
         """
         Retrieve partitions information for one device from sysfs
         """
-        part_info_path_base = f'{self._sysfs_path}/{self._name}'
+        part_info_path_base = f"{self._sysfs_path}/{self._name}"
         index = 1
-        part_info_path = f'{part_info_path_base}{index}'
+        part_info_path = f"{part_info_path_base}{index}"
         while os.path.exists(part_info_path):
-            majmin = Disk.__try_to_read_first_line(f'{part_info_path}/dev', '-1:-1').split(':')
+            majmin = Disk.__try_to_read_first_line(
+                f"{part_info_path}/dev", "-1:-1"
+            ).split(":")
 
-            self._partitions.append(Partition(major=Disk.__safe_int(majmin[0]),
-                                              minor=Disk.__safe_int(majmin[1]),
-                                              blocks=Disk.__safe_int(Disk.__try_to_read_first_line(f'{part_info_path}/size', 0)),
-                                              name=f'{self._name}{index}'
-                                              )
-                                    )
+            self._partitions.append(
+                Partition(
+                    major=Disk.__safe_int(majmin[0]),
+                    minor=Disk.__safe_int(majmin[1]),
+                    blocks=Disk.__safe_int(
+                        Disk.__try_to_read_first_line(f"{part_info_path}/size", 0)
+                    ),
+                    name=f"{self._name}{index}",
+                )
+            )
             index += 1
-            part_info_path = f'{part_info_path_base}{index}'
+            part_info_path = f"{part_info_path_base}{index}"
 
     def lookup(self):
         """
@@ -128,11 +136,19 @@ class Disk:
         if self._looked_up:
             return
 
-        self._model = Disk.__try_to_read_first_line(f'{self._sysfs_path}/device/model', 'Unknown model')
-        rotational = Disk.__try_to_read_first_line(f'{self._sysfs_path}/queue/rotational', 'Unknown')
+        self._model = Disk.__try_to_read_first_line(
+            f"{self._sysfs_path}/device/model", "Unknown model"
+        )
+        rotational = Disk.__try_to_read_first_line(
+            f"{self._sysfs_path}/queue/rotational", "Unknown"
+        )
         self._type = Disk.__rotational_info_to_disk_type(rotational)
-        self._major_minor = Disk.__try_to_read_first_line(f'{self._sysfs_path}/dev', 'Unknown')
-        sectors_count = Disk.__safe_int(Disk.__try_to_read_first_line(f'{self._sysfs_path}/size', 'Unknown'))
+        self._major_minor = Disk.__try_to_read_first_line(
+            f"{self._sysfs_path}/dev", "Unknown"
+        )
+        sectors_count = Disk.__safe_int(
+            Disk.__try_to_read_first_line(f"{self._sysfs_path}/size", "Unknown")
+        )
         if type(sectors_count) is int:
             # Linux uses 512 bytes sectors
             self._size = sectors_count // (2 * 1024 * 1024)
@@ -145,21 +161,21 @@ class Disk:
         if not self._looked_up:
             self.lookup()
 
-        ret = ''
-        ret = f'Disk ({self._major_minor}) {self._name}: \n'
-        ret += f'\tBlocks: {self._blocks}\n'
-        ret += f'\tSize: {self._size}Gb\n'
-        ret += f'\tModel: {self._model}\n'
-        ret += f'\tType: {self._type}\n'
-        ret += '\n'
+        ret = ""
+        ret = f"Disk ({self._major_minor}) {self._name}: \n"
+        ret += f"\tBlocks: {self._blocks}\n"
+        ret += f"\tSize: {self._size}Gb\n"
+        ret += f"\tModel: {self._model}\n"
+        ret += f"\tType: {self._type}\n"
+        ret += "\n"
 
-        ret += f'Disk has {len(self._partitions)} partition(s): \n'
+        ret += f"Disk has {len(self._partitions)} partition(s): \n"
         for part in self._partitions:
             if part.minor != 0:
-                ret += f'\tBlocks: {part.blocks}\n'
-                ret += f'\tSize: {part.blocks // (2 * 1024 * 1024)}Gb\n'
-                ret += f'\tName: {part.name}\n'
-                ret += '\n'
+                ret += f"\tBlocks: {part.blocks}\n"
+                ret += f"\tSize: {part.blocks // (2 * 1024 * 1024)}Gb\n"
+                ret += f"\tName: {part.name}\n"
+                ret += "\n"
 
         return ret
 
@@ -167,8 +183,8 @@ class Disk:
 def search_physical_drives():
     disks = []
 
-    virtual_drive_pattern = re.compile('.*/devices/virtual/.*')
-    for possible_drive in os.scandir('/sys/block'):
+    virtual_drive_pattern = re.compile(".*/devices/virtual/.*")
+    for possible_drive in os.scandir("/sys/block"):
         realpath = os.path.realpath(possible_drive.path)
         # path seems to point to a "real" drive
         if virtual_drive_pattern.match(realpath) is None:

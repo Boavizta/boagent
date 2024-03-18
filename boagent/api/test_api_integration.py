@@ -2,17 +2,16 @@ from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from unittest import TestCase
 from pytest import mark
-import config
 from config import Settings
 
 # Mocks for testing environment
-config.settings = Settings(
+settings = Settings(
     hardware_file_path="./tests/mocks/hardware_data.json",
     db_path="./tests/mocks/boagent.db",
     power_file_path="./tests/mocks/power_data.json",
 )
 
-from api import app # noqa
+from api import app  # noqa
 
 NOW_ISO8601 = datetime.now().isoformat()
 NOW_ISO8601_MINUS_ONE_MINUTE = datetime.fromisoformat(NOW_ISO8601) - timedelta(
@@ -23,7 +22,6 @@ client = TestClient(app)
 
 
 class ApiEndpointsTest(TestCase):
-
     def test_read_info(self):
         response = client.get("/info")
         assert response.status_code == 200

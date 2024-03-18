@@ -5,5 +5,5 @@ Monitoring agent/framework for evaluating the environmental impacts of a machine
 """
 
 __version__ = "0.0.8"
-__author__ = 'Benoit Petit <bpetit@hubblo.org>'
-__credits__ = 'Boavizta contributors'
+__author__ = "Benoit Petit <bpetit@hubblo.org>"
+__credits__ = "Boavizta contributors"

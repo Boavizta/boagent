@@ -17,12 +17,12 @@ def sort_ram(items: list):
                 hash_map["{}:{}".format(r["capacity"], r["manufacturer"])] = {
                     "units": 1,
                     "manufacturer": r["manufacturer"],
-                    "capacity": r["capacity"]
+                    "capacity": r["capacity"],
                 }
         else:
             hash_map["{}".format(r["capacity"])] = {
                 "units": 1,
-                "capacity": r["capacity"]
+                "capacity": r["capacity"],
             }
     return [v for k, v in hash_map.items()]
 
@@ -31,13 +31,15 @@ def sort_disks(items: list):
     hash_map = {}
     for r in items:
         if "{}:{}:{}".format(r["capacity"], r["manufacturer"], r["type"]) in hash_map:
-            hash_map["{}:{}:{}".format(r["capacity"], r["manufacturer"], r["type"])]["units"] += 1
+            hash_map["{}:{}:{}".format(r["capacity"], r["manufacturer"], r["type"])][
+                "units"
+            ] += 1
         else:
             hash_map["{}:{}:{}".format(r["capacity"], r["manufacturer"], r["type"])] = {
                 "units": 1,
                 "manufacturer": r["manufacturer"],
                 "capacity": r["capacity"],
-                "type": r["type"]
+                "type": r["type"],
             }
     return [v for k, v in hash_map.items()]
 
@@ -46,17 +48,15 @@ def get_boavizta_api_client():
     config = Configuration(
         host=BOAVIZTAPI_ENDPOINT,
     )
-    client = ApiClient(
-        configuration=config, pool_threads=2
-    )
+    client = ApiClient(configuration=config, pool_threads=2)
     return client
 
 
 def iso8601_or_timestamp_as_timestamp(iso_time: str):
-    '''
+    """
     Takes an str that's either a timestamp or an iso8601
     time. Returns a float that represents a timestamp.
-    '''
+    """
     if iso_time == "0.0" or iso_time == "0":
         return float(iso_time)
     else:
@@ -87,23 +87,47 @@ def format_prometheus_output(res):
         if "value" in v and "type" in v:
             if "description" not in v:
                 v["description"] = "TODO: define me"
-            response += format_prometheus_metric(k, "{}. {}".format(v["description"], "In {} ({}).".format(v["long_unit"], v["unit"])), v["type"], v["value"])
-    #response += format_prometheus_metric("energy_consumption", "Energy consumed in the evaluation time window (evaluated at least for an hour, be careful if the time windows is lower than 1 hour), in Wh", "counter", res["emissions_calculation_data"]["energy_consumption"])
+            response += format_prometheus_metric(
+                k,
+                "{}. {}".format(
+                    v["description"], "In {} ({}).".format(v["long_unit"], v["unit"])
+                ),
+                v["type"],
+                v["value"],
+            )
+        # response += format_prometheus_metric("energy_consumption", "Energy consumed in the evaluation time window (evaluated at least for an hour, be careful if the time windows is lower than 1 hour), in Wh", "counter", res["emissions_calculation_data"]["energy_consumption"])
         else:
             for x, y in v.items():
                 if "value" in y and "type" in y:
                     if "description" not in y:
                         y["description"] = "TODO: define me"
-                    response += format_prometheus_metric("{}_{}".format(k,x), "{}. {}".format(y["description"], "In {} ({}).".format(y["long_unit"], y["unit"])), y["type"], y["value"])
+                    response += format_prometheus_metric(
+                        "{}_{}".format(k, x),
+                        "{}. {}".format(
+                            y["description"],
+                            "In {} ({}).".format(y["long_unit"], y["unit"]),
+                        ),
+                        y["type"],
+                        y["value"],
+                    )
 
     return response
 
 
-def format_prometheus_metric(metric_name, metric_description, metric_type, metric_value):
+def format_prometheus_metric(
+    metric_name, metric_description, metric_type, metric_value
+):
     response = """# HELP {} {}
 # TYPE {} {}
 {} {}
-""".format(metric_name, metric_description, metric_name, metric_type, metric_name, metric_value)
+""".format(
+        metric_name,
+        metric_description,
+        metric_name,
+        metric_type,
+        metric_name,
+        metric_value,
+    )
     return response
 
 
@@ -121,10 +145,12 @@ def filter_date_range(data: list, start_date: datetime, stop_date: datetime) -> 
         if d["timestamp"] < end:
             upper_index += 1
 
-    return data[lower_index: upper_index]
+    return data[lower_index:upper_index]
 
 
 def format_scaphandre_json(file: str | PathLike) -> str:
-    with open(file, 'r') as fd:
-        formatted_scaphandre_json = f"[{fd.read()}]".replace('{"host"', ',{"host"').replace(',{"host"', '{"host"', 1)
+    with open(file, "r") as fd:
+        formatted_scaphandre_json = f"[{fd.read()}]".replace(
+            '{"host"', ',{"host"'
+        ).replace(',{"host"', '{"host"', 1)
     return formatted_scaphandre_json
