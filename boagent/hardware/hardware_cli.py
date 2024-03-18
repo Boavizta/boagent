@@ -19,15 +19,15 @@ lshw_disks = lshw.disks
 @click.command()
 @click.option("--output-file", help="File to output the hardwate data to")
 def main(output_file):
-    res = {}
-    res["disk"] = get_disks()
-    res["cpu"] = get_cpus()
-    res["ram"] = get_ram()
+    hardware_data = {}
+    hardware_data["disks"] = get_disks()
+    hardware_data["cpus"] = get_cpus()
+    hardware_data["rams"] = get_ram()
     if output_file is not None:
         with open(output_file, "w") as fd:
-            json.dump(res, fd, indent=4)
+            json.dump(hardware_data, fd, indent=4)
     else:
-        json.dump(res, sys.stdout, indent=4)
+        json.dump(hardware_data, sys.stdout, indent=4)
     return 0
 
 
@@ -39,12 +39,12 @@ def main(output_file):
 
 
 def format_disks(disks):
-    res = []
+    hardware_data = []
     for disk in disks:
-        res.append(
+        hardware_data.append(
             {"capacity": disk.size, "manufacturer": disk.vendor, "type": disk.type}
         )
-    return res """
+    return hardware_data """
 
 
 def get_disks():
@@ -63,15 +63,15 @@ def get_ram():
 
 
 """ def format_rams(rams):
-    res = []
+    hardware_data = []
     for ram in rams:
         options = {
             "capacity": ram.size_gb,
         }
         if ram.manufacturer is not None and len(ram.manufacturer) > 0:
             options["manufacturer"] = ram.manufacturer
-        res.append(options)
-    return res
+        hardware_data.append(options)
+    return hardware_data
  """
 
 if __name__ == "__main__":
