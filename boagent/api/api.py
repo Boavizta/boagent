@@ -411,11 +411,15 @@ def get_metrics(
 
     res = {"emissions_calculation_data": {}}
 
-    host_avg_consumption = None
+    avg_power = None
+    use_time_ratio = None
+    time_workload = None
 
     if measure_power:
         power_data = get_power_data(start_time, end_time)
         avg_power = power_data["avg_power"]
+        use_time_ratio = power_data["use_time_ratio"]
+        time_workload = power_data["time_workload"]
         if "warning" in power_data:
             res["emissions_calculation_data"][
                 "energy_consumption_warning"
@@ -424,7 +428,9 @@ def get_metrics(
     boaviztapi_data = query_machine_impact_data(
         model={},
         configuration=hardware_data,
-        usage=format_usage_request(start_time, end_time, avg_power, location),
+        usage=format_usage_request(
+            start_time, end_time, avg_power, use_time_ratio, location, time_workload
+        ),
     )
 
     if measure_power:
@@ -499,7 +505,7 @@ def get_metrics(
         if "USAGE" in boaviztapi_data:
             res["emissions_calculation_data"] = {
                 "average_power_measured": {
-                    "value": host_avg_consumption,
+                    "value": avg_power,
                     "description": "Average power measured from start_time to end_time",
                     "type": "gauge",
                     "unit": "W",
