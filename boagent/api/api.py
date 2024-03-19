@@ -548,14 +548,17 @@ def get_metrics(
 
 
 def format_usage_request(
-    start_time, end_time, host_avg_consumption=None, location=None
+    start_time, end_time, host_avg_consumption=None, use_time_ratio=None, location=None
 ):
     hours_use_time = (end_time - start_time) / 3600.0
     kwargs_usage = {"hours_use_time": hours_use_time}
     if location:
         kwargs_usage["usage_location"] = location
     if host_avg_consumption:
-        kwargs_usage["hours_electrical_consumption"] = host_avg_consumption
+        avg_power = host_avg_consumption / hours_use_time
+        kwargs_usage["avg_power"] = avg_power
+    if use_time_ratio:
+        kwargs_usage["use_time_ratio"] = use_time_ratio
     return kwargs_usage
 
 
@@ -648,9 +651,11 @@ def generate_machine_configuration(hardware_data) -> Dict[str, Any]:
         },
         "ram": sort_ram(hardware_data["rams"]),
         "disk": sort_disks(hardware_data["disks"]),
-        "power_supply": hardware_data["power_supply"]
-        if "power_supply" in hardware_data
-        else {"units": 1}
+        "power_supply": (
+            hardware_data["power_supply"]
+            if "power_supply" in hardware_data
+            else {"units": 1}
+        ),
         # TODO: if cpu is a small one, guess that power supply is light/average weight of a laptops power supply ?
     }
     return config
