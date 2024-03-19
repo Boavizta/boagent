@@ -14,7 +14,6 @@ from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
-from boaviztapi_sdk.model.server_dto import ServerDTO
 from utils import (
     iso8601_or_timestamp_as_timestamp,
     format_scaphandre_json,
@@ -23,6 +22,8 @@ from utils import (
     sort_ram,
     sort_disks,
 )
+from boaviztapi_sdk.models.server import Server
+
 from config import settings
 from database import (
     get_session,
@@ -620,20 +621,25 @@ def query_machine_impact_data(
     server_impact = None
 
     if configuration:
-        server_dto = ServerDTO(usage=usage, configuration=configuration)
-        server_impact = server_api.server_impact_by_config_v1_server_post(
-            server_dto=server_dto
+        server = Server(usage=usage, configuration=configuration)
+        server_impact = server_api.server_impact_from_configuration_v1_server_post(
+            server=server
         )
     elif model:
-        server_dto = ServerDTO(usage=usage, model=model)
-        server_impact = server_api.server_impact_by_model_v1_server_get(
-            server_dto=server_dto
+        # server = Server(usage=usage, model=model)
+        # TO IMPLEMENT
+        # This conditional was based on a previous version of BoaviztAPI, where a server model could
+        # be sent to /v1/server through a GET method. BoaviztAPI now expects an archetype string to
+        # return a prerecorded impact from an asset.
+        server_impact = server_api.server_impact_from_model_v1_server_get(
+            archetype="dellR740"
         )
 
     return server_impact
 
 
 def generate_machine_configuration(hardware_data) -> Dict[str, Any]:
+    # Either delete or transfer this logic to hardware_cli / lshw
     config = {
         "cpu": {
             "units": len(hardware_data["cpus"]),

@@ -1,7 +1,12 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from api import build_hardware_data, read_hardware_data, get_hardware_data
+from api import (
+    build_hardware_data,
+    read_hardware_data,
+    get_hardware_data,
+    query_machine_impact_data,
+)
 import os
 
 
@@ -15,11 +20,9 @@ class ApiUnitTest(TestCase):
 
         build_hardware_data()
         data = read_hardware_data()
-        assert type(data) is dict
-        assert type(data) is dict
-        assert type(data["cpu"]) is list
-        assert type(data["ram"]) is list
-        assert type(data["disk"]) is list
+        assert type(data["cpus"]) is list
+        assert type(data["rams"]) is list
+        assert type(data["disks"]) is list
 
     @patch("api.build_hardware_data")
     def test_read_get_hardware_data_with_fetch_hardware_false(
@@ -34,10 +37,15 @@ class ApiUnitTest(TestCase):
         assert type(data) is dict
         mocked_build_hardware.assert_not_called()
 
-    def test_tead_get_hardware_data_with_fetch_hardware_true(self):
+    def test_read_get_hardware_data_with_fetch_hardware_true(self):
 
         data = get_hardware_data(fetch_hardware=True)
         assert type(data) is dict
+
+    def test_read_query_machine_impact_data(self):
+        server_impact = query_machine_impact_data()
+        print(server_impact)
+        pass
 
     def tearDown(self) -> None:
         os.remove("./hardware_data.json")

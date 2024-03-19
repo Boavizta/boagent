@@ -142,10 +142,15 @@ class LshwTest(TestCase):
         self, mocked_is_tool
     ):
 
-        with open(f"{mock_lshw_data}_disks.json", "r") as file:
+        with open(f"{mock_lshw_data}_disks.json", "r") as file, self.assertRaises(
+            Exception
+        ) as nvme_cli_exception:
             mocked_is_tool.return_value = False
             data = load(file)
-            self.assertRaises(Exception, hw.find_storage(data))
+            hw.find_storage(data)
+
+        caught_exception = nvme_cli_exception.exception
+        assert str(caught_exception) == "nvme-cli >= 1.0 does not seem to be installed"
 
     def test_read_disks_manufacturer(self):
 

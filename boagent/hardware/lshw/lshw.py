@@ -210,6 +210,15 @@ class Lshw:
         split_model = model_string.split(" ")
         vendor = ""
 
+        if len(split_model) == 1:
+            check_string_for_numbers = bool(re.search("\\d", model_string))
+            if check_string_for_numbers:
+                raise Exception(
+                    "Lshw did not output an acceptable manufacturer name for this device."
+                )
+            else:
+                return model_string
+
         model_first_str = split_model[0]
         model_second_str = split_model[1]
         check_first_string_for_numbers = re.search("\\d", model_first_str)
