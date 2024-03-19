@@ -8,7 +8,7 @@ import pandas as pd
 from pytz import UTC, utc
 from datetime import datetime, timedelta
 from subprocess import run
-from typing import Dict, Any, Tuple, List, Optional
+from typing import Dict, Any, Tuple, List, Optional, Union
 from croniter import croniter
 from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
@@ -546,7 +546,12 @@ def get_metrics(
 
 
 def format_usage_request(
-    start_time, end_time, avg_power=None, use_time_ratio=None, location=None
+    start_time: float,
+    end_time: float,
+    avg_power: Union[float, None] = None,
+    use_time_ratio: Union[float, None] = None,
+    location: Union[str, None] = None,
+    time_workload: Union[float, None] = None,
 ):
     hours_use_time = (end_time - start_time) / 3600.0
     kwargs_usage = {"hours_use_time": hours_use_time}
@@ -556,6 +561,8 @@ def format_usage_request(
         kwargs_usage["avg_power"] = avg_power
     if use_time_ratio:
         kwargs_usage["use_time_ratio"] = use_time_ratio
+    if time_workload:
+        kwargs_usage["time_workload"] = time_workload
     return kwargs_usage
 
 
