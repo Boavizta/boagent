@@ -627,6 +627,7 @@ def query_machine_impact_data(
         )
     elif model:
         # server = Server(usage=usage, model=model)
+        # TO IMPLEMENT
         # This conditional was based on a previous version of BoaviztAPI, where a server model could
         # be sent to /v1/server through a GET method. BoaviztAPI now expects an archetype string to
         # return a prerecorded impact from an asset.
@@ -638,6 +639,7 @@ def query_machine_impact_data(
 
 
 def generate_machine_configuration(hardware_data) -> Dict[str, Any]:
+    # Either delete or transfer this logic to hardware_cli / lshw
     config = {
         "cpu": {
             "units": len(hardware_data["cpus"]),
