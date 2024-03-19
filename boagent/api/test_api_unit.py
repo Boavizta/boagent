@@ -90,6 +90,19 @@ class FormatUsageRequestTest(TestCase):
         assert "use_time_ratio" in formatted_request
         assert "usage_location" in formatted_request
 
+    def test_format_usage_request_with_time_workload_as_percentage(self):
+
+        start_time = 1710837858
+        end_time = 1710841458
+        time_workload = 50
+
+        formatted_request = format_usage_request(
+            start_time=start_time, end_time=end_time, time_workload=time_workload
+        )
+
+        assert type(formatted_request) is dict
+        assert "time_workload" in formatted_request
+
 
 class ComputeAvgConsumptionTest(TestCase):
     def test_compute_average_consumption(self):
