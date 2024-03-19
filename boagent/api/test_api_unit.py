@@ -75,14 +75,14 @@ class FormatUsageRequestTest(TestCase):
         start_time = 1710837858
         end_time = 1710841458
         location = "FRA"
-        host_avg_consumption = 120
+        avg_power = 120
         use_time_ratio = 1
 
         formatted_request = format_usage_request(
             start_time=start_time,
             end_time=end_time,
             location=location,
-            host_avg_consumption=host_avg_consumption,
+            avg_power=avg_power,
             use_time_ratio=use_time_ratio,
         )
         assert type(formatted_request) is dict

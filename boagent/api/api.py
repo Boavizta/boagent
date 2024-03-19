@@ -415,7 +415,7 @@ def get_metrics(
 
     if measure_power:
         power_data = get_power_data(start_time, end_time)
-        host_avg_consumption = power_data["host_avg_consumption"]
+        avg_power = power_data["avg_power"]
         if "warning" in power_data:
             res["emissions_calculation_data"][
                 "energy_consumption_warning"
@@ -424,9 +424,7 @@ def get_metrics(
     boaviztapi_data = query_machine_impact_data(
         model={},
         configuration=hardware_data,
-        usage=format_usage_request(
-            start_time, end_time, host_avg_consumption, location
-        ),
+        usage=format_usage_request(start_time, end_time, avg_power, location),
     )
 
     if measure_power:
@@ -548,14 +546,13 @@ def get_metrics(
 
 
 def format_usage_request(
-    start_time, end_time, host_avg_consumption=None, use_time_ratio=None, location=None
+    start_time, end_time, avg_power=None, use_time_ratio=None, location=None
 ):
     hours_use_time = (end_time - start_time) / 3600.0
     kwargs_usage = {"hours_use_time": hours_use_time}
     if location:
         kwargs_usage["usage_location"] = location
-    if host_avg_consumption:
-        avg_power = host_avg_consumption / hours_use_time
+    if avg_power:
         kwargs_usage["avg_power"] = avg_power
     if use_time_ratio:
         kwargs_usage["use_time_ratio"] = use_time_ratio
@@ -569,7 +566,7 @@ def get_power_data(start_time, end_time):
     data = json.loads(formatted_scaphandre_json)
     res = [e for e in data if start_time <= float(e["host"]["timestamp"]) <= end_time]
     power_data["raw_data"] = res
-    power_data["host_avg_consumption"] = compute_average_consumption(res)
+    power_data["avg_power"] = compute_average_consumption(res)
     if end_time - start_time <= 3600:
         power_data["warning"] = (
             "The time window is lower than one hour, but the energy consumption estimate is in "
@@ -579,7 +576,7 @@ def get_power_data(start_time, end_time):
     return power_data
 
 
-def compute_average_consumption(power_data):
+def compute_average_consumption(power_data) -> float:
     # Host energy consumption
     total_host = 0.0
     avg_host = 0.0
