@@ -52,7 +52,7 @@ def get_boavizta_api_client():
     return client
 
 
-def iso8601_or_timestamp_as_timestamp(iso_time: str):
+def iso8601_or_timestamp_as_timestamp(iso_time: str) -> float:
     """
     Takes an str that's either a timestamp or an iso8601
     time. Returns a float that represents a timestamp.
