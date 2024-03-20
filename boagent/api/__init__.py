@@ -6,4 +6,5 @@ from .api import (
     query_machine_impact_data,
     compute_average_consumption,
     get_power_data,
+    get_metrics,
 )

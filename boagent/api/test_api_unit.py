@@ -9,6 +9,7 @@ from api import (
     format_usage_request,
     compute_average_consumption,
     get_power_data,
+    get_metrics,
 )
 
 from utils import format_scaphandre_json
@@ -155,6 +156,195 @@ class GetPowerDataTest(TestCase):
         assert "warning" in power_data
 
 
+class GetMetricsNotVerboseNoScaphandreTest(TestCase):
+    def setUp(self) -> None:
+        self.time_workload_as_percentage = 70
+        self.time_workload_as_list_of_dicts = [
+            {"time_percentage": 50, "load_percentage": 0},
+            {"time_percentage": 25, "load_percentage": 60},
+            {"time_percentage": 25, "load_percentage": 100},
+        ]
+        self.start_time = 1710837858
+        self.end_time = 1710841458
+        self.verbose = False
+        self.location = "FRA"
+        self.measure_power = False
+        self.lifetime = 5.0
+        self.fetch_hardware = False
+
+        with open("./tests/mocks/boaviztapi_response_not_verbose.json", "r") as file:
+            self.boaviztapi_data = json.load(file)
+
+    @patch("api.query_machine_impact_data")
+    def test_get_metrics_with_time_workload_as_percentage(
+        self, mocked_query_machine_impact_data
+    ):
+
+        metrics = get_metrics(
+            self.start_time,
+            self.end_time,
+            self.verbose,
+            self.location,
+            self.measure_power,
+            self.lifetime,
+            self.fetch_hardware,
+            self.time_workload_as_percentage,
+        )
+
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+
+        assert type(metrics) is dict
+        assert "emissions_calculation_data" in metrics
+        assert "embedded_emissions" in metrics
+        assert "embedded_abiotic_resources_depletion" in metrics
+        assert "embedded_primary_energy" in metrics
+
+    @patch("api.query_machine_impact_data")
+    def test_get_metrics_with_time_workload_as_list_of_dicts(
+        self, mocked_query_machine_impact_data
+    ):
+
+        metrics = get_metrics(
+            self.start_time,
+            self.end_time,
+            self.verbose,
+            self.location,
+            self.measure_power,
+            self.lifetime,
+            self.fetch_hardware,
+            self.time_workload_as_list_of_dicts,
+        )
+
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+        assert type(metrics) is dict
+        assert "emissions_calculation_data" in metrics
+        assert "embedded_emissions" in metrics
+        assert "embedded_abiotic_resources_depletion" in metrics
+        assert "embedded_primary_energy" in metrics
+
+
+class GetMetricsVerboseNoScaphandreTest(TestCase):
+    def setUp(self) -> None:
+        self.time_workload_as_percentage = 70
+        self.time_workload_as_list_of_dicts = [
+            {"time_percentage": 50, "load_percentage": 0},
+            {"time_percentage": 25, "load_percentage": 60},
+            {"time_percentage": 25, "load_percentage": 100},
+        ]
+        self.start_time = 1710837858
+        self.end_time = 1710841458
+        self.verbose = True
+        self.location = "FRA"
+        self.measure_power = False
+        self.lifetime = 5.0
+        self.fetch_hardware = False
+
+        with open("./tests/mocks/boaviztapi_response_verbose.json", "r") as file:
+            self.boaviztapi_data = json.load(file)
+
+    @patch("api.query_machine_impact_data")
+    def test_get_metrics_verbose_with_time_workload_percentage(
+        self, mocked_query_machine_impact_data
+    ):
+
+        metrics = get_metrics(
+            self.start_time,
+            self.end_time,
+            self.verbose,
+            self.location,
+            self.measure_power,
+            self.lifetime,
+            self.fetch_hardware,
+            self.time_workload_as_percentage,
+        )
+
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+
+        assert type(metrics) is dict
+        assert "emissions_calculation_data" in metrics
+        assert "embedded_emissions" in metrics
+        assert "embedded_abiotic_resources_depletion" in metrics
+        assert "embedded_primary_energy" in metrics
+        assert "raw_data" in metrics
+        assert "electricity_carbon_intensity" in metrics
+
+    @patch("api.query_machine_impact_data")
+    def test_get_metrics_verbose_with_time_workload_as_list_of_dicts(
+        self, mocked_query_machine_impact_data
+    ):
+
+        metrics = get_metrics(
+            self.start_time,
+            self.end_time,
+            self.verbose,
+            self.location,
+            self.measure_power,
+            self.lifetime,
+            self.fetch_hardware,
+            self.time_workload_as_list_of_dicts,
+        )
+
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+
+        assert type(metrics) is dict
+        assert "emissions_calculation_data" in metrics
+        assert "embedded_emissions" in metrics
+        assert "embedded_abiotic_resources_depletion" in metrics
+        assert "embedded_primary_energy" in metrics
+        assert "raw_data" in metrics
+        assert "electricity_carbon_intensity" in metrics
+
+
+class GetMetricsVerboseWithScaphandreTest(TestCase):
+    def setUp(self) -> None:
+        self.start_time = 1710837858
+        self.end_time = 1710841458
+        self.verbose = True
+        self.location = "FRA"
+        self.measure_power = True
+        self.lifetime = 5.0
+        self.fetch_hardware = False
+
+        with open("./tests/mocks/boaviztapi_response_verbose.json", "r") as file:
+            self.boaviztapi_data = json.load(file)
+
+        with open("./tests/mocks/formatted_scaphandre.json", "r") as file:
+            power_data = {}
+            power_data["raw_data"] = file.read()
+            power_data["avg_power"] = 11.86
+            self.power_data = power_data
+
+    @patch("api.query_machine_impact_data")
+    @patch("api.get_power_data")
+    def test_get_metrics_verbose_with_scaphandre(
+        self, mocked_query_machine_impact_data, mocked_power_data
+    ):
+
+        metrics = get_metrics(
+            self.start_time,
+            self.end_time,
+            self.verbose,
+            self.location,
+            self.measure_power,
+            self.lifetime,
+            self.fetch_hardware,
+        )
+
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+        mocked_power_data.return_value = self.power_data
+
+        assert type(metrics) is dict
+        assert "total_operational_emissions" in metrics
+        assert "total_operational_abiotic_resources_depletion" in metrics
+        assert "total_operational_primary_energy_consumed" in metrics
+        assert "start_time" in metrics
+        assert "end_time" in metrics
+        assert "average_power_measured" in metrics
+        assert "raw_data" in metrics
+        assert "electricity_carbon_intensity" in metrics
+        assert "power_data" in metrics["raw_data"]
+
+
 loader = TestLoader()
 suite = TestSuite()
 
@@ -162,3 +352,6 @@ suite.addTests(loader.loadTestsFromTestCase(ReadHardwareDataTest))
 suite.addTests(loader.loadTestsFromTestCase(FormatUsageRequestTest))
 suite.addTests(loader.loadTestsFromTestCase(ComputeAvgConsumptionTest))
 suite.addTests(loader.loadTestsFromTestCase(GetPowerDataTest))
+suite.addTests(loader.loadTestsFromTestCase(GetMetricsNotVerboseNoScaphandreTest))
+suite.addTests(loader.loadTestsFromTestCase(GetMetricsVerboseNoScaphandreTest))
+suite.addTests(loader.loadTestsFromTestCase(GetMetricsVerboseWithScaphandreTest))
