@@ -392,7 +392,8 @@ def get_metrics(
     location: str,
     measure_power: bool,
     lifetime: float,
-    fetch_hardware: bool = False,
+    fetch_hardware: bool,
+    time_workload: Union[float, list[dict[str, int]], None] = None,
 ):
 
     now: float = time.time()
@@ -413,13 +414,11 @@ def get_metrics(
 
     avg_power = None
     use_time_ratio = None
-    time_workload = None
 
     if measure_power:
         power_data = get_power_data(start_time, end_time)
         avg_power = power_data["avg_power"]
         use_time_ratio = power_data["use_time_ratio"]
-        time_workload = power_data["time_workload"]
         if "warning" in power_data:
             res["emissions_calculation_data"][
                 "energy_consumption_warning"
@@ -469,85 +468,84 @@ def get_metrics(
             "unit": "s",
             "long_unit": "seconds",
         }
+        res["average_power_measured"] = {
+            "value": avg_power,
+            "description": "Average power measured from start_time to end_time",
+            "type": "gauge",
+            "unit": "W",
+            "long_unit": "Watts",
+        }
 
-        if "manufacturer" in boaviztapi_data:
-            res["calculated_emissions"] = {
-                "value": boaviztapi_data["impacts"]["gwp"]["manufacturer"] * ratio
-                + boaviztapi_data["impacts"]["gwp"]["use"],
-                "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between "
-                "start_time and end_time",
-                "type": "gauge",
-                "unit": "kg CO2eq",
-                "long_unit": "kilograms CO2 equivalent",
-            }
-            res["embedded_emissions"] = {
-                "value": boaviztapi_data["impacts"]["gwp"]["manufacturer"] * ratio,
-                "description": "Embedded carbon emissions (manufacturing phase)",
-                "type": "gauge",
-                "unit": "kg CO2eq",
-                "long_unit": "kilograms CO2 equivalent",
-            }
-            res["embedded_abiotic_resources_depletion"] = {
-                "value": boaviztapi_data["impacts"]["adp"]["manufacturer"] * ratio,
-                "description": "Embedded abiotic ressources consumed (manufacturing phase)",
-                "type": "gauge",
-                "unit": "kg Sbeq",
-                "long_unit": "kilograms ADP equivalent",
-            }
-            res["embedded_primary_energy"] = {
-                "value": boaviztapi_data["impacts"]["pe"]["manufacturer"] * ratio,
-                "description": "Embedded primary energy consumed (manufacturing phase)",
-                "type": "gauge",
-                "unit": "MJ",
-                "long_unit": "Mega Joules",
-            }
+    """ res["calculated_emissions"] = {
+        "value": boaviztapi_data["impacts"]["gwp"]["value"] * ratio
+        + boaviztapi_data["impacts"]["gwp"]["use"]["value"],
+        "description": "Total Green House Gaz emissions calculated for manufacturing and usage phases, between "
+        "start_time and end_time",
+        "type": "gauge",
+        "unit": "kg CO2eq",
+        "long_unit": "kilograms CO2 equivalent",
+    } """
 
-        if "USAGE" in boaviztapi_data:
-            res["emissions_calculation_data"] = {
-                "average_power_measured": {
-                    "value": avg_power,
-                    "description": "Average power measured from start_time to end_time",
-                    "type": "gauge",
-                    "unit": "W",
-                    "long_unit": "Watts",
-                },
-                "electricity_carbon_intensity": {
-                    "value": boaviztapi_data["verbose"]["USAGE"]["gwp_factor"]["value"],
-                    "description": "Carbon intensity of the electricity mix. Mix considered : {}".format(
-                        location
-                    ),
-                    "type": "gauge",
-                    "unit": "kg CO2eq / kWh",
-                    "long_unit": "Kilograms CO2 equivalent per KiloWattHour",
-                },
-            }
-            usage_location_status = boaviztapi_data["verbose"]["USAGE"][
-                "usage_location"
-            ]["status"]
-            if usage_location_status == "MODIFY":
-                res["emissions_calculation_data"]["electricity_carbon_intensity"][
-                    "description"
-                ] += (
-                    "WARNING : The provided trigram doesn't match any existing country. So this result is "
-                    "based on average European electricity mix. Be careful with this data. "
-                )
-            elif usage_location_status == "SET":
-                res["emissions_calculation_data"]["electricity_carbon_intensity"][
-                    "description"
-                ] += (
-                    "WARNING : As no information was provided about your location, this result is based on "
-                    "average European electricity mix. Be careful with this data. "
-                )
+    res["embedded_emissions"] = {
+        "value": boaviztapi_data["impacts"]["gwp"]["embedded"]["value"] * ratio,
+        "description": "Embedded carbon emissions (manufacturing phase)",
+        "type": "gauge",
+        "unit": "kg CO2eq",
+        "long_unit": "kilograms CO2 equivalent",
+    }
+    res["embedded_abiotic_resources_depletion"] = {
+        "value": boaviztapi_data["impacts"]["adp"]["embedded"]["value"] * ratio,
+        "description": "Embedded abiotic ressources consumed (manufacturing phase)",
+        "type": "gauge",
+        "unit": "kg Sbeq",
+        "long_unit": "kilograms ADP equivalent",
+    }
+    res["embedded_primary_energy"] = {
+        "value": boaviztapi_data["impacts"]["pe"]["embedded"]["value"] * ratio,
+        "description": "Embedded primary energy consumed (manufacturing phase)",
+        "type": "gauge",
+        "unit": "MJ",
+        "long_unit": "Mega Joules",
+    }
 
-        if verbose:
-            res["emissions_calculation_data"]["raw_data"] = {
-                "hardware_data": hardware_data,
-                "resources_data": "not implemented yet",
-                "boaviztapi_data": boaviztapi_data,
-                "power_data": power_data,
-                "start_time": start_time,
-                "end_time": end_time,
-            }
+    usage_location_status = boaviztapi_data["verbose"]["usage_location"]["status"]
+
+    if usage_location_status == "MODIFY":
+        res["emissions_calculation_data"]["electricity_carbon_intensity"][
+            "description"
+        ] += (
+            "WARNING : The provided trigram doesn't match any existing country. So this result is "
+            "based on average European electricity mix. Be careful with this data. "
+        )
+    elif usage_location_status == "SET":
+        res["emissions_calculation_data"]["electricity_carbon_intensity"][
+            "description"
+        ] += (
+            "WARNING : As no information was provided about your location, this result is based on "
+            "average European electricity mix. Be careful with this data. "
+        )
+
+    if verbose:
+        res["raw_data"] = {
+            "hardware_data": hardware_data,
+            "resources_data": "not implemented yet",
+            "boaviztapi_data": boaviztapi_data,
+            "start_time": start_time,
+            "end_time": end_time,
+        }
+        res["electricity_carbon_intensity"] = {
+            "value": boaviztapi_data["verbose"]["gwp_factor"]["value"],
+            "description": "Carbon intensity of the electricity mix. Mix considered : {}".format(
+                location
+            ),
+            "type": "gauge",
+            "unit": "kg CO2eq / kWh",
+            "long_unit": "Kilograms CO2 equivalent per KiloWattHour",
+        }
+
+        if measure_power:
+            res["raw_data"]["power_data"] = power_data
+
     return res
 
 
@@ -557,7 +555,7 @@ def format_usage_request(
     avg_power: Union[float, None] = None,
     use_time_ratio: Union[float, None] = None,
     location: Union[str, None] = None,
-    time_workload: Union[float, None] = None,
+    time_workload: Union[float, list[dict[str, int]], None] = None,
 ):
     hours_use_time = (end_time - start_time) / 3600.0
     kwargs_usage = {"hours_use_time": hours_use_time}
