@@ -8,7 +8,8 @@ import pandas as pd
 from pytz import UTC, utc
 from datetime import datetime, timedelta
 from subprocess import run
-from typing import Dict, Any, Tuple, List, Optional, Union
+from typing import Dict, TypedDict, Any, Tuple, List, Optional, Union
+from pydantic import BaseModel
 from croniter import croniter
 from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
@@ -46,6 +47,15 @@ AZURE_LOCATION = settings.azure_location
 BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint
 CARBON_AWARE_API_ENDPOINT = settings.carbon_aware_api_endpoint
 CARBON_AWARE_API_TOKEN = settings.carbon_aware_api_token
+
+
+class TimeWorkloadDict(TypedDict):
+    time_percentage: float
+    load_percentage: float
+
+
+class TimeWorkloadList(BaseModel):
+    time_workload: list[TimeWorkloadDict]
 
 
 def configure_static(app):
@@ -204,10 +214,11 @@ async def query(
     start_time: str = "0.0",
     end_time: str = "0.0",
     verbose: bool = False,
-    location: str = None,
+    location: Union[str, None] = None,
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
+    time_workload: Union[float, list[dict[str, float]], None] = None,
 ):
     """
     start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
@@ -217,6 +228,8 @@ async def query(
     measure_power: Get electricity consumption metrics from Scaphandre or not.\n
     lifetime: Full lifetime of the machine to consider.\n
     fetch_hardware: Regenerate hardware.json file with current machine hardware or not.\n
+    time_workload: Workload percentage for CPU and RAM. Can be a float or a list of dictionaries with format
+    {"time_percentage": float, "load_percentage": float}
     """
     return get_metrics(
         iso8601_or_timestamp_as_timestamp(start_time),
@@ -226,6 +239,7 @@ async def query(
         measure_power,
         lifetime,
         fetch_hardware,
+        time_workload,
     )
 
 
@@ -389,11 +403,11 @@ def get_metrics(
     start_time: float,
     end_time: float,
     verbose: bool,
-    location: str,
+    location: Union[str, None],
     measure_power: bool,
     lifetime: float,
     fetch_hardware: bool,
-    time_workload: Union[float, list[dict[str, int]], None] = None,
+    time_workload: Union[float, list[dict[str, float]], None] = None,
 ):
 
     now: float = time.time()
