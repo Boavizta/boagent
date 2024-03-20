@@ -508,23 +508,6 @@ def get_metrics(
         "long_unit": "Mega Joules",
     }
 
-    usage_location_status = boaviztapi_data["verbose"]["usage_location"]["status"]
-
-    if usage_location_status == "MODIFY":
-        res["emissions_calculation_data"]["electricity_carbon_intensity"][
-            "description"
-        ] += (
-            "WARNING : The provided trigram doesn't match any existing country. So this result is "
-            "based on average European electricity mix. Be careful with this data. "
-        )
-    elif usage_location_status == "SET":
-        res["emissions_calculation_data"]["electricity_carbon_intensity"][
-            "description"
-        ] += (
-            "WARNING : As no information was provided about your location, this result is based on "
-            "average European electricity mix. Be careful with this data. "
-        )
-
     if verbose:
         res["raw_data"] = {
             "hardware_data": hardware_data,
