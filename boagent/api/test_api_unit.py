@@ -8,6 +8,7 @@ from api import (
     # query_machine_impact_data,
     format_usage_request,
     compute_average_consumption,
+    get_power_data,
 )
 
 from utils import format_scaphandre_json
@@ -55,14 +56,15 @@ class ReadHardwareDataTest(TestCase):
 
 
 class FormatUsageRequestTest(TestCase):
+    def setUp(self) -> None:
+        self.start_time = 1710837858
+        self.end_time = 1710841458
+
     def test_format_usage_request_with_start_and_end_times(self):
 
-        start_time = 1710837858
-        end_time = 1710841458
-
         formatted_request = format_usage_request(
-            start_time=start_time,
-            end_time=end_time,
+            start_time=self.start_time,
+            end_time=self.end_time,
         )
 
         assert type(formatted_request) is dict
@@ -72,15 +74,13 @@ class FormatUsageRequestTest(TestCase):
         self,
     ):
 
-        start_time = 1710837858
-        end_time = 1710841458
         location = "FRA"
         avg_power = 120
         use_time_ratio = 1
 
         formatted_request = format_usage_request(
-            start_time=start_time,
-            end_time=end_time,
+            start_time=self.start_time,
+            end_time=self.end_time,
             location=location,
             avg_power=avg_power,
             use_time_ratio=use_time_ratio,
@@ -92,12 +92,12 @@ class FormatUsageRequestTest(TestCase):
 
     def test_format_usage_request_with_time_workload_as_percentage(self):
 
-        start_time = 1710837858
-        end_time = 1710841458
         time_workload = 50
 
         formatted_request = format_usage_request(
-            start_time=start_time, end_time=end_time, time_workload=time_workload
+            start_time=self.start_time,
+            end_time=self.end_time,
+            time_workload=time_workload,
         )
 
         assert type(formatted_request) is dict
@@ -114,9 +114,51 @@ class ComputeAvgConsumptionTest(TestCase):
         assert type(avg_host) is float
 
 
+class GetPowerDataTest(TestCase):
+    def setUp(self) -> None:
+        # One-hour interval
+        self.start_time = 1710837858
+        self.end_time = 1710841458
+        # Ten minutes interval
+        self.short_interval_start_time = 1710923675
+        self.short_interval_end_time = 1710924275
+
+    @patch("api.format_scaphandre_json")
+    def test_get_power_data(self, mocked_format_scaphandre_json):
+
+        mocked_format_scaphandre_json.return_value = open(
+            "./tests/mocks/formatted_scaphandre.json"
+        ).read()
+
+        power_data = get_power_data(self.start_time, self.end_time)
+
+        assert type(power_data) is dict
+        assert "raw_data" in power_data
+        assert "avg_power" in power_data
+
+    @patch("api.format_scaphandre_json")
+    def test_get_power_data_with_short_time_interval(
+        self, mocked_format_scaphandre_json
+    ):
+
+        mocked_format_scaphandre_json.return_value = open(
+            "./tests/mocks/formatted_scaphandre.json"
+        ).read()
+
+        power_data = get_power_data(
+            self.short_interval_start_time, self.short_interval_end_time
+        )
+
+        assert type(power_data) is dict
+        assert "raw_data" in power_data
+        assert "avg_power" in power_data
+        assert "warning" in power_data
+
+
 loader = TestLoader()
 suite = TestSuite()
 
 suite.addTests(loader.loadTestsFromTestCase(ReadHardwareDataTest))
 suite.addTests(loader.loadTestsFromTestCase(FormatUsageRequestTest))
 suite.addTests(loader.loadTestsFromTestCase(ComputeAvgConsumptionTest))
+suite.addTests(loader.loadTestsFromTestCase(GetPowerDataTest))
