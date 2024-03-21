@@ -7,8 +7,8 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import Column, DateTime, Integer, Float, insert, select, inspect
 from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.orm import Session, declarative_base, declared_attr
-from api.config import settings
-from api.utils import filter_date_range
+from config import settings
+from utils import filter_date_range
 
 
 DB_PATH = settings.db_path

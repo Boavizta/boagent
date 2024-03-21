@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     boaviztapi_endpoint: str = os.getenv("BOAVIZTAPI_ENDPOINT", "http://localhost:5000")
     db_path: str = os.getenv("BOAGENT_DB_PATH", "../../db/boagent.db")
     public_path: str = os.getenv("BOAGENT_PUBLIC_PATH", "../public")
-    assets_path: str = os.getenv("BOAGENT_ASSETS_PATH", "./public/assets/")
+    assets_path: str = os.getenv("BOAGENT_ASSETS_PATH", "../public/assets/")
     carbon_aware_api_endpoint: str = os.getenv(
         "CARBON_AWARE_API_ENDPOINT", "https://carbon-aware-api.azurewebsites.net"
     )
