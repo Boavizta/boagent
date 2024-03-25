@@ -1,7 +1,7 @@
 from datetime import datetime
 from boaviztapi_sdk import ApiClient, Configuration
 from dateutil import parser
-from config import settings
+from api.config import settings
 from os import PathLike
 
 BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint

@@ -9,13 +9,12 @@ from pytz import UTC, utc
 from datetime import datetime, timedelta
 from subprocess import run
 from typing import Dict, Any, Tuple, List, Optional, Union
-from pydantic import BaseModel
 from croniter import croniter
 from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
-from utils import (
+from api.utils import (
     iso8601_or_timestamp_as_timestamp,
     format_scaphandre_json,
     format_prometheus_output,
@@ -25,8 +24,8 @@ from utils import (
 )
 from boaviztapi_sdk.models.server import Server
 
-from config import settings
-from database import (
+from api.config import settings
+from api.database import (
     get_session,
     select_metric,
     get_most_recent_data,
@@ -47,15 +46,6 @@ AZURE_LOCATION = settings.azure_location
 BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint
 CARBON_AWARE_API_ENDPOINT = settings.carbon_aware_api_endpoint
 CARBON_AWARE_API_TOKEN = settings.carbon_aware_api_token
-
-
-# class TimeWorkloadDict(TypedDict):
-#    time_percentage: float
-#    load_percentage: float
-
-
-# class TimeWorkloadList(BaseModel):
-#    time_workload: list[TimeWorkloadDict]
 
 
 def configure_static(app):
