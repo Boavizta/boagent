@@ -24,13 +24,14 @@ mock_boaviztapi_response_not_verbose = os.path.join(f"{current_dir}", "../mocks/
 mock_boaviztapi_response_verbose = os.path.join(f"{current_dir}", "../mocks/boaviztapi_response_verbose.json")
 mock_formatted_scaphandre = os.path.join(f"{current_dir}", "../mocks/formatted_scaphandre.json")
 hardware_cli = os.path.join(f"{current_dir}", "")
+hardware_data = os.path.join(f"{current_dir}", "../../hardware/hardware_data.json")
 
 
 class ReadHardwareDataTest(TestCase):
     def test_build_hardware_data(self):
 
         build_hardware_data()
-        assert os.path.exists("./hardware_data.json") is True
+        assert os.path.exists(hardware_data) is True
 
     def test_read_hardware_data(self):
 
@@ -62,7 +63,7 @@ class ReadHardwareDataTest(TestCase):
     #    pass
 
     def tearDown(self) -> None:
-        os.remove("./hardware_data.json")
+        os.remove(hardware_data)
 
 
 class FormatUsageRequestTest(TestCase):

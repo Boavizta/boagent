@@ -137,7 +137,6 @@ dmypy.json
 .idea/
 .vscode/
 
-*.json
 *.db
 *.svg
 *.csv
