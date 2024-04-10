@@ -2,11 +2,11 @@ from cpuinfo import get_cpu_info
 from cpuid import cpuid, cpu_microarchitecture
 from typing import TypeAlias
 
-from lshw import LSHW
+from .lshw import Lshw
 
 CpuInfo: TypeAlias = list[dict[str, str | tuple | dict[str, str] | dict]]
 
-lshw_data = LSHW()
+lshw_data = Lshw()
 
 """ def get_socket_number_linux(location: str = "/sys/devices/system/node/possible") -> int:
     with open(location, 'r') as f:

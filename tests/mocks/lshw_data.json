@@ -1,0 +1,1137 @@
+{
+  "id" : "repair-thinkpad-t490s",
+  "class" : "system",
+  "claimed" : true,
+  "description" : "Computer",
+  "width" : 64,
+  "capabilities" : {
+    "smp" : "Symmetric Multi-Processing",
+    "vsyscall32" : "32-bit processes"
+  },
+  "children" : [    {
+      "id" : "core",
+      "class" : "bus",
+      "claimed" : true,
+      "description" : "Motherboard",
+      "physid" : "0",
+      "children" : [        {
+          "id" : "memory",
+          "class" : "memory",
+          "claimed" : true,
+          "description" : "System memory",
+          "physid" : "0",
+          "units" : "bytes",
+          "size" : 8589934592
+        },
+        {
+          "id" : "cpu",
+          "class" : "processor",
+          "claimed" : true,
+          "product" : "Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz",
+          "vendor" : "Intel Corp.",
+          "physid" : "1",
+          "businfo" : "cpu@0",
+          "version" : "6.142.12",
+          "units" : "Hz",
+          "size" : 2173979000,
+          "capacity" : 4600000000,
+          "width" : 64,
+          "configuration" : {
+            "microcode" : "248"
+          },
+          "capabilities" : {
+            "fpu" : "mathematical co-processor",
+            "fpu_exception" : "FPU exceptions reporting",
+            "wp" : true,
+            "vme" : "virtual mode extensions",
+            "de" : "debugging extensions",
+            "pse" : "page size extensions",
+            "tsc" : "time stamp counter",
+            "msr" : "model-specific registers",
+            "pae" : "4GB+ memory addressing (Physical Address Extension)",
+            "mce" : "machine check exceptions",
+            "cx8" : "compare and exchange 8-byte",
+            "apic" : "on-chip advanced programmable interrupt controller (APIC)",
+            "sep" : "fast system calls",
+            "mtrr" : "memory type range registers",
+            "pge" : "page global enable",
+            "mca" : "machine check architecture",
+            "cmov" : "conditional move instruction",
+            "pat" : "page attribute table",
+            "pse36" : "36-bit page size extensions",
+            "clflush" : true,
+            "dts" : "debug trace and EMON store MSRs",
+            "acpi" : "thermal control (ACPI)",
+            "mmx" : "multimedia extensions (MMX)",
+            "fxsr" : "fast floating point save/restore",
+            "sse" : "streaming SIMD extensions (SSE)",
+            "sse2" : "streaming SIMD extensions (SSE2)",
+            "ss" : "self-snoop",
+            "ht" : "HyperThreading",
+            "tm" : "thermal interrupt and status",
+            "pbe" : "pending break event",
+            "syscall" : "fast system calls",
+            "nx" : "no-execute bit (NX)",
+            "pdpe1gb" : true,
+            "rdtscp" : true,
+            "x86-64" : "64bits extensions (x86-64)",
+            "constant_tsc" : true,
+            "art" : true,
+            "arch_perfmon" : true,
+            "pebs" : true,
+            "bts" : true,
+            "rep_good" : true,
+            "nopl" : true,
+            "xtopology" : true,
+            "nonstop_tsc" : true,
+            "cpuid" : true,
+            "aperfmperf" : true,
+            "pni" : true,
+            "pclmulqdq" : true,
+            "dtes64" : true,
+            "monitor" : true,
+            "ds_cpl" : true,
+            "vmx" : true,
+            "est" : true,
+            "tm2" : true,
+            "ssse3" : true,
+            "sdbg" : true,
+            "fma" : true,
+            "cx16" : true,
+            "xtpr" : true,
+            "pdcm" : true,
+            "pcid" : true,
+            "sse4_1" : true,
+            "sse4_2" : true,
+            "x2apic" : true,
+            "movbe" : true,
+            "popcnt" : true,
+            "tsc_deadline_timer" : true,
+            "aes" : true,
+            "xsave" : true,
+            "avx" : true,
+            "f16c" : true,
+            "rdrand" : true,
+            "lahf_lm" : true,
+            "abm" : true,
+            "3dnowprefetch" : true,
+            "cpuid_fault" : true,
+            "epb" : true,
+            "invpcid_single" : true,
+            "ssbd" : true,
+            "ibrs" : true,
+            "ibpb" : true,
+            "stibp" : true,
+            "ibrs_enhanced" : true,
+            "tpr_shadow" : true,
+            "flexpriority" : true,
+            "ept" : true,
+            "vpid" : true,
+            "ept_ad" : true,
+            "fsgsbase" : true,
+            "tsc_adjust" : true,
+            "sgx" : true,
+            "bmi1" : true,
+            "avx2" : true,
+            "smep" : true,
+            "bmi2" : true,
+            "erms" : true,
+            "invpcid" : true,
+            "mpx" : true,
+            "rdseed" : true,
+            "adx" : true,
+            "smap" : true,
+            "clflushopt" : true,
+            "intel_pt" : true,
+            "xsaveopt" : true,
+            "xsavec" : true,
+            "xgetbv1" : true,
+            "xsaves" : true,
+            "dtherm" : true,
+            "ida" : true,
+            "arat" : true,
+            "pln" : true,
+            "pts" : true,
+            "hwp" : true,
+            "hwp_notify" : true,
+            "hwp_act_window" : true,
+            "hwp_epp" : true,
+            "vnmi" : true,
+            "md_clear" : true,
+            "flush_l1d" : true,
+            "arch_capabilities" : true,
+            "cpufreq" : "CPU Frequency scaling"
+          }
+        },
+        {
+          "id" : "pci",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:00",
+          "description" : "Host bridge",
+          "product" : "Coffee Lake HOST and DRAM Controller",
+          "vendor" : "Intel Corporation",
+          "physid" : "100",
+          "businfo" : "pci@0000:00:00.0",
+          "version" : "0c",
+          "width" : 32,
+          "clock" : 33000000,
+          "configuration" : {
+            "driver" : "skl_uncore"
+          },
+          "children" : [            {
+              "id" : "display",
+              "class" : "display",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:02.0",
+              "description" : "VGA compatible controller",
+              "product" : "WhiskeyLake-U GT2 [UHD Graphics 620]",
+              "vendor" : "Intel Corporation",
+              "physid" : "2",
+              "businfo" : "pci@0000:00:02.0",
+              "logicalname" : "/dev/fb0",
+              "version" : "02",
+              "width" : 64,
+              "clock" : 33000000,
+              "configuration" : {
+                "depth" : "32",
+                "driver" : "i915",
+                "latency" : "0",
+                "resolution" : "1920,1080"
+              },
+              "capabilities" : {
+                "vga_controller" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing",
+                "rom" : "extension ROM",
+                "fb" : "framebuffer"
+              }
+            },
+            {
+              "id" : "generic:0",
+              "class" : "generic",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:04.0",
+              "description" : "Signal processing controller",
+              "product" : "Xeon E3-1200 v5/E3-1500 v5/6th Gen Core Processor Thermal Subsystem",
+              "vendor" : "Intel Corporation",
+              "physid" : "4",
+              "businfo" : "pci@0000:00:04.0",
+              "version" : "0c",
+              "width" : 64,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "proc_thermal",
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "generic:1",
+              "class" : "generic",
+              "handle" : "PCI:0000:00:08.0",
+              "description" : "System peripheral",
+              "product" : "Xeon E3-1200 v5/v6 / E3-1500 v5 / 6th/7th/8th Gen Core Processor Gaussian Mixture Model",
+              "vendor" : "Intel Corporation",
+              "physid" : "8",
+              "businfo" : "pci@0000:00:08.0",
+              "version" : "00",
+              "width" : 64,
+              "clock" : 33000000,
+              "configuration" : {
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "generic:2",
+              "class" : "generic",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:12.0",
+              "description" : "Signal processing controller",
+              "product" : "Cannon Point-LP Thermal Controller",
+              "vendor" : "Intel Corporation",
+              "physid" : "12",
+              "businfo" : "pci@0000:00:12.0",
+              "version" : "30",
+              "width" : 64,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "intel_pch_thermal",
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "usb",
+              "class" : "bus",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:14.0",
+              "description" : "USB controller",
+              "product" : "Cannon Point-LP USB 3.1 xHCI Controller",
+              "vendor" : "Intel Corporation",
+              "physid" : "14",
+              "businfo" : "pci@0000:00:14.0",
+              "version" : "30",
+              "width" : 64,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "xhci_hcd",
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "xhci" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "memory",
+              "class" : "memory",
+              "handle" : "PCI:0000:00:14.2",
+              "description" : "RAM memory",
+              "product" : "Cannon Point-LP Shared SRAM",
+              "vendor" : "Intel Corporation",
+              "physid" : "14.2",
+              "businfo" : "pci@0000:00:14.2",
+              "version" : "30",
+              "width" : 64,
+              "clock" : 33000000,
+              "configuration" : {
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "network:0",
+              "class" : "network",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:14.3",
+              "description" : "Wireless interface",
+              "product" : "Cannon Point-LP CNVi [Wireless-AC]",
+              "vendor" : "Intel Corporation",
+              "physid" : "14.3",
+              "businfo" : "pci@0000:00:14.3",
+              "logicalname" : "wlp0s20f3",
+              "version" : "30",
+              "serial" : "38:00:25:8e:bf:a2",
+              "width" : 64,
+              "clock" : 33000000,
+              "configuration" : {
+                "broadcast" : "yes",
+                "driver" : "iwlwifi",
+                "driverversion" : "6.5.0-21-generic",
+                "firmware" : "46.fae53a8b.0 9000-pu-b0-jf-b0-",
+                "ip" : "192.168.10.82",
+                "latency" : "0",
+                "link" : "yes",
+                "multicast" : "yes",
+                "wireless" : "IEEE 802.11"
+              },
+              "capabilities" : {
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing",
+                "ethernet" : true,
+                "physical" : "Physical interface",
+                "wireless" : "Wireless-LAN"
+              }
+            },
+            {
+              "id" : "communication",
+              "class" : "communication",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:16.0",
+              "description" : "Communication controller",
+              "product" : "Cannon Point-LP MEI Controller #1",
+              "vendor" : "Intel Corporation",
+              "physid" : "16",
+              "businfo" : "pci@0000:00:16.0",
+              "version" : "30",
+              "width" : 64,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "mei_me",
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "pci:0",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCIBUS:0000:01",
+              "description" : "PCI bridge",
+              "product" : "Cannon Point-LP PCI Express Root Port #1",
+              "vendor" : "Intel Corporation",
+              "physid" : "1c",
+              "businfo" : "pci@0000:00:1c.0",
+              "version" : "f0",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "pcieport"
+              },
+              "capabilities" : {
+                "pci" : true,
+                "normal_decode" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              },
+              "children" : [                {
+                  "id" : "generic",
+                  "class" : "bus",
+                  "claimed" : true,
+                  "handle" : "PCI:0000:01:00.0",
+                  "description" : "MMC Host",
+                  "product" : "GL9750 SD Host Controller",
+                  "vendor" : "Genesys Logic, Inc",
+                  "physid" : "0",
+                  "businfo" : "pci@0000:01:00.0",
+                  "logicalname" : "mmc0",
+                  "version" : "01",
+                  "width" : 32,
+                  "clock" : 33000000,
+                  "configuration" : {
+                    "driver" : "sdhci-pci",
+                    "latency" : "0"
+                  },
+                  "capabilities" : {
+                    "bus_master" : "bus mastering",
+                    "cap_list" : "PCI capabilities listing"
+                  }
+                }]
+            },
+            {
+              "id" : "pci:1",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCIBUS:0000:02",
+              "description" : "PCI bridge",
+              "product" : "Cannon Point-LP PCI Express Root Port #5",
+              "vendor" : "Intel Corporation",
+              "physid" : "1c.4",
+              "businfo" : "pci@0000:00:1c.4",
+              "version" : "f0",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "pcieport"
+              },
+              "capabilities" : {
+                "pci" : true,
+                "normal_decode" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              },
+              "children" : [                {
+                  "id" : "pci",
+                  "class" : "bridge",
+                  "claimed" : true,
+                  "handle" : "PCIBUS:0000:03",
+                  "description" : "PCI bridge",
+                  "product" : "JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016]",
+                  "vendor" : "Intel Corporation",
+                  "physid" : "0",
+                  "businfo" : "pci@0000:02:00.0",
+                  "version" : "01",
+                  "width" : 32,
+                  "clock" : 33000000,
+                  "configuration" : {
+                    "driver" : "pcieport"
+                  },
+                  "capabilities" : {
+                    "pci" : true,
+                    "normal_decode" : true,
+                    "bus_master" : "bus mastering",
+                    "cap_list" : "PCI capabilities listing"
+                  },
+                  "children" : [                    {
+                      "id" : "pci:0",
+                      "class" : "bridge",
+                      "claimed" : true,
+                      "handle" : "PCIBUS:0000:04",
+                      "description" : "PCI bridge",
+                      "product" : "JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016]",
+                      "vendor" : "Intel Corporation",
+                      "physid" : "0",
+                      "businfo" : "pci@0000:03:00.0",
+                      "version" : "01",
+                      "width" : 32,
+                      "clock" : 33000000,
+                      "configuration" : {
+                        "driver" : "pcieport"
+                      },
+                      "capabilities" : {
+                        "pci" : true,
+                        "normal_decode" : true,
+                        "bus_master" : "bus mastering",
+                        "cap_list" : "PCI capabilities listing"
+                      },
+                      "children" : [                        {
+                          "id" : "generic",
+                          "class" : "generic",
+                          "claimed" : true,
+                          "handle" : "PCI:0000:04:00.0",
+                          "description" : "System peripheral",
+                          "product" : "JHL6240 Thunderbolt 3 NHI (Low Power) [Alpine Ridge LP 2016]",
+                          "vendor" : "Intel Corporation",
+                          "physid" : "0",
+                          "businfo" : "pci@0000:04:00.0",
+                          "version" : "01",
+                          "width" : 32,
+                          "clock" : 33000000,
+                          "configuration" : {
+                            "driver" : "thunderbolt",
+                            "latency" : "0"
+                          },
+                          "capabilities" : {
+                            "bus_master" : "bus mastering",
+                            "cap_list" : "PCI capabilities listing"
+                          }
+                        }]
+                    },
+                    {
+                      "id" : "pci:1",
+                      "class" : "bridge",
+                      "claimed" : true,
+                      "handle" : "PCIBUS:0000:05",
+                      "description" : "PCI bridge",
+                      "product" : "JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016]",
+                      "vendor" : "Intel Corporation",
+                      "physid" : "1",
+                      "businfo" : "pci@0000:03:01.0",
+                      "version" : "01",
+                      "width" : 32,
+                      "clock" : 33000000,
+                      "configuration" : {
+                        "driver" : "pcieport"
+                      },
+                      "capabilities" : {
+                        "pci" : true,
+                        "normal_decode" : true,
+                        "bus_master" : "bus mastering",
+                        "cap_list" : "PCI capabilities listing"
+                      }
+                    },
+                    {
+                      "id" : "pci:2",
+                      "class" : "bridge",
+                      "claimed" : true,
+                      "handle" : "PCIBUS:0000:3a",
+                      "description" : "PCI bridge",
+                      "product" : "JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016]",
+                      "vendor" : "Intel Corporation",
+                      "physid" : "2",
+                      "businfo" : "pci@0000:03:02.0",
+                      "version" : "01",
+                      "width" : 32,
+                      "clock" : 33000000,
+                      "configuration" : {
+                        "driver" : "pcieport"
+                      },
+                      "capabilities" : {
+                        "pci" : true,
+                        "normal_decode" : true,
+                        "bus_master" : "bus mastering",
+                        "cap_list" : "PCI capabilities listing"
+                      },
+                      "children" : [                        {
+                          "id" : "usb",
+                          "class" : "bus",
+                          "claimed" : true,
+                          "handle" : "PCI:0000:3a:00.0",
+                          "description" : "USB controller",
+                          "product" : "JHL6240 Thunderbolt 3 USB 3.1 Controller (Low Power) [Alpine Ridge LP 2016]",
+                          "vendor" : "Intel Corporation",
+                          "physid" : "0",
+                          "businfo" : "pci@0000:3a:00.0",
+                          "version" : "01",
+                          "width" : 32,
+                          "clock" : 33000000,
+                          "configuration" : {
+                            "driver" : "xhci_hcd",
+                            "latency" : "0"
+                          },
+                          "capabilities" : {
+                            "xhci" : true,
+                            "bus_master" : "bus mastering",
+                            "cap_list" : "PCI capabilities listing"
+                          }
+                        }]
+                    }]
+                }]
+            },
+            {
+              "id" : "pci:2",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCIBUS:0000:3c",
+              "description" : "PCI bridge",
+              "product" : "Cannon Point-LP PCI Express Root Port #9",
+              "vendor" : "Intel Corporation",
+              "physid" : "1d",
+              "businfo" : "pci@0000:00:1d.0",
+              "version" : "f0",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "pcieport"
+              },
+              "capabilities" : {
+                "pci" : true,
+                "normal_decode" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "pci:3",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCIBUS:0000:3d",
+              "description" : "PCI bridge",
+              "product" : "Cannon Point-LP PCI Express Root Port #13",
+              "vendor" : "Intel Corporation",
+              "physid" : "1d.4",
+              "businfo" : "pci@0000:00:1d.4",
+              "version" : "f0",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "pcieport"
+              },
+              "capabilities" : {
+                "pci" : true,
+                "normal_decode" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              },
+              "children" : [                {
+                  "id" : "nvme",
+                  "class" : "storage",
+                  "claimed" : true,
+                  "handle" : "PCI:0000:3d:00.0",
+                  "description" : "NVMe device",
+                  "product" : "KXG6AZNV256G TOSHIBA",
+                  "vendor" : "Toshiba Corporation",
+                  "physid" : "0",
+                  "businfo" : "pci@0000:3d:00.0",
+                  "logicalname" : "/dev/nvme0",
+                  "version" : "5108AGLA",
+                  "serial" : "39NS11RYTMCQ",
+                  "width" : 64,
+                  "clock" : 33000000,
+                  "configuration" : {
+                    "driver" : "nvme",
+                    "latency" : "0",
+                    "nqn" : "nqn.2017-03.jp.co.toshiba:KXG6AZNV256G TOSHIBA:39NS11RYTMCQ",
+                    "state" : "live"
+                  },
+                  "capabilities" : {
+                    "nvme" : true,
+                    "nvm_express" : true,
+                    "bus_master" : "bus mastering",
+                    "cap_list" : "PCI capabilities listing"
+                  },
+                  "children" : [                    {
+                      "id" : "namespace:0",
+                      "class" : "disk",
+                      "claimed" : true,
+                      "description" : "NVMe disk",
+                      "physid" : "0",
+                      "logicalname" : "hwmon3"
+                    },
+                    {
+                      "id" : "namespace:1",
+                      "class" : "disk",
+                      "claimed" : true,
+                      "description" : "NVMe disk",
+                      "physid" : "2",
+                      "logicalname" : "/dev/ng0n1"
+                    },
+                    {
+                      "id" : "namespace:2",
+                      "class" : "disk",
+                      "claimed" : true,
+                      "description" : "NVMe disk",
+                      "physid" : "1",
+                      "businfo" : "nvme@0:1",
+                      "logicalname" : "/dev/nvme0n1",
+                      "configuration" : {
+                        "wwid" : "eui.8ce38e020004f28f"
+                      }
+                    }]
+                }]
+            },
+            {
+              "id" : "isa",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:1f.0",
+              "description" : "ISA bridge",
+              "product" : "Cannon Point-LP LPC Controller",
+              "vendor" : "Intel Corporation",
+              "physid" : "1f",
+              "businfo" : "pci@0000:00:1f.0",
+              "version" : "30",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "isa" : true,
+                "bus_master" : "bus mastering"
+              },
+              "children" : [                {
+                  "id" : "pnp00:00",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "0",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:01",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "1",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:02",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "2",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:03",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "3",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:04",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0b00",
+                  "physid" : "4",
+                  "configuration" : {
+                    "driver" : "rtc_cmos"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:05",
+                  "class" : "generic",
+                  "claimed" : true,
+                  "product" : "PnP device INT3f0d",
+                  "physid" : "5",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:06",
+                  "class" : "generic",
+                  "claimed" : true,
+                  "product" : "PnP device LEN0071",
+                  "physid" : "6",
+                  "configuration" : {
+                    "driver" : "i8042 kbd"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:07",
+                  "class" : "generic",
+                  "claimed" : true,
+                  "product" : "PnP device LEN0401",
+                  "physid" : "7",
+                  "configuration" : {
+                    "driver" : "i8042 aux"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:08",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "8",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:09",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "9",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:0a",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "a",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:0b",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c01",
+                  "physid" : "b",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                }]
+            },
+            {
+              "id" : "multimedia",
+              "class" : "multimedia",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:1f.3",
+              "description" : "Audio device",
+              "product" : "Cannon Point-LP High Definition Audio Controller",
+              "vendor" : "Intel Corporation",
+              "physid" : "1f.3",
+              "businfo" : "pci@0000:00:1f.3",
+              "logicalname" : ["card0", "/dev/snd/controlC0", "/dev/snd/hwC0D0", "/dev/snd/hwC0D2", "/dev/snd/pcmC0D0c", "/dev/snd/pcmC0D0p", "/dev/snd/pcmC0D3p", "/dev/snd/pcmC0D7p", "/dev/snd/pcmC0D8p"],
+              "version" : "30",
+              "width" : 64,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "snd_hda_intel",
+                "latency" : "64"
+              },
+              "capabilities" : {
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              },
+              "children" : [                {
+                  "id" : "input:0",
+                  "class" : "input",
+                  "claimed" : true,
+                  "product" : "HDA Intel PCH Mic",
+                  "physid" : "0",
+                  "logicalname" : ["input20", "/dev/input/event8"]
+                },
+                {
+                  "id" : "input:1",
+                  "class" : "input",
+                  "claimed" : true,
+                  "product" : "HDA Intel PCH Headphone",
+                  "physid" : "1",
+                  "logicalname" : ["input21", "/dev/input/event9"]
+                },
+                {
+                  "id" : "input:2",
+                  "class" : "input",
+                  "claimed" : true,
+                  "product" : "HDA Intel PCH HDMI/DP,pcm=3",
+                  "physid" : "2",
+                  "logicalname" : ["input22", "/dev/input/event10"]
+                },
+                {
+                  "id" : "input:3",
+                  "class" : "input",
+                  "claimed" : true,
+                  "product" : "HDA Intel PCH HDMI/DP,pcm=7",
+                  "physid" : "3",
+                  "logicalname" : ["input23", "/dev/input/event11"]
+                },
+                {
+                  "id" : "input:4",
+                  "class" : "input",
+                  "claimed" : true,
+                  "product" : "HDA Intel PCH HDMI/DP,pcm=8",
+                  "physid" : "4",
+                  "logicalname" : ["input24", "/dev/input/event12"]
+                }]
+            },
+            {
+              "id" : "serial:0",
+              "class" : "bus",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:1f.4",
+              "description" : "SMBus",
+              "product" : "Cannon Point-LP SMBus Controller",
+              "vendor" : "Intel Corporation",
+              "physid" : "1f.4",
+              "businfo" : "pci@0000:00:1f.4",
+              "version" : "30",
+              "width" : 64,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "i801_smbus",
+                "latency" : "0"
+              },
+              "children" : [                {
+                  "id" : "input:0",
+                  "class" : "input",
+                  "claimed" : true,
+                  "product" : "Elan Touchpad",
+                  "physid" : "0",
+                  "logicalname" : ["input16", "/dev/input/event4", "/dev/input/mouse0"],
+                  "capabilities" : {
+                    "i2c" : "I²C bus"
+                  }
+                },
+                {
+                  "id" : "input:1",
+                  "class" : "input",
+                  "claimed" : true,
+                  "product" : "Elan TrackPoint",
+                  "physid" : "1",
+                  "logicalname" : ["input17", "/dev/input/event5", "/dev/input/mouse1"],
+                  "capabilities" : {
+                    "i2c" : "I²C bus"
+                  }
+                }]
+            },
+            {
+              "id" : "serial:1",
+              "class" : "bus",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:1f.5",
+              "description" : "Serial bus controller",
+              "product" : "Cannon Point-LP SPI Controller",
+              "vendor" : "Intel Corporation",
+              "physid" : "1f.5",
+              "businfo" : "pci@0000:00:1f.5",
+              "version" : "30",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "intel-spi",
+                "latency" : "0"
+              }
+            },
+            {
+              "id" : "network:1",
+              "class" : "network",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:1f.6",
+              "description" : "Ethernet interface",
+              "product" : "Ethernet Connection (6) I219-V",
+              "vendor" : "Intel Corporation",
+              "physid" : "1f.6",
+              "businfo" : "pci@0000:00:1f.6",
+              "logicalname" : "enp0s31f6",
+              "version" : "30",
+              "serial" : "98:fa:9b:1f:f1:fb",
+              "units" : "bit/s",
+              "capacity" : 1000000000,
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "autonegotiation" : "on",
+                "broadcast" : "yes",
+                "driver" : "e1000e",
+                "driverversion" : "6.5.0-21-generic",
+                "firmware" : "0.5-3",
+                "latency" : "0",
+                "link" : "no",
+                "multicast" : "yes",
+                "port" : "twisted pair"
+              },
+              "capabilities" : {
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing",
+                "ethernet" : true,
+                "physical" : "Physical interface",
+                "tp" : "twisted pair",
+                "10bt" : "10Mbit/s",
+                "10bt-fd" : "10Mbit/s (full duplex)",
+                "100bt" : "100Mbit/s",
+                "100bt-fd" : "100Mbit/s (full duplex)",
+                "1000bt-fd" : "1Gbit/s (full duplex)",
+                "autonegotiation" : "Auto-negotiation"
+              }
+            }]
+        }]
+    },
+    {
+      "id" : "scsi",
+      "class" : "storage",
+      "claimed" : true,
+      "handle" : "SCSI:00",
+      "physid" : "1",
+      "businfo" : "scsi@0",
+      "logicalname" : "scsi0",
+      "configuration" : {
+        "driver" : "usb-storage"
+      },
+      "capabilities" : {
+        "scsi-host" : "SCSI host adapter"
+      }
+    },
+    {
+      "id" : "input:0",
+      "class" : "input",
+      "claimed" : true,
+      "product" : "Sleep Button",
+      "physid" : "2",
+      "logicalname" : ["input0", "/dev/input/event0"],
+      "capabilities" : {
+        "platform" : true
+      }
+    },
+    {
+      "id" : "input:1",
+      "class" : "input",
+      "claimed" : true,
+      "product" : "Lid Switch",
+      "physid" : "3",
+      "logicalname" : ["input1", "/dev/input/event1"],
+      "capabilities" : {
+        "platform" : true
+      }
+    },
+    {
+      "id" : "input:2",
+      "class" : "input",
+      "claimed" : true,
+      "product" : "ThinkPad Extra Buttons",
+      "physid" : "4",
+      "logicalname" : ["input18", "/dev/input/event7"],
+      "capabilities" : {
+        "platform" : true
+      }
+    },
+    {
+      "id" : "input:3",
+      "class" : "input",
+      "claimed" : true,
+      "product" : "Video Bus",
+      "physid" : "5",
+      "logicalname" : ["input19", "/dev/input/event6"],
+      "capabilities" : {
+        "platform" : true
+      }
+    },
+    {
+      "id" : "input:4",
+      "class" : "input",
+      "claimed" : true,
+      "product" : "Power Button",
+      "physid" : "6",
+      "logicalname" : ["input2", "/dev/input/event2"],
+      "capabilities" : {
+        "platform" : true
+      }
+    },
+    {
+      "id" : "input:5",
+      "class" : "input",
+      "claimed" : true,
+      "product" : "Logitech Wireless Mouse M560",
+      "physid" : "7",
+      "logicalname" : ["input25", "/dev/input/event13", "/dev/input/mouse2"],
+      "capabilities" : {
+        "usb" : "USB"
+      }
+    },
+    {
+      "id" : "input:6",
+      "class" : "input",
+      "claimed" : true,
+      "product" : "AT Translated Set 2 keyboard",
+      "physid" : "8",
+      "logicalname" : ["input3", "/dev/input/event3", "input3::capslock", "input3::numlock", "input3::scrolllock"],
+      "capabilities" : {
+        "i8042" : "i8042 PC AT keyboard controller"
+      }
+    },
+    {
+      "id" : "network",
+      "class" : "network",
+      "claimed" : true,
+      "description" : "Ethernet interface",
+      "physid" : "9",
+      "businfo" : "usb@4:1",
+      "logicalname" : "enxf8e43bcd2594",
+      "serial" : "f8:e4:3b:cd:25:94",
+      "configuration" : {
+        "autonegotiation" : "off",
+        "broadcast" : "yes",
+        "driver" : "cdc_ncm",
+        "driverversion" : "6.5.0-21-generic",
+        "duplex" : "half",
+        "firmware" : "CDC NCM (NO ZLP)",
+        "ip" : "192.168.10.50",
+        "link" : "yes",
+        "multicast" : "yes",
+        "port" : "twisted pair"
+      },
+      "capabilities" : {
+        "ethernet" : true,
+        "physical" : "Physical interface"
+      }
+    }]
+}

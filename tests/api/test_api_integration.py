@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from unittest import TestCase
 from pytest import mark
-from config import Settings
+from boagent.api.config import Settings
 
 # Mocks for testing environment
 settings = Settings(

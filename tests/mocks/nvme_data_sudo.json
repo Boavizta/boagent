@@ -1,0 +1,17 @@
+{
+  "Devices" : [
+    {
+      "NameSpace" : 1,
+      "DevicePath" : "/dev/nvme0n1",
+      "Firmware" : "5108AGLA",
+      "Index" : 0,
+      "ModelNumber" : "KXG6AZNV256G TOSHIBA",
+      "ProductName" : "Non-Volatile memory controller: Toshiba Corporation XG6 NVMe SSD Controller Satellite Pro",
+      "SerialNumber" : "39NS11RYTMCQ",
+      "UsedBytes" : 256060514304,
+      "MaximumLBA" : 500118192,
+      "PhysicalSize" : 256060514304,
+      "SectorSize" : 512
+    }
+  ]
+}

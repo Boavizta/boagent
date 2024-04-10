@@ -3,7 +3,7 @@
 import click
 import json
 import sys
-from lshw import Lshw
+from .lshw import Lshw
 
 # from disk import search_physical_drives
 # from cpu import get_cpus

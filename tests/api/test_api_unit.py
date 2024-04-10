@@ -1,7 +1,10 @@
+import os
+import json
+
 from unittest import TestCase, TestSuite, TestLoader
 from unittest.mock import patch
 
-from api.api import (
+from boagent.api.api import (
     build_hardware_data,
     read_hardware_data,
     get_hardware_data,
@@ -12,21 +15,28 @@ from api.api import (
     get_metrics,
 )
 
-from api.utils import format_scaphandre_json
-import os
-import json
+from boagent.api.utils import format_scaphandre_json
 
 
 current_dir = os.path.dirname(__file__)
 mock_power_data = os.path.join(f"{current_dir}", "../mocks/power_data.json")
 mock_hardware_data = os.path.join(f"{current_dir}", "../mocks/hardware_data.json")
-mock_boaviztapi_response_not_verbose = os.path.join(f"{current_dir}", "../mocks/boaviztapi_response_not_verbose.json")
-mock_boaviztapi_response_verbose = os.path.join(f"{current_dir}", "../mocks/boaviztapi_response_verbose.json")
-mock_formatted_scaphandre = os.path.join(f"{current_dir}", "../mocks/formatted_scaphandre.json")
+mock_boaviztapi_response_not_verbose = os.path.join(
+    f"{current_dir}", "../mocks/boaviztapi_response_not_verbose.json"
+)
+mock_boaviztapi_response_verbose = os.path.join(
+    f"{current_dir}", "../mocks/boaviztapi_response_verbose.json"
+)
+mock_formatted_scaphandre = os.path.join(
+    f"{current_dir}", "../mocks/formatted_scaphandre.json"
+)
 hardware_cli = os.path.join(f"{current_dir}", "")
-hardware_data = os.path.join(f"{current_dir}", "../../hardware/hardware_data.json")
+hardware_data = os.path.join(
+    f"{current_dir}", "../../boagent/hardware/hardware_data.json"
+)
 
 
+@patch("boagent.api.build_hardware_data")
 class ReadHardwareDataTest(TestCase):
     def test_build_hardware_data(self):
 
@@ -41,7 +51,7 @@ class ReadHardwareDataTest(TestCase):
         assert type(data["rams"]) is list
         assert type(data["disks"]) is list
 
-    @patch("api.build_hardware_data")
+    @patch("boagent.api.build_hardware_data")
     def test_get_hardware_data_with_fetch_hardware_false(self, mocked_build_hardware):
 
         # Test case where hardware_data.json is already present on the
@@ -116,7 +126,6 @@ class FormatUsageRequestTest(TestCase):
 
 
 class ComputeAvgConsumptionTest(TestCase):
-
     def test_compute_average_consumption(self):
 
         power_data = format_scaphandre_json(f"{mock_power_data}")
@@ -137,10 +146,12 @@ class GetPowerDataTest(TestCase):
 
         self.formatted_scaphandre = f"{mock_formatted_scaphandre}"
 
-    @patch("api.api.format_scaphandre_json")
+    @patch("boagent.api.api.format_scaphandre_json")
     def test_get_power_data(self, mocked_format_scaphandre_json):
 
-        mocked_format_scaphandre_json.return_value = open(mock_formatted_scaphandre, "r").read()
+        mocked_format_scaphandre_json.return_value = open(
+            mock_formatted_scaphandre, "r"
+        ).read()
 
         power_data = get_power_data(self.start_time, self.end_time)
 
@@ -148,12 +159,14 @@ class GetPowerDataTest(TestCase):
         assert "raw_data" in power_data
         assert "avg_power" in power_data
 
-    @patch("api.api.format_scaphandre_json")
+    @patch("boagent.api.api.format_scaphandre_json")
     def test_get_power_data_with_short_time_interval(
         self, mocked_format_scaphandre_json
     ):
 
-        mocked_format_scaphandre_json.return_value = open(mock_formatted_scaphandre, "r").read()
+        mocked_format_scaphandre_json.return_value = open(
+            mock_formatted_scaphandre, "r"
+        ).read()
 
         power_data = get_power_data(
             self.short_interval_start_time, self.short_interval_end_time
@@ -184,7 +197,7 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
         with open(mock_boaviztapi_response_not_verbose, "r") as file:
             self.boaviztapi_data = json.load(file)
 
-    @patch("api.api.query_machine_impact_data")
+    @patch("boagent.api.api.query_machine_impact_data")
     def test_get_metrics_with_time_workload_as_percentage(
         self, mocked_query_machine_impact_data
     ):
@@ -208,7 +221,7 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
         assert "embedded_abiotic_resources_depletion" in metrics
         assert "embedded_primary_energy" in metrics
 
-    @patch("api.api.query_machine_impact_data")
+    @patch("boagent.api.api.query_machine_impact_data")
     def test_get_metrics_with_time_workload_as_list_of_dicts(
         self, mocked_query_machine_impact_data
     ):
@@ -251,7 +264,7 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
         with open(mock_boaviztapi_response_verbose, "r") as file:
             self.boaviztapi_data = json.load(file)
 
-    @patch("api.api.query_machine_impact_data")
+    @patch("boagent.api.api.query_machine_impact_data")
     def test_get_metrics_verbose_with_time_workload_percentage(
         self, mocked_query_machine_impact_data
     ):
@@ -277,7 +290,7 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
         assert "raw_data" in metrics
         assert "electricity_carbon_intensity" in metrics
 
-    @patch("api.api.query_machine_impact_data")
+    @patch("boagent.api.api.query_machine_impact_data")
     def test_get_metrics_verbose_with_time_workload_as_list_of_dicts(
         self, mocked_query_machine_impact_data
     ):
@@ -323,8 +336,8 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
             power_data["avg_power"] = 11.86
             self.power_data = power_data
 
-    @patch("api.api.query_machine_impact_data")
-    @patch("api.api.get_power_data")
+    @patch("boagent.api.api.query_machine_impact_data")
+    @patch("boagent.api.api.get_power_data")
     def test_get_metrics_verbose_with_scaphandre(
         self, mocked_query_machine_impact_data, mocked_power_data
     ):

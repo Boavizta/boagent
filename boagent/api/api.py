@@ -14,7 +14,8 @@ from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
-from api.utils import (
+from boaviztapi_sdk.models.server import Server
+from .utils import (
     iso8601_or_timestamp_as_timestamp,
     format_scaphandre_json,
     format_prometheus_output,
@@ -22,10 +23,10 @@ from api.utils import (
     sort_ram,
     sort_disks,
 )
-from boaviztapi_sdk.models.server import Server
 
-from api.config import settings
-from api.database import (
+from .config import settings
+
+from .database import (
     get_session,
     select_metric,
     get_most_recent_data,

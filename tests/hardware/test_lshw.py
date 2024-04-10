@@ -1,5 +1,5 @@
 from unittest import TestCase
-from hardware.lshw.lshw import Lshw
+from boagent.hardware.lshw import Lshw
 from unittest.mock import patch
 from json import load
 from os import path
@@ -106,7 +106,7 @@ class LshwTest(TestCase):
             assert "logicalname" in disk
             assert type(disk["logicalname"]) is str
 
-    @patch("hardware.lshw.Lshw.get_rotational_int")
+    @patch("boagent.hardware.lshw.Lshw.get_rotational_int")
     def test_check_disk_type_is_ssd(self, mocked_get_rotational):
 
         dev_logicalname = "/dev/ssdonsata"
@@ -115,7 +115,7 @@ class LshwTest(TestCase):
         disk_type = hw.get_disk_type(dev_logicalname)
         assert disk_type == "ssd"
 
-    @patch("hardware.lshw.Lshw.get_rotational_int")
+    @patch("boagent.hardware.lshw.Lshw.get_rotational_int")
     def test_check_disk_type_is_hdd(self, mocked_get_rotational):
 
         dev_logicalname = "/dev/sdaex"
@@ -137,7 +137,7 @@ class LshwTest(TestCase):
         disk_type = hw.get_disk_type(dev_erroneous_name)
         assert disk_type == "unknown"
 
-    @patch("hardware.lshw.lshw.is_tool")
+    @patch("boagent.hardware.lshw.is_tool")
     def test_check_nvme_cli_is_installed_to_find_storage_and_raises_error_if_not(
         self, mocked_is_tool
     ):
