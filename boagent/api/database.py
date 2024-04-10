@@ -7,10 +7,10 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import Column, DateTime, Integer, Float, insert, select, inspect
 from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.orm import Session, declarative_base, declared_attr
-from api.config import settings
-from api.utils import filter_date_range
+from .config import Settings
+from .utils import filter_date_range
 
-
+settings = Settings()
 DB_PATH = settings.db_path
 POWER_DATA_FILE_PATH = settings.power_file_path
 
