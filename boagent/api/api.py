@@ -24,7 +24,7 @@ from .utils import (
     sort_disks,
 )
 
-from .config import settings
+from .config import Settings
 
 from .database import (
     get_session,
@@ -34,6 +34,7 @@ from .database import (
     new_highlight_spikes,
 )
 
+settings = Settings()
 
 HARDWARE_FILE_PATH = settings.hardware_file_path
 POWER_DATA_FILE_PATH = settings.power_file_path
@@ -47,6 +48,10 @@ AZURE_LOCATION = settings.azure_location
 BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint
 CARBON_AWARE_API_ENDPOINT = settings.carbon_aware_api_endpoint
 CARBON_AWARE_API_TOKEN = settings.carbon_aware_api_token
+PROJECT_NAME = settings.project_name
+PROJECT_VERSION = settings.project_version
+PROJECT_DESCRIPTION = settings.project_description
+TAGS_METADATA = settings.tags_metadata
 
 
 def configure_static(app):
@@ -55,12 +60,12 @@ def configure_static(app):
 
 def configure_app():
     app = FastAPI(
-        title=settings.PROJECT_NAME,
-        version=settings.PROJECT_VERSION,
-        description=settings.PROJECT_DESCRIPTION,
+        title=PROJECT_NAME,
+        version=PROJECT_VERSION,
+        description=PROJECT_DESCRIPTION,
         contact={"name": "Boavizta Members", "url": "https://boavizta.org/en"},
         license_info={"name": "Apache-2.0"},
-        openapi_tags=settings.TAGS_METADATA,
+        openapi_tags=TAGS_METADATA,
     )
     configure_static(app)
     return app
