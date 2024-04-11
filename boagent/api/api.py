@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from subprocess import run
 from typing import Dict, Any, Tuple, List, Optional, Union
 from croniter import croniter
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
@@ -214,7 +214,46 @@ async def query(
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
-    time_workload: Union[float, list[dict[str, float]], None] = None,
+):
+    """
+    start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
+    end_time: End time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
+    verbose: Get detailled metrics with extra information.\n
+    location: Country code to configure the local electricity grid to take into account.\n
+    measure_power: Get electricity consumption metrics from Scaphandre or not.\n
+    lifetime: Full lifetime of the machine to consider.\n
+    fetch_hardware: Regenerate hardware.json file with current machine hardware or not.\n
+    """
+    return get_metrics(
+        iso8601_or_timestamp_as_timestamp(start_time),
+        iso8601_or_timestamp_as_timestamp(end_time),
+        verbose,
+        location,
+        measure_power,
+        lifetime,
+        fetch_hardware,
+    )
+
+
+time_workload_example = {
+    "time_workload": [
+        {"time_percentage": 50, "load_percentage": 0},
+        {"time_percentage": 25, "load_percentage": 60},
+        {"time_percentage": 25, "load_percentage": 100},
+    ]
+}
+
+
+@app.post("/query", tags=["query"])
+async def query_with_time_workload(
+    start_time: str = "0.0",
+    end_time: str = "0.0",
+    verbose: bool = False,
+    location: Union[str, None] = None,
+    measure_power: bool = True,
+    lifetime: float = DEFAULT_LIFETIME,
+    fetch_hardware: bool = False,
+    time_workload: Union[float, list[dict[str, float]], None] = Body(None, example=time_workload_example),
 ):
     """
     start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
@@ -430,9 +469,9 @@ def get_metrics(
         avg_power = power_data["avg_power"]
         use_time_ratio = power_data["use_time_ratio"]
         if "warning" in power_data:
-            res["emissions_calculation_data"][
-                "energy_consumption_warning"
-            ] = power_data["warning"]
+            res["emissions_calculation_data"]["energy_consumption_warning"] = (
+                power_data["warning"]
+            )
 
     boaviztapi_data = query_machine_impact_data(
         model={},
