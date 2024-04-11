@@ -19,11 +19,15 @@ def is_tool(name):
 class Lshw:
     def __init__(self):
         if not is_tool("lshw"):
-            logging.error("lshw does not seem to be installed")
+            print("lshw does not seem to be installed.")
             sys.exit(1)
 
-        data = subprocess.getoutput("sudo lshw -quiet -json 2> /dev/null")
-        json_data = json.loads(data)
+        try:
+            data = subprocess.getoutput("sudo lshw -quiet -json 2> /dev/null")
+            json_data = json.loads(data)
+        except json.JSONDecodeError:
+            print("lshw does not seem do be executed as root.")
+            sys.exit(1)
         # Starting from version 02.18, `lshw -json` wraps its result in a list
         # rather than returning directly a dictionary
         if isinstance(json_data, list):
@@ -154,7 +158,7 @@ class Lshw:
                     "units": +1,
                     "name": obj["product"],
                     "vendor": obj["vendor"],
-                    "core_units": obj["configuration"]["cores"],
+                    "core_units": obj["configuration"]["cores"], # ONLY AVAILABLE AS ROOT
                     # "description": obj["description"],
                     # "location": obj["slot"],
                 }
