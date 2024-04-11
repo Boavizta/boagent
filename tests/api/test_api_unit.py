@@ -30,14 +30,13 @@ mock_boaviztapi_response_verbose = os.path.join(
 mock_formatted_scaphandre = os.path.join(
     f"{current_dir}", "../mocks/formatted_scaphandre.json"
 )
-hardware_cli = os.path.join(f"{current_dir}", "")
-hardware_data = os.path.join(
-    f"{current_dir}", "../../boagent/hardware/hardware_data.json"
-)
+hardware_cli = os.path.join(f"{current_dir}", "../../boagent/hardware/hardware_cli.py")
+hardware_data = os.path.join(f"{current_dir}", "../../boagent/api/hardware_data.json")
 
 
-@patch("boagent.api.build_hardware_data")
 class ReadHardwareDataTest(TestCase):
+    @patch("boagent.api.api.HARDWARE_CLI", hardware_cli)
+    @patch("boagent.api.api.HARDWARE_FILE_PATH", hardware_data)
     def test_build_hardware_data(self):
 
         build_hardware_data()
@@ -51,7 +50,7 @@ class ReadHardwareDataTest(TestCase):
         assert type(data["rams"]) is list
         assert type(data["disks"]) is list
 
-    @patch("boagent.api.build_hardware_data")
+    @patch("boagent.api.api.build_hardware_data")
     def test_get_hardware_data_with_fetch_hardware_false(self, mocked_build_hardware):
 
         # Test case where hardware_data.json is already present on the
@@ -178,6 +177,8 @@ class GetPowerDataTest(TestCase):
         assert "warning" in power_data
 
 
+@patch("boagent.api.api.read_hardware_data")
+@patch("boagent.api.api.query_machine_impact_data")
 class GetMetricsNotVerboseNoScaphandreTest(TestCase):
     def setUp(self) -> None:
         self.time_workload_as_percentage = 70
@@ -197,9 +198,11 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
         with open(mock_boaviztapi_response_not_verbose, "r") as file:
             self.boaviztapi_data = json.load(file)
 
-    @patch("boagent.api.api.query_machine_impact_data")
+        with open(mock_hardware_data, "r") as file:
+            self.hardware_data = json.load(file)
+
     def test_get_metrics_with_time_workload_as_percentage(
-        self, mocked_query_machine_impact_data
+        self, mocked_read_hardware_data, mocked_query_machine_impact_data
     ):
 
         metrics = get_metrics(
@@ -213,6 +216,7 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
             self.time_workload_as_percentage,
         )
 
+        mocked_read_hardware_data.return_value = self.hardware_data
         mocked_query_machine_impact_data.return_value = self.boaviztapi_data
 
         assert type(metrics) is dict
@@ -221,9 +225,8 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
         assert "embedded_abiotic_resources_depletion" in metrics
         assert "embedded_primary_energy" in metrics
 
-    @patch("boagent.api.api.query_machine_impact_data")
     def test_get_metrics_with_time_workload_as_list_of_dicts(
-        self, mocked_query_machine_impact_data
+        self, mocked_read_hardware_data, mocked_query_machine_impact_data
     ):
 
         metrics = get_metrics(
@@ -237,7 +240,9 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
             self.time_workload_as_list_of_dicts,
         )
 
+        mocked_read_hardware_data.return_value = self.hardware_data
         mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+
         assert type(metrics) is dict
         assert "emissions_calculation_data" in metrics
         assert "embedded_emissions" in metrics
@@ -245,6 +250,8 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
         assert "embedded_primary_energy" in metrics
 
 
+@patch("boagent.api.api.read_hardware_data")
+@patch("boagent.api.api.query_machine_impact_data")
 class GetMetricsVerboseNoScaphandreTest(TestCase):
     def setUp(self) -> None:
         self.time_workload_as_percentage = 70
@@ -264,9 +271,11 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
         with open(mock_boaviztapi_response_verbose, "r") as file:
             self.boaviztapi_data = json.load(file)
 
-    @patch("boagent.api.api.query_machine_impact_data")
+        with open(mock_hardware_data, "r") as file:
+            self.hardware_data = json.load(file)
+
     def test_get_metrics_verbose_with_time_workload_percentage(
-        self, mocked_query_machine_impact_data
+        self, mocked_read_hardware_data, mocked_query_machine_impact_data
     ):
 
         metrics = get_metrics(
@@ -280,6 +289,7 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
             self.time_workload_as_percentage,
         )
 
+        mocked_read_hardware_data.return_value = self.hardware_data
         mocked_query_machine_impact_data.return_value = self.boaviztapi_data
 
         assert type(metrics) is dict
@@ -290,9 +300,8 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
         assert "raw_data" in metrics
         assert "electricity_carbon_intensity" in metrics
 
-    @patch("boagent.api.api.query_machine_impact_data")
     def test_get_metrics_verbose_with_time_workload_as_list_of_dicts(
-        self, mocked_query_machine_impact_data
+        self, mocked_read_hardware_data, mocked_query_machine_impact_data
     ):
 
         metrics = get_metrics(
@@ -306,6 +315,7 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
             self.time_workload_as_list_of_dicts,
         )
 
+        mocked_read_hardware_data.return_value = self.hardware_data
         mocked_query_machine_impact_data.return_value = self.boaviztapi_data
 
         assert type(metrics) is dict
@@ -336,10 +346,17 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
             power_data["avg_power"] = 11.86
             self.power_data = power_data
 
+        with open(mock_hardware_data, "r") as file:
+            self.hardware_data = json.load(file)
+
     @patch("boagent.api.api.query_machine_impact_data")
     @patch("boagent.api.api.get_power_data")
+    @patch("boagent.api.api.read_hardware_data")
     def test_get_metrics_verbose_with_scaphandre(
-        self, mocked_query_machine_impact_data, mocked_power_data
+        self,
+        mocked_read_hardware_data,
+        mocked_query_machine_impact_data,
+        mocked_power_data,
     ):
 
         metrics = get_metrics(
@@ -352,6 +369,7 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
             self.fetch_hardware,
         )
 
+        mocked_read_hardware_data.return_value = self.hardware_data
         mocked_query_machine_impact_data.return_value = self.boaviztapi_data
         mocked_power_data.return_value = self.power_data
 
