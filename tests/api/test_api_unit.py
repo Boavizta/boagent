@@ -34,9 +34,8 @@ hardware_cli = os.path.join(f"{current_dir}", "../../boagent/hardware/hardware_c
 hardware_data = os.path.join(f"{current_dir}", "../../boagent/api/hardware_data.json")
 
 
+@patch("boagent.api.api.HARDWARE_FILE_PATH", hardware_data)
 class ReadHardwareDataTest(TestCase):
-    @patch("boagent.api.api.HARDWARE_CLI", hardware_cli)
-    @patch("boagent.api.api.HARDWARE_FILE_PATH", hardware_data)
     def test_build_hardware_data(self):
 
         build_hardware_data()
