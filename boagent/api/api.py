@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
 from boaviztapi_sdk.models.server import Server
+from boagent.hardware.lshw import Lshw
 from .utils import (
     iso8601_or_timestamp_as_timestamp,
     format_scaphandre_json,
@@ -253,7 +254,9 @@ async def query_with_time_workload(
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
-    time_workload: Union[float, list[dict[str, float]], None] = Body(None, example=time_workload_example),
+    time_workload: Union[float, list[dict[str, float]], None] = Body(
+        None, example=time_workload_example
+    ),
 ):
     """
     start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
@@ -651,7 +654,13 @@ def read_hardware_data() -> Dict:
 
 
 def build_hardware_data():
-    run([HARDWARE_CLI, "--output-file", HARDWARE_FILE_PATH])
+    lshw = Lshw()
+    with open(HARDWARE_FILE_PATH, "w") as hardware_file:
+        hardware_data = {}
+        hardware_data["disks"] = lshw.disks
+        hardware_data["cpus"] = lshw.cpus
+        hardware_data["rams"] = lshw.memories
+        json.dump(hardware_data, hardware_file)
 
 
 def query_machine_impact_data(
