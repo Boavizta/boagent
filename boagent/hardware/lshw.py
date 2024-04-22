@@ -23,7 +23,7 @@ class Lshw:
             sys.exit(1)
 
         try:
-            data = subprocess.getoutput("sudo lshw -quiet -json 2> /dev/null")
+            data = subprocess.getoutput("lshw -quiet -json 2> /dev/null")
             json_data = json.loads(data)
         except json.JSONDecodeError:
             print("lshw does not seem do be executed as root.")
@@ -131,7 +131,7 @@ class Lshw:
             try:
                 nvme = json.loads(
                     subprocess.check_output(
-                        ["sudo", "nvme", "-list", "-o", "json"], encoding="utf8"
+                        ["nvme", "-list", "-o", "json"], encoding="utf8"
                     )
                 )
                 for device in nvme["Devices"]:
@@ -158,7 +158,9 @@ class Lshw:
                     "units": +1,
                     "name": obj["product"],
                     "vendor": obj["vendor"],
-                    "core_units": obj["configuration"]["cores"], # ONLY AVAILABLE AS ROOT
+                    "core_units": obj["configuration"][
+                        "cores"
+                    ],  # ONLY AVAILABLE AS ROOT
                     # "description": obj["description"],
                     # "location": obj["slot"],
                 }
