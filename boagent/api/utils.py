@@ -49,7 +49,7 @@ def get_boavizta_api_client():
     config = Configuration(
         host=BOAVIZTAPI_ENDPOINT,
     )
-    client = ApiClient(configuration=config, pool_threads=2)
+    client = ApiClient(configuration=config)
     return client
 
 
