@@ -28,7 +28,7 @@ mock_boaviztapi_response_verbose = os.path.join(
     f"{current_dir}", "../mocks/boaviztapi_response_verbose.json"
 )
 mock_formatted_scaphandre = os.path.join(
-    f"{current_dir}", "../mocks/formatted_scaphandre.json"
+    f"{current_dir}", "../mocks/formatted_power_data_one_hour.json"
 )
 hardware_cli = os.path.join(f"{current_dir}", "../../boagent/hardware/hardware_cli.py")
 hardware_data = os.path.join(f"{current_dir}", "../../boagent/api/hardware_data.json")
@@ -136,11 +136,11 @@ class ComputeAvgConsumptionTest(TestCase):
 class GetPowerDataTest(TestCase):
     def setUp(self) -> None:
         # One-hour interval
-        self.start_time = 1710837858
-        self.end_time = 1710841458
+        self.start_time = 1713776733
+        self.end_time = 1713780333
         # Ten minutes interval
-        self.short_interval_start_time = 1710923675
-        self.short_interval_end_time = 1710924275
+        self.short_interval_start_time = 1713776733
+        self.short_interval_end_time = 1713777333
 
         self.formatted_scaphandre = f"{mock_formatted_scaphandre}"
 
@@ -156,6 +156,8 @@ class GetPowerDataTest(TestCase):
         assert type(power_data) is dict
         assert "raw_data" in power_data
         assert "avg_power" in power_data
+        assert type(power_data["avg_power"]) is float
+        assert power_data["avg_power"] > 0
 
     @patch("boagent.api.api.format_scaphandre_json")
     def test_get_power_data_with_short_time_interval(
