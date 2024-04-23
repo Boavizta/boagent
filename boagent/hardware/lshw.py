@@ -1,6 +1,5 @@
 from shutil import which
 import subprocess
-import logging
 import json
 import sys
 import re
@@ -19,14 +18,13 @@ def is_tool(name):
 class Lshw:
     def __init__(self):
         if not is_tool("lshw"):
-            print("lshw does not seem to be installed.")
+            sys.stderr.write("lshw does not seem to be installed.")
             sys.exit(1)
-
         try:
             data = subprocess.getoutput("lshw -quiet -json 2> /dev/null")
             json_data = json.loads(data)
         except json.JSONDecodeError:
-            print("lshw does not seem do be executed as root.")
+            sys.stderr.write("lshw does not seem do be executed as root.")
             sys.exit(1)
         # Starting from version 02.18, `lshw -json` wraps its result in a list
         # rather than returning directly a dictionary
@@ -126,8 +124,8 @@ class Lshw:
                     self.disks.append(d)
         if "nvme" in obj["configuration"]["driver"]:
             if not is_tool("nvme"):
-                logging.error("nvme-cli >= 1.0 does not seem to be installed")
-                raise Exception("nvme-cli >= 1.0 does not seem to be installed")
+                sys.stderr.write("nvme-cli >= 1.0 does not seem to be installed")
+                sys.exit(1)
             try:
                 nvme = json.loads(
                     subprocess.check_output(
@@ -220,7 +218,7 @@ class Lshw:
             check_string_for_numbers = bool(re.search("\\d", model_string))
             if check_string_for_numbers:
                 raise Exception(
-                    "Lshw did not output an acceptable manufacturer name for this device."
+                    "Lshw did not output a parsable manufacturer name for this device."
                 )
             else:
                 return model_string
@@ -257,10 +255,9 @@ class Lshw:
             rotational_fp = os.path.realpath(
                 f"{SYS_BLOCK_PATH}{device}/queue/rotational", strict=True
             )
-            print(rotational_fp)
 
         except OSError:
-            print("Rotational file was not found")
+            sys.stderr.write("Rotational file was not found")
             return 2
         else:
             with open(rotational_fp, "r") as file:
