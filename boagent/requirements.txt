@@ -1,7 +1,0 @@
-fastapi==0.75.2
-uvicorn==0.17.6
-boaviztapi-sdk==0.1.2
-cpuid==0.0.10
-py-cpuinfo==8.0.0
-dataclasses
-pre_commit
