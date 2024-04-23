@@ -7,7 +7,6 @@ import pandas as pd
 
 from pytz import UTC, utc
 from datetime import datetime, timedelta
-from subprocess import run
 from typing import Dict, Any, Tuple, List, Optional, Union
 from croniter import croniter
 from fastapi import FastAPI, Response, Body
@@ -18,7 +17,6 @@ from boaviztapi_sdk.models.server import Server
 from boagent.hardware.lshw import Lshw
 from .utils import (
     iso8601_or_timestamp_as_timestamp,
-    format_scaphandre_json,
     format_prometheus_output,
     get_boavizta_api_client,
     sort_ram,
@@ -470,11 +468,11 @@ def get_metrics(
     if measure_power:
         power_data = get_power_data(start_time, end_time)
         avg_power = power_data["avg_power"]
-        use_time_ratio = power_data["use_time_ratio"]
+        # use_time_ratio = power_data["use_time_ratio"]
         if "warning" in power_data:
-            res["emissions_calculation_data"]["energy_consumption_warning"] = (
-                power_data["warning"]
-            )
+            res["emissions_calculation_data"][
+                "energy_consumption_warning"
+            ] = power_data["warning"]
 
     boaviztapi_data = query_machine_impact_data(
         model={},
@@ -608,18 +606,21 @@ def format_usage_request(
 def get_power_data(start_time, end_time):
     # Get all items of the json list where start_time <= host.timestamp <= end_time
     power_data = {}
-    formatted_scaphandre_json = format_scaphandre_json(POWER_DATA_FILE_PATH)
-    data = json.loads(formatted_scaphandre_json)
-    res = [e for e in data if start_time <= float(e["host"]["timestamp"]) <= end_time]
-    power_data["raw_data"] = res
-    power_data["avg_power"] = compute_average_consumption(res)
-    if end_time - start_time <= 3600:
-        power_data["warning"] = (
-            "The time window is lower than one hour, but the energy consumption estimate is in "
-            "Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be "
-            "careful with this data. "
-        )
-    return power_data
+    with open(POWER_DATA_FILE_PATH, "r") as power_data_file:
+        formatted_data = f"{power_data_file.read()}]"
+        data = json.loads(formatted_data)
+        queried_power_data = [
+            e for e in data if start_time <= float(e["host"]["timestamp"]) <= end_time
+        ]
+        power_data["raw_data"] = queried_power_data
+        power_data["avg_power"] = compute_average_consumption(queried_power_data)
+        if end_time - start_time <= 3600:
+            power_data["warning"] = (
+                "The time window is lower than one hour, but the energy consumption estimate is in "
+                "Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be "
+                "careful with this data. "
+            )
+        return power_data
 
 
 def compute_average_consumption(power_data) -> float:
