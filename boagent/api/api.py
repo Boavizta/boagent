@@ -456,6 +456,13 @@ def get_metrics(
 
     avg_power = None
 
+    if len(location) < 3 or location == "EEE":
+        res["location_warning"] = {
+            "warning_message": "Location is either set as default, or has not been set, and is therefore set to the default BoaviztAPI location. "
+            "Be aware that the presented results can be drastically different due to location. "
+            "It is recommended that you set the asset location with the corresponding country code, see: https://doc.api.boavizta.org/Explanations/usage/countries/"
+        }
+
     if measure_power:
         power_data = get_power_data(start_time, end_time)
         avg_power = power_data["avg_power"]
