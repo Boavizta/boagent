@@ -250,6 +250,51 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
         assert "embedded_abiotic_resources_depletion" in metrics
         assert "embedded_primary_energy" in metrics
 
+    def test_get_metrics_with_default_location(
+        self, mocked_read_hardware_data, mocked_query_machine_impact_data
+    ):
+
+        metrics = get_metrics(
+            self.start_time,
+            self.end_time,
+            self.verbose,
+            "EEE",
+            self.measure_power,
+            self.lifetime,
+            self.fetch_hardware,
+            self.time_workload_as_list_of_dicts,
+        )
+
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+
+        assert type(metrics) is dict
+        assert "location_warning" in metrics
+
+    def test_get_metrics_with_no_set_location(
+        self, mocked_read_hardware_data, mocked_query_machine_impact_data
+    ):
+
+        empty_location = ""
+
+        metrics = get_metrics(
+            self.start_time,
+            self.end_time,
+            self.verbose,
+            empty_location,
+            self.measure_power,
+            self.lifetime,
+            self.fetch_hardware,
+            self.time_workload_as_list_of_dicts,
+        )
+
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+
+        print(len(empty_location))
+        assert type(metrics) is dict
+        assert "location_warning" in metrics
+
 
 @patch("boagent.api.api.read_hardware_data")
 @patch("boagent.api.api.query_machine_impact_data")
