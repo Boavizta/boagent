@@ -7,6 +7,7 @@ import pandas as pd
 
 from pytz import UTC, utc
 from datetime import datetime, timedelta
+from pydantic import BaseModel
 from typing import Dict, Any, Tuple, List, Optional, Union
 from croniter import croniter
 from fastapi import FastAPI, Response, Body
@@ -182,8 +183,7 @@ async def metrics(
     start_time: str = "0.0",
     end_time: str = "0.0",
     verbose: bool = False,
-    output: str = "json",
-    location: str = None,
+    location: str = "",
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
@@ -209,7 +209,7 @@ async def query(
     start_time: str = "0.0",
     end_time: str = "0.0",
     verbose: bool = False,
-    location: Union[str, None] = None,
+    location: str = "EEE",
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
@@ -234,6 +234,11 @@ async def query(
     )
 
 
+class WorkloadTime(BaseModel):
+    time_percentage: float = 0.0
+    load_percentage: float = 0.0
+
+
 time_workload_example = {
     "time_workload": [
         {"time_percentage": 50, "load_percentage": 0},
@@ -248,11 +253,11 @@ async def query_with_time_workload(
     start_time: str = "0.0",
     end_time: str = "0.0",
     verbose: bool = False,
-    location: Union[str, None] = None,
+    location: str = "EEE",
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
-    time_workload: Union[float, list[dict[str, float]], None] = Body(
+    time_workload: Union[dict[str, float], dict[str, List[WorkloadTime]]] = Body(
         None, example=time_workload_example
     ),
 ):
@@ -439,11 +444,11 @@ def get_metrics(
     start_time: float,
     end_time: float,
     verbose: bool,
-    location: Union[str, None],
+    location: str,
     measure_power: bool,
     lifetime: float,
     fetch_hardware: bool,
-    time_workload: Union[float, list[dict[str, float]], None] = None,
+    time_workload: Union[dict[str, float], dict[str, List[WorkloadTime]], None] = None,
 ):
 
     now: float = time.time()
@@ -463,12 +468,10 @@ def get_metrics(
     res = {"emissions_calculation_data": {}}
 
     avg_power = None
-    use_time_ratio = None
 
     if measure_power:
         power_data = get_power_data(start_time, end_time)
         avg_power = power_data["avg_power"]
-        # use_time_ratio = power_data["use_time_ratio"]
         if "warning" in power_data:
             res["emissions_calculation_data"][
                 "energy_consumption_warning"
@@ -478,7 +481,7 @@ def get_metrics(
         model={},
         configuration=hardware_data,
         usage=format_usage_request(
-            start_time, end_time, avg_power, use_time_ratio, location, time_workload
+            start_time, end_time, avg_power, location, time_workload
         ),
     )
 
@@ -586,9 +589,8 @@ def format_usage_request(
     start_time: float,
     end_time: float,
     avg_power: Union[float, None] = None,
-    use_time_ratio: Union[float, None] = None,
-    location: Union[str, None] = None,
-    time_workload: Union[float, list[dict[str, int]], None] = None,
+    location: str = "EEE",
+    time_workload: Union[dict[str, float], dict[str, List[WorkloadTime]], None] = None,
 ):
     hours_use_time = (end_time - start_time) / 3600.0
     kwargs_usage = {"hours_use_time": hours_use_time}
@@ -596,8 +598,6 @@ def format_usage_request(
         kwargs_usage["usage_location"] = location
     if avg_power:
         kwargs_usage["avg_power"] = avg_power
-    if use_time_ratio:
-        kwargs_usage["use_time_ratio"] = use_time_ratio
     if time_workload:
         kwargs_usage["time_workload"] = time_workload
     return kwargs_usage
