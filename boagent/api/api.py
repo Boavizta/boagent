@@ -7,7 +7,6 @@ import pandas as pd
 
 from pytz import UTC, utc
 from datetime import datetime, timedelta
-from pydantic import BaseModel
 from typing import Dict, Any, Tuple, List, Optional, Union
 from croniter import croniter
 from fastapi import FastAPI, Response, Body
@@ -33,6 +32,8 @@ from .database import (
     get_max,
     new_highlight_spikes,
 )
+
+from .models import WorkloadTime, time_workload_example
 
 settings = Settings()
 
@@ -232,20 +233,6 @@ async def query(
         lifetime,
         fetch_hardware,
     )
-
-
-class WorkloadTime(BaseModel):
-    time_percentage: float = 0.0
-    load_percentage: float = 0.0
-
-
-time_workload_example = {
-    "time_workload": [
-        {"time_percentage": 50, "load_percentage": 0},
-        {"time_percentage": 25, "load_percentage": 60},
-        {"time_percentage": 25, "load_percentage": 100},
-    ]
-}
 
 
 @app.post("/query", tags=["query"])
