@@ -15,7 +15,7 @@ from boagent.api.api import (
     get_metrics,
 )
 
-from boagent.api.utils import format_scaphandre_json
+# from boagent.api.utils import format_scaphandre_json
 
 
 current_dir = os.path.dirname(__file__)
@@ -89,29 +89,26 @@ class FormatUsageRequestTest(TestCase):
         assert type(formatted_request) is dict
         assert "hours_use_time" in formatted_request
 
-    def test_format_usage_request_with_host_avg_consumption_use_time_ratio_and_location(
+    def test_format_usage_request_with_host_avg_consumption_and_location(
         self,
     ):
 
         location = "FRA"
         avg_power = 120
-        use_time_ratio = 1
 
         formatted_request = format_usage_request(
             start_time=self.start_time,
             end_time=self.end_time,
             location=location,
             avg_power=avg_power,
-            use_time_ratio=use_time_ratio,
         )
         assert type(formatted_request) is dict
         assert "avg_power" in formatted_request
-        assert "use_time_ratio" in formatted_request
         assert "usage_location" in formatted_request
 
     def test_format_usage_request_with_time_workload_as_percentage(self):
 
-        time_workload = 50
+        time_workload = {"time_workload": 50.0}
 
         formatted_request = format_usage_request(
             start_time=self.start_time,
@@ -126,7 +123,8 @@ class FormatUsageRequestTest(TestCase):
 class ComputeAvgConsumptionTest(TestCase):
     def test_compute_average_consumption(self):
 
-        power_data = format_scaphandre_json(f"{mock_power_data}")
+        with open(mock_power_data, "r") as power_data_file:
+            power_data = f"[{power_data_file.read()}]"
         data = json.loads(power_data)
         avg_host = compute_average_consumption(data)
 
@@ -182,12 +180,14 @@ class GetPowerDataTest(TestCase):
 @patch("boagent.api.api.query_machine_impact_data")
 class GetMetricsNotVerboseNoScaphandreTest(TestCase):
     def setUp(self) -> None:
-        self.time_workload_as_percentage = 70
-        self.time_workload_as_list_of_dicts = [
-            {"time_percentage": 50, "load_percentage": 0},
-            {"time_percentage": 25, "load_percentage": 60},
-            {"time_percentage": 25, "load_percentage": 100},
-        ]
+        self.time_workload_as_percentage = {"time_workload": 70.0}
+        self.time_workload_as_list_of_dicts = {
+            "time_workload": [
+                {"time_percentage": 50, "load_percentage": 0},
+                {"time_percentage": 25, "load_percentage": 60},
+                {"time_percentage": 25, "load_percentage": 100},
+            ]
+        }
         self.start_time = 1710837858
         self.end_time = 1710841458
         self.verbose = False
@@ -255,12 +255,15 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
 @patch("boagent.api.api.query_machine_impact_data")
 class GetMetricsVerboseNoScaphandreTest(TestCase):
     def setUp(self) -> None:
-        self.time_workload_as_percentage = 70
-        self.time_workload_as_list_of_dicts = [
-            {"time_percentage": 50, "load_percentage": 0},
-            {"time_percentage": 25, "load_percentage": 60},
-            {"time_percentage": 25, "load_percentage": 100},
-        ]
+        self.time_workload_as_percentage = {"time_workload": 70.0}
+        self.time_workload_as_list_of_dicts = {
+            "time_workload": [
+                {"time_percentage": 50, "load_percentage": 0},
+                {"time_percentage": 25, "load_percentage": 60},
+                {"time_percentage": 25, "load_percentage": 100},
+            ]
+        }
+
         self.start_time = 1710837858
         self.end_time = 1710841458
         self.verbose = True
