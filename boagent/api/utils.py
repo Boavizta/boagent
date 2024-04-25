@@ -96,21 +96,59 @@ def format_prometheus_output(res):
                 v["type"],
                 v["value"],
             )
-        # response += format_prometheus_metric("energy_consumption", "Energy consumed in the evaluation time window (evaluated at least for an hour, be careful if the time windows is lower than 1 hour), in Wh", "counter", res["emissions_calculation_data"]["energy_consumption"])
+        if "boaviztapi_data" in v:
+            for impact_name, impact_items in v["boaviztapi_data"]["impacts"].items():
+                if "unit" in impact_items:
+                    if "description" not in impact_items:
+                        impact_items["description"] = "TODO: define me"
+                    response += format_prometheus_metric(
+                        "{}".format(impact_name),
+                        "{}. {}".format(
+                            impact_items["description"],
+                            "In {}".format(impact_items["unit"]),
+                        ),
+                        "{} {}".format("embedded", "use"),
+                        "{} {}".format(
+                            f"embedded_impact: {impact_items['embedded']}",
+                            f"use_impact: {impact_items['use']}",
+                        ),
+                    )
+
+            for component_name, component_impacts in v["boaviztapi_data"]["verbose"].items():
+                print(f"COMPONENT: {component_name}")
+                if "impacts" in component_impacts:
+                    for impact, items in component_impacts["impacts"].items():
+                        if "description" not in items:
+                            items["description"] = "TODO: define me"
+                        response += format_prometheus_metric(
+                            "{} {}".format(component_name, impact),
+                            "{}. {}".format(
+                                items["description"],
+                                "In {}".format(items['unit']),
+                            ),
+                            "{} {}".format("embedded", "use"),
+                            "{} {}".format(
+                                f"embedded_impact: {items['embedded']}",
+                                f"use_impact: {items['use']}",
+                            ),
+                        )
         else:
             for x, y in v.items():
-                if "value" in y and "type" in y:
-                    if "description" not in y:
-                        y["description"] = "TODO: define me"
-                    response += format_prometheus_metric(
-                        "{}_{}".format(k, x),
-                        "{}. {}".format(
-                            y["description"],
-                            "In {} ({}).".format(y["long_unit"], y["unit"]),
-                        ),
-                        y["type"],
-                        y["value"],
-                    )
+                if type(y) is float:
+                    pass
+                else:
+                    if "value" in y and "type" in y:
+                        if "description" not in y:
+                            y["description"] = "TODO: define me"
+                        response += format_prometheus_metric(
+                            "{}_{}".format(k, x),
+                            "{}. {}".format(
+                                y["description"],
+                                "In {} ({}).".format(y["long_unit"], y["unit"]),
+                            ),
+                            y["type"],
+                            y["value"],
+                        )
 
     return response
 
