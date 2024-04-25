@@ -14,6 +14,7 @@ from boagent.api.api import (
     get_power_data,
     get_metrics,
 )
+from boagent.api.utils import format_prometheus_output
 
 # from boagent.api.utils import format_scaphandre_json
 
@@ -29,6 +30,12 @@ mock_boaviztapi_response_verbose = os.path.join(
 )
 mock_formatted_scaphandre = os.path.join(
     f"{current_dir}", "../mocks/formatted_power_data_one_hour.json"
+)
+mock_get_metrics_not_verbose = os.path.join(
+    f"{current_dir}", "../mocks/get_metrics_not_verbose.json"
+)
+mock_get_metrics_verbose = os.path.join(
+    f"{current_dir}", "../mocks/get_metrics_verbose.json"
 )
 hardware_cli = os.path.join(f"{current_dir}", "../../boagent/hardware/hardware_cli.py")
 hardware_data = os.path.join(f"{current_dir}", "../../boagent/api/hardware_data.json")
@@ -129,6 +136,37 @@ class ComputeAvgConsumptionTest(TestCase):
         avg_host = compute_average_consumption(data)
 
         assert type(avg_host) is float
+
+
+class FormatPrometheusOutput(TestCase):
+
+    def setUp(self):
+        self.get_metrics_response_not_verbose_path = mock_get_metrics_not_verbose
+        self.get_metrics_response_verbose_path = mock_get_metrics_verbose
+
+    def test_format_prometheus_output_with_get_metrics_not_verbose(self):
+
+        with open(mock_get_metrics_not_verbose, "r") as json_response:
+            response_to_format = json.load(json_response)
+
+        prometheus_output = format_prometheus_output(response_to_format)
+
+        assert type(prometheus_output) is str
+        assert len(prometheus_output) > 1
+        assert "TYPE" in prometheus_output
+        assert "HELP" in prometheus_output
+
+    def test_format_prometheus_output_with_get_metrics_verbose(self):
+
+        with open(mock_get_metrics_verbose, "r") as json_response:
+            response_to_format = json.load(json_response)
+
+        prometheus_output = format_prometheus_output(response_to_format)
+
+        assert type(prometheus_output) is str
+        assert len(prometheus_output) > 1
+        assert "TYPE" in prometheus_output
+        assert "HELP" in prometheus_output
 
 
 class GetPowerDataTest(TestCase):
