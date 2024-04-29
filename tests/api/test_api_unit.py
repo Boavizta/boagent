@@ -16,8 +16,6 @@ from boagent.api.api import (
 )
 from boagent.api.utils import format_prometheus_output
 
-# from boagent.api.utils import format_scaphandre_json
-
 
 current_dir = os.path.dirname(__file__)
 mock_power_data = os.path.join(f"{current_dir}", "../mocks/power_data.json")
@@ -143,13 +141,13 @@ class FormatPrometheusOutput(TestCase):
         self.get_metrics_response_not_verbose_path = mock_get_metrics_not_verbose
         self.get_metrics_response_verbose_path = mock_get_metrics_verbose
         self.components = [
-            "ASSEMBLY-1",
-            "CPU-1",
-            "RAM-1",
-            "SSD-1",
-            "POWER_SUPPLY-1",
-            "CASE-1",
-            "MOTHERBOARD-1",
+            "assembly_1",
+            "cpu_1",
+            "ram_1",
+            "ssd_1",
+            "power_supply_1",
+            "case_1",
+            "motherboard_1",
         ]
 
     def test_format_prometheus_output_with_get_metrics_not_verbose(self):
