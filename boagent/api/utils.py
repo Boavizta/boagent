@@ -132,59 +132,61 @@ def format_prometheus_output(res, verbose: bool):
                     "impacts"
                 ].items():
                     if "unit" in impact_items:
-                        embedded_impact_values = f"{{value={impact_items['embedded']['value']},min={impact_items['embedded']['min']},max={impact_items['embedded']['max']}}}"
-                        response += format_prometheus_metric(
-                            "{}".format(f"{impact_name}_total_impact"),
-                            "{}. {}".format(
-                                impact_items["description"],
-                                "In {}".format(impact_items["unit"]),
-                            ),
-                            "{}".format("gauge"),
-                            "{}".format(
-                                f"{impact_items['embedded']['value']}",
-                            ),
-                            embedded_impact_values,
-                        )
+                        for value in impact_items["embedded"]:
+                            if value == "warnings":
+                                pass
+                            else:
+                                response += format_prometheus_metric(
+                                    "{}".format(f"{impact_name}_total_impact_{value}"),
+                                    "{}. {}".format(
+                                        impact_items["description"],
+                                        "In {}".format(impact_items["unit"]),
+                                    ),
+                                    "{}".format("gauge"),
+                                    "{}".format(f"{impact_items['embedded'][value]}"),
+                                )
 
                 for component_name, component_impacts in v["boaviztapi_data"][
                     "verbose"
                 ].items():
-                    print(f"COMPONENT: {component_name}")
                     formatted_component_name = component_name.lower().replace("-", "_")
                     if "impacts" in component_impacts:
                         for impact, items in component_impacts["impacts"].items():
-                            component_embedded_impact_values = f"{{value={items['embedded']['value']},min={items['embedded']['min']},max={items['embedded']['max']}}}"
-                            response += format_prometheus_metric(
-                                "{}".format(
-                                    f"{formatted_component_name}_{impact}_embedded_impact"
-                                ),
-                                "{}. {}".format(
-                                    items["description"],
-                                    "In {}".format(items["unit"]),
-                                ),
-                                "{}".format("gauge"),
-                                "{}".format(
-                                    f"{items['embedded']['value']}",
-                                ),
-                                component_embedded_impact_values,
-                            )
+                            for component_embedded_impact_metric, value in items[
+                                "embedded"
+                            ].items():
+                                if component_embedded_impact_metric == "warnings":
+                                    pass
+                                else:
+                                    response += format_prometheus_metric(
+                                        "{}".format(
+                                            f"{formatted_component_name}_{impact}_embedded_impact_{component_embedded_impact_metric}"
+                                        ),
+                                        "{}. {}".format(
+                                            items["description"],
+                                            "In {}".format(items["unit"]),
+                                        ),
+                                        "{}".format("gauge"),
+                                        "{}".format(
+                                            f"{value}",
+                                        ),
+                                    )
 
     return response
 
 
 def format_prometheus_metric(
-    metric_name, metric_description, metric_type, metric_value, metric_label=""
+    metric_name, metric_description, metric_type, metric_value
 ):
     response = """# HELP {} {}
 # TYPE {} {}
-{}{} {}
+{} {}
 """.format(
         metric_name,
         metric_description,
         metric_name,
         metric_type,
         metric_name,
-        metric_label,
         metric_value,
     )
     return response
