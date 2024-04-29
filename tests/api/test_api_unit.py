@@ -139,17 +139,25 @@ class ComputeAvgConsumptionTest(TestCase):
 
 
 class FormatPrometheusOutput(TestCase):
-
     def setUp(self):
         self.get_metrics_response_not_verbose_path = mock_get_metrics_not_verbose
         self.get_metrics_response_verbose_path = mock_get_metrics_verbose
+        self.components = [
+            "ASSEMBLY-1",
+            "CPU-1",
+            "RAM-1",
+            "SSD-1",
+            "POWER_SUPPLY-1",
+            "CASE-1",
+            "MOTHERBOARD-1",
+        ]
 
     def test_format_prometheus_output_with_get_metrics_not_verbose(self):
 
         with open(mock_get_metrics_not_verbose, "r") as json_response:
             response_to_format = json.load(json_response)
 
-        prometheus_output = format_prometheus_output(response_to_format)
+        prometheus_output = format_prometheus_output(response_to_format, verbose=False)
 
         assert type(prometheus_output) is str
         assert len(prometheus_output) > 1
@@ -161,12 +169,15 @@ class FormatPrometheusOutput(TestCase):
         with open(mock_get_metrics_verbose, "r") as json_response:
             response_to_format = json.load(json_response)
 
-        prometheus_output = format_prometheus_output(response_to_format)
+        prometheus_output = format_prometheus_output(response_to_format, verbose=True)
 
+        print(prometheus_output)
         assert type(prometheus_output) is str
         assert len(prometheus_output) > 1
         assert "TYPE" in prometheus_output
         assert "HELP" in prometheus_output
+        assert all(component in prometheus_output for component in self.components)
+        assert False is True
 
 
 class GetPowerDataTest(TestCase):
