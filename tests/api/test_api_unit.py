@@ -171,13 +171,11 @@ class FormatPrometheusOutput(TestCase):
 
         prometheus_output = format_prometheus_output(response_to_format, verbose=True)
 
-        print(prometheus_output)
         assert type(prometheus_output) is str
         assert len(prometheus_output) > 1
         assert "TYPE" in prometheus_output
         assert "HELP" in prometheus_output
         assert all(component in prometheus_output for component in self.components)
-        assert False is True
 
 
 class GetPowerDataTest(TestCase):
