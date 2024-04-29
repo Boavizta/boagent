@@ -82,56 +82,33 @@ def iso8601_or_timestamp_as_timestamp(iso_time: str) -> float:
                 return float(iso_time)
 
 
-def format_prometheus_output(res):
+def format_prometheus_output(res, verbose: bool):
     response = ""
     for k, v in res.items():
         if "value" in v and "type" in v:
             if "description" not in v:
                 v["description"] = "TODO: define me"
-            response += format_prometheus_metric(
-                k,
-                "{}. {}".format(
-                    v["description"], "In {} ({}).".format(v["long_unit"], v["unit"])
-                ),
-                v["type"],
-                v["value"],
-            )
-        if "boaviztapi_data" in v:
-            for impact_name, impact_items in v["boaviztapi_data"]["impacts"].items():
-                if "unit" in impact_items:
-                    if "description" not in impact_items:
-                        impact_items["description"] = "TODO: define me"
-                    response += format_prometheus_metric(
-                        "{}".format(impact_name),
-                        "{}. {}".format(
-                            impact_items["description"],
-                            "In {}".format(impact_items["unit"]),
-                        ),
-                        "{} {}".format("embedded", "use"),
-                        "{} {}".format(
-                            f"embedded_impact: {impact_items['embedded']}",
-                            f"use_impact: {impact_items['use']}",
-                        ),
-                    )
+            if type(v["value"]) is float:
+                response += format_prometheus_metric(
+                    k,
+                    "{}. {}".format(
+                        v["description"],
+                        "In {} ({}).".format(v["long_unit"], v["unit"]),
+                    ),
+                    v["type"],
+                    v["value"],
+                )
+            if type(v["value"]) is dict:
+                response += format_prometheus_metric(
+                    k,
+                    "{}. {}".format(
+                        v["description"],
+                        "In {} ({}).".format(v["long_unit"], v["unit"]),
+                    ),
+                    v["type"],
+                    v["value"]["value"],
+                )
 
-            for component_name, component_impacts in v["boaviztapi_data"]["verbose"].items():
-                print(f"COMPONENT: {component_name}")
-                if "impacts" in component_impacts:
-                    for impact, items in component_impacts["impacts"].items():
-                        if "description" not in items:
-                            items["description"] = "TODO: define me"
-                        response += format_prometheus_metric(
-                            "{} {}".format(component_name, impact),
-                            "{}. {}".format(
-                                items["description"],
-                                "In {}".format(items['unit']),
-                            ),
-                            "{} {}".format("embedded", "use"),
-                            "{} {}".format(
-                                f"embedded_impact: {items['embedded']}",
-                                f"use_impact: {items['use']}",
-                            ),
-                        )
         else:
             for x, y in v.items():
                 if type(y) is float:
@@ -149,22 +126,65 @@ def format_prometheus_output(res):
                             y["type"],
                             y["value"],
                         )
+        if verbose:
+            if "boaviztapi_data" in v:
+                for impact_name, impact_items in v["boaviztapi_data"][
+                    "impacts"
+                ].items():
+                    if "unit" in impact_items:
+                        embedded_impact_values = f"{{value={impact_items['embedded']['value']},min={impact_items['embedded']['min']},max={impact_items['embedded']['max']}}}"
+                        response += format_prometheus_metric(
+                            "{}".format(f"{impact_name}_total_impact"),
+                            "{}. {}".format(
+                                impact_items["description"],
+                                "In {}".format(impact_items["unit"]),
+                            ),
+                            "{}".format("gauge"),
+                            "{}".format(
+                                f"{impact_items['embedded']['value']}",
+                            ),
+                            embedded_impact_values,
+                        )
+
+                for component_name, component_impacts in v["boaviztapi_data"][
+                    "verbose"
+                ].items():
+                    print(f"COMPONENT: {component_name}")
+                    formatted_component_name = component_name.lower().replace("-", "_")
+                    if "impacts" in component_impacts:
+                        for impact, items in component_impacts["impacts"].items():
+                            component_embedded_impact_values = f"{{value={items['embedded']['value']},min={items['embedded']['min']},max={items['embedded']['max']}}}"
+                            response += format_prometheus_metric(
+                                "{}".format(
+                                    f"{formatted_component_name}_{impact}_embedded_impact"
+                                ),
+                                "{}. {}".format(
+                                    items["description"],
+                                    "In {}".format(items["unit"]),
+                                ),
+                                "{}".format("gauge"),
+                                "{}".format(
+                                    f"{items['embedded']['value']}",
+                                ),
+                                component_embedded_impact_values,
+                            )
 
     return response
 
 
 def format_prometheus_metric(
-    metric_name, metric_description, metric_type, metric_value
+    metric_name, metric_description, metric_type, metric_value, metric_label=""
 ):
     response = """# HELP {} {}
 # TYPE {} {}
-{} {}
+{}{} {}
 """.format(
         metric_name,
         metric_description,
         metric_name,
         metric_type,
         metric_name,
+        metric_label,
         metric_value,
     )
     return response

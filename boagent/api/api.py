@@ -199,7 +199,8 @@ async def metrics(
                 measure_power,
                 lifetime,
                 fetch_hardware,
-            )
+            ),
+            verbose,
         ),
         media_type="plain-text",
     )
