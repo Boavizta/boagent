@@ -15,20 +15,6 @@ This is an API, you could use either your browser, curl, or call it directly fro
 
 Once the API is running, a Swagger interface is available on [localhost:8000/docs](http://localhost:8000/docs).
 
-## How it works
-
-Currently, Boagent only works for Linux systems.
-
-Boagent exposes multiple API endpoints, most notably `/query` and `/metrics`. Both will query an instance of [BoaviztAPI](https://doc.api.boavizta.org/) in order to give the environmental impacts
-of the received hardware data. `/query` will return a response in JSON, and `/metrics` will return a response parsable by a Prometheus instance. If needed, both those
-endpoints can return data from [Scaphandre](https://github.com/hubblo-org/scaphandre/) and give the energy consumption of components from the queried hardware.
-
-Presently, Boagent gets hardware data through a parsing of the output of `lshw`, a common utility available for Linux distributions that lists a lot of information of all
-hardware components on a running computer. The code for this `Lshw` class is an adaptation of [netbox-agent](https://github.com/Solvik/netbox-agent)'s implementation.
-`lshw`, to get all proper data needed by BoaviztAPI, needs to be executed as a privileged user with `sudo`. Boagent, executed with the available `docker-compose` file,
-will run as privileged and will be able to receive the needed hardware data. At the moment, only data for the CPU, RAM and storage (either HDD or SSD) are parsed and sent to BoaviztAPI
-in order to calculate impacts.
-
 ### Run natively
 
 To run it :
@@ -91,6 +77,20 @@ You can set those variables in the following order (as interpreted by the tool):
 3. rely on default values from `config.py`
 
 You can check the configuration applied by querying the `/info` route.
+
+## How it works
+
+Currently, Boagent only works for Linux systems.
+
+Boagent exposes multiple API endpoints, most notably `/query` and `/metrics`. Both will query an instance of [BoaviztAPI](https://doc.api.boavizta.org/) in order to give the environmental impacts
+of the received hardware data. `/query` will return a response in JSON, and `/metrics` will return a response parsable by a Prometheus instance. If needed, both those
+endpoints can return data from [Scaphandre](https://github.com/hubblo-org/scaphandre/) and give the energy consumption of components from the queried hardware.
+
+Presently, Boagent gets hardware data through a parsing of the output of `lshw`, a common utility available for Linux distributions that lists a lot of information of all
+hardware components on a running computer. The code for this `Lshw` class is an adaptation of [netbox-agent](https://github.com/Solvik/netbox-agent)'s implementation.
+`lshw`, to get all proper data needed by BoaviztAPI, needs to be executed as a privileged user with `sudo`. Boagent, executed with the available `docker-compose` file,
+will run as privileged and will be able to receive the needed hardware data. At the moment, only data for the CPU, RAM and storage (either HDD or SSD) are parsed and sent to BoaviztAPI
+in order to calculate impacts.
 
 ## Deeper explanations
 
