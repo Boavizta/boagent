@@ -15,6 +15,20 @@ This is an API, you could use either your browser, curl, or call it directly fro
 
 Once the API is running, a Swagger interface is available on [localhost:8000/docs](http://localhost:8000/docs).
 
+## How it works
+
+Currently, Boagent only works for Linux systems.
+
+Boagent exposes multiple API endpoints, most notably `/query` and `/metrics`. Both will query an instance of [BoaviztAPI](https://doc.api.boavizta.org/) in order to give the environmental impacts
+of the received hardware data. `/query` will return a response in JSON, and `/metrics` will return a response parsable by a Prometheus instance. If needed, both those
+endpoints can return data from [Scaphandre](https://github.com/hubblo-org/scaphandre/) and give the energy consumption of components from the queried hardware.
+
+Presently, Boagent gets hardware data through a parsing of the output of `lshw`, a common utility available for Linux distributions that lists a lot of information of all
+hardware components on a running computer. The code for this `Lshw` class is an adaptation of [netbox-agent](https://github.com/Solvik/netbox-agent)'s implementation.
+`lshw`, to get all proper data needed by BoaviztAPI, needs to be executed as a privileged user with `sudo`. Boagent, executed with the available `docker-compose` file,
+will run as privileged and will be able to receive the needed hardware data. At the moment, only data for the CPU, RAM and storage (either HDD or SSD) are parsed and sent to BoaviztAPI
+in order to calculate impacts.
+
 ### Run natively
 
 To run it :
@@ -26,8 +40,7 @@ cd api/
 uvicorn api:app --reload
 ```
 
-The app can run without root privileges, but you won't get full data about the RAM and get some warnings.
-Run as root to have the best evaluation possible.
+Boagent will not be able to return proper responses from its endpoints without root privileges in order to fetch hardware data.
 
 ### Run in a docker container
 
@@ -55,7 +68,7 @@ Ensure that the version of BoaviztAPI SDK installed (see `requirements.txt`) is 
 
 ### Scaphandre
 
-To get power consumption metrics, you need [Scaphandre](https://github.com/hubblo-org/scaphandre) runnig in the background, with the json exporter. This will write power metrics to a file, that Boagent will read :
+To get power consumption metrics, you need [Scaphandre](https://github.com/hubblo-org/scaphandre) running in the background, with the json exporter. This will write power metrics to a file, that Boagent will read :
 
 ```
 scaphandre json -s 5 -f power_data.json
