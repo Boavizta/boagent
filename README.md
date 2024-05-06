@@ -20,9 +20,8 @@ Once the API is running, a Swagger interface is available on [localhost:8000/doc
 To run it :
 
 ```
-cd boagent/
 pip3 install -r requirements.txt
-cd api/
+cd boagent/api/
 uvicorn api:app --reload
 ```
 
