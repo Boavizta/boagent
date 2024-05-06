@@ -31,7 +31,7 @@ services:
       - "./boagent:/home/boagent/boagent"
 
   scaphandre:
-    image: hubblo/scaphandre:1.0.0
+    image: hubblo/scaphandre:dev
     privileged: true
     volumes:
       - type: bind
