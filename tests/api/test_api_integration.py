@@ -1,6 +1,10 @@
+import json
+import os
+
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from unittest import TestCase
+from unittest.mock import patch
 from pytest import mark
 from boagent.api.config import Settings
 
@@ -11,17 +15,39 @@ settings = Settings(
     power_file_path="./tests/mocks/power_data.json",
 )
 
-from api import app  # noqa
+from boagent.api.api import app  # noqa
 
 NOW_ISO8601 = datetime.now().isoformat()
 NOW_ISO8601_MINUS_ONE_MINUTE = datetime.fromisoformat(NOW_ISO8601) - timedelta(
     minutes=1
 )
 
+current_dir = os.path.dirname(__file__)
+mock_boaviztapi_response_not_verbose = os.path.join(
+    f"{current_dir}", "../mocks/boaviztapi_response_not_verbose.json"
+)
+mock_get_metrics_not_verbose = os.path.join(
+    f"{current_dir}", "../mocks/get_metrics_not_verbose.json"
+)
+mock_get_metrics_verbose = os.path.join(
+    f"{current_dir}", "../mocks/get_metrics_verbose.json"
+)
+
 client = TestClient(app)
 
 
 class ApiEndpointsTest(TestCase):
+    def setUp(self):
+        with open(
+            mock_boaviztapi_response_not_verbose, "r"
+        ) as boaviztapi_response_file:
+            self.boaviztapi_response_not_verbose = json.load(boaviztapi_response_file)
+
+        with open(mock_get_metrics_not_verbose, "r") as get_metrics_not_verbose_file:
+            self.get_metrics_not_verbose = json.load(get_metrics_not_verbose_file)
+        with open(mock_get_metrics_verbose, "r") as get_metrics_verbose_file:
+            self.get_metrics_verbose = json.load(get_metrics_verbose_file)
+
     def test_read_info(self):
         response = client.get("/info")
         assert response.status_code == 200
@@ -30,7 +56,28 @@ class ApiEndpointsTest(TestCase):
         response = client.get("/web")
         assert response.status_code == 200
 
-    def test_read_metrics(self):
+    @patch("boagent.api.api.get_metrics")
+    def test_read_metrics_with_success(self, mocked_get_metrics):
+
+        mocked_get_metrics.return_value = self.get_metrics_not_verbose
+
+        params = {
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
+            "verbose": "false",
+            "location": "FRA",
+            "measure_power": "false",
+            "lifetime": 5,
+            "fetch_hardware": "false",
+        }
+
+        response = client.get("/metrics", params=params)
+        assert response.status_code == 200
+
+    @patch("boagent.api.api.get_metrics")
+    def test_read_metrics_with_verbose_with_success(self, mocked_get_metrics):
+
+        mocked_get_metrics.return_value = self.get_metrics_verbose
 
         params = {
             "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
@@ -46,7 +93,12 @@ class ApiEndpointsTest(TestCase):
         assert response.status_code == 200
 
     @mark.query
-    def test_read_query_without_measure_power_and_fetch_hardware(self):
+    @patch("boagent.api.api.get_metrics")
+    def test_read_query_without_measure_power_and_fetch_hardware_with_success(
+        self, mocked_get_metrics
+    ):
+
+        mocked_get_metrics.return_value = self.boaviztapi_response_not_verbose
 
         params = {
             "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
@@ -62,7 +114,10 @@ class ApiEndpointsTest(TestCase):
         assert response.status_code == 200
 
     @mark.query
-    def test_read_query_with_measure_power(self):
+    @patch("boagent.api.api.get_metrics")
+    def test_read_query_with_measure_power_with_success(self, mocked_get_metrics):
+
+        mocked_get_metrics.return_value = self.get_metrics_not_verbose
 
         params = {
             "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
@@ -78,7 +133,10 @@ class ApiEndpointsTest(TestCase):
         assert response.status_code == 200
 
     @mark.query
-    def test_read_query_with_fetch_hardware(self):
+    @patch("boagent.api.api.get_metrics")
+    def test_read_query_with_fetch_hardware_with_success(self, mocked_get_metrics):
+
+        mocked_get_metrics.return_value = self.get_metrics_not_verbose
 
         params = {
             "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
@@ -94,7 +152,10 @@ class ApiEndpointsTest(TestCase):
         assert response.status_code == 200
 
     @mark.query
-    def test_read_query_with_measure_power_and_fetch_hardware(self):
+    @patch("boagent.api.api.get_metrics")
+    def test_read_query_with_measure_power_and_fetch_hardware(self, mocked_get_metrics):
+
+        mocked_get_metrics.return_value = self.boaviztapi_response_not_verbose
 
         params = {
             "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
@@ -110,7 +171,12 @@ class ApiEndpointsTest(TestCase):
         assert response.status_code == 200
 
     @mark.query
-    def test_read_query_with_measure_power_and_fetch_hardware_verbose(self):
+    @patch("boagent.api.api.get_metrics")
+    def test_read_query_with_measure_power_and_fetch_hardware_verbose(
+        self, mocked_get_metrics
+    ):
+
+        mocked_get_metrics.return_value = self.get_metrics_verbose
 
         params = {
             "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
