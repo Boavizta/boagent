@@ -73,7 +73,6 @@ def configure_app():
 
 
 app = configure_app()
-items = {}
 
 
 @app.get("/info", tags=["info"])
