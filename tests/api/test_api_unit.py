@@ -13,6 +13,7 @@ from boagent.api.api import (
     compute_average_consumption,
     get_power_data,
     get_metrics,
+    get_process_info,
 )
 from boagent.api.utils import format_prometheus_output
 
@@ -28,6 +29,9 @@ mock_boaviztapi_response_verbose = os.path.join(
 )
 mock_formatted_scaphandre = os.path.join(
     f"{current_dir}", "../mocks/formatted_power_data_one_hour.json"
+)
+mock_formatted_scaphandre_with_processes = os.path.join(
+    f"{current_dir}", "../mocks/formatted_scaphandre.json"
 )
 mock_get_metrics_not_verbose = os.path.join(
     f"{current_dir}", "../mocks/get_metrics_not_verbose.json"
@@ -187,12 +191,8 @@ class GetPowerDataTest(TestCase):
 
         self.formatted_scaphandre = f"{mock_formatted_scaphandre}"
 
-    @patch("boagent.api.api.format_scaphandre_json")
-    def test_get_power_data(self, mocked_format_scaphandre_json):
-
-        mocked_format_scaphandre_json.return_value = open(
-            mock_formatted_scaphandre, "r"
-        ).read()
+    @patch("boagent.api.api.POWER_DATA_FILE_PATH", mock_formatted_scaphandre)
+    def test_get_power_data(self):
 
         power_data = get_power_data(self.start_time, self.end_time)
 
@@ -202,14 +202,8 @@ class GetPowerDataTest(TestCase):
         assert type(power_data["avg_power"]) is float
         assert power_data["avg_power"] > 0
 
-    @patch("boagent.api.api.format_scaphandre_json")
-    def test_get_power_data_with_short_time_interval(
-        self, mocked_format_scaphandre_json
-    ):
-
-        mocked_format_scaphandre_json.return_value = open(
-            mock_formatted_scaphandre, "r"
-        ).read()
+    @patch("boagent.api.api.POWER_DATA_FILE_PATH", mock_formatted_scaphandre)
+    def test_get_power_data_with_short_time_interval(self):
 
         power_data = get_power_data(
             self.short_interval_start_time, self.short_interval_end_time
@@ -479,6 +473,50 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
         assert "power_data" in metrics["raw_data"]
 
 
+class AllocateEmbeddedImpactForProcess(TestCase):
+    def setUp(self):
+
+        self.start_time = 1710837858
+        self.end_time = 1710841458
+        self.verbose = False
+        self.location = "EEE"
+        self.measure_power = False
+        self.lifetime = 5.0
+        self.fetch_hardware = False
+
+        with open(mock_boaviztapi_response_not_verbose, "r") as boaviztapi_data:
+            self.boaviztapi_data = json.load(boaviztapi_data)
+
+    @patch("boagent.api.api.query_machine_impact_data")
+    def test_get_total_embedded_impacts_for_host(
+        self, mocked_query_machine_impact_data
+    ):
+
+        total_embedded_impacts_host = get_metrics(
+            self.start_time,
+            self.end_time,
+            self.verbose,
+            self.location,
+            self.measure_power,
+            self.lifetime,
+            self.fetch_hardware,
+        )
+
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+
+        assert "embedded_emissions" in total_embedded_impacts_host
+        assert "embedded_abiotic_resources_depletion" in total_embedded_impacts_host
+        assert "embedded_primary_energy" in total_embedded_impacts_host
+
+    @patch(
+        "boagent.api.api.POWER_DATA_FILE_PATH", mock_formatted_scaphandre_with_processes
+    )
+    def test_get_process_info(self):
+
+        process_details = get_process_info(2310)
+        assert type(process_details) is list
+
+
 loader = TestLoader()
 suite = TestSuite()
 
@@ -489,3 +527,4 @@ suite.addTests(loader.loadTestsFromTestCase(GetPowerDataTest))
 suite.addTests(loader.loadTestsFromTestCase(GetMetricsNotVerboseNoScaphandreTest))
 suite.addTests(loader.loadTestsFromTestCase(GetMetricsVerboseNoScaphandreTest))
 suite.addTests(loader.loadTestsFromTestCase(GetMetricsVerboseWithScaphandreTest))
+suite.addTests(loader.loadTestsFromTestCase(AllocateEmbeddedImpactForProcess))
