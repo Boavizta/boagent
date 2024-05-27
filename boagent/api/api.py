@@ -271,6 +271,55 @@ async def query_with_time_workload(
     )
 
 
+@app.get("/process_embedded_impacts")
+async def process_embedded_impacts(
+    process: int = 0,
+    start_time: str = "0.0",
+    end_time: str = "0.0",
+    verbose: bool = False,
+    location: str = "EEE",
+    measure_power: bool = True,
+    lifetime: float = DEFAULT_LIFETIME,
+    fetch_hardware: bool = False,
+):
+
+    boaviztapi_data = get_metrics(
+        iso8601_or_timestamp_as_timestamp(start_time),
+        iso8601_or_timestamp_as_timestamp(end_time),
+        verbose,
+        location,
+        measure_power,
+        lifetime,
+        fetch_hardware,
+    )
+
+    gwp_impact = boaviztapi_data["embedded_emissions"]["value"]
+    adp_impact = boaviztapi_data["embedded_abiotic_resources_depletion"]["value"]
+    pe_impact = boaviztapi_data["embedded_primary_energy"]["value"]
+    host_impacts = {
+        "host_gwp_impact": gwp_impact,
+        "host_adp_impact": adp_impact,
+        "host_pe_impact": pe_impact,
+    }
+
+    return host_impacts
+
+
+def get_process_info(process_id):
+    with open(POWER_DATA_FILE_PATH, "r") as power_data_file:
+        format_data = f"{power_data_file.read()}]"
+        data = json.loads(format_data)
+
+        process_info = list()
+
+        for category in data:
+            for process in category["consumers"]:
+                if process["pid"] == process_id:
+                    process_info_with_timestamp = f"{process['timestamp']}:{process}"
+                    process_info.append(process_info_with_timestamp)
+        return process_info
+
+
 @app.get("/last_info")
 async def last_info():
     res = {
