@@ -191,6 +191,12 @@ class ApiEndpointsTest(TestCase):
         response = client.get("/query", params=params)
         assert response.status_code == 200
 
+    @patch("boagent.api.api.get_metrics")
+    def test_read_process_embedded_impacts(self, mocked_get_metrics):
+        mocked_get_metrics.return_value = self.get_metrics_not_verbose
+        response = client.get("/process_embedded_impacts")
+        assert response.status_code == 200
+
     def test_read_yearly_embedded(self):
         response = client.get("/yearly_embedded")
         assert response.status_code == 200
