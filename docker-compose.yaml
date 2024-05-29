@@ -41,7 +41,7 @@ services:
         source: /sys/class/powercap
         target: /sys/class/powercap
       - "powerdata:/app/data:rw"
-    command: [ "--no-header", "json", "-s", "10", "--max-top-consumers", "0",  "-f", "/app/data/power_data.json" ]
+    command: [ "--no-header", "json", "-s", "10", "--resources", "-f", "/app/data/power_data.json" ]
     networks:
       - boagent-network
 
