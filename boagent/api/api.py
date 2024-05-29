@@ -273,14 +273,14 @@ async def query_with_time_workload(
 
 @app.get("/process_embedded_impacts")
 async def process_embedded_impacts(
-    process: int = 0,
+    process_id: int = 0,
     start_time: str = "0.0",
     end_time: str = "0.0",
     verbose: bool = False,
     location: str = "EEE",
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
-    fetch_hardware: bool = False,
+    fetch_hardware: bool = True,
 ):
 
     boaviztapi_data = get_metrics(
@@ -302,6 +302,8 @@ async def process_embedded_impacts(
         "host_pe_impact": pe_impact,
     }
 
+    # process_info = get_process_info(process_id)
+    # host_ram_in_bytes = get_total_ram_in_bytes()
     return host_impacts
 
 
@@ -315,9 +317,33 @@ def get_process_info(process_id):
         for category in data:
             for process in category["consumers"]:
                 if process["pid"] == process_id:
-                    process_info_with_timestamp = f"{process['timestamp']}:{process}"
-                    process_info.append(process_info_with_timestamp)
+                    process_info.append(process)
         return process_info
+
+
+def get_total_ram_in_bytes():
+
+    hardware_data = get_hardware_data(True)
+    total_ram_capacity_in_gigabytes = 0
+
+    for unit in hardware_data["rams"]:
+        total_ram_capacity_in_gigabytes += unit["capacity"]
+
+    total_ram_in_bytes = total_ram_capacity_in_gigabytes * 1073741824
+    return total_ram_in_bytes
+
+
+def get_process_ram_shares(process, ram_total):
+
+    process_info = get_process_info(process)
+    process_ram_shares = list()
+    for timestamp in process_info:
+        process_ram_share = (
+            int(timestamp["resources_usage"]["memory_usage"]) / ram_total
+        )
+        process_ram_shares.append(process_ram_share)
+
+    return process_ram_shares
 
 
 @app.get("/last_info")
