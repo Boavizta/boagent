@@ -14,6 +14,8 @@ from boagent.api.api import (
     get_power_data,
     get_metrics,
     get_process_info,
+    get_total_ram_in_bytes,
+    get_process_ram_shares,
 )
 from boagent.api.utils import format_prometheus_output
 
@@ -133,8 +135,8 @@ class ComputeAvgConsumptionTest(TestCase):
     def test_compute_average_consumption(self):
 
         with open(mock_power_data, "r") as power_data_file:
-            power_data = f"[{power_data_file.read()}]"
-        data = json.loads(power_data)
+            # power_data = f"[{power_data_file.read()}]"
+            data = json.load(power_data_file)
         avg_host = compute_average_consumption(data)
 
         assert type(avg_host) is float
@@ -513,8 +515,27 @@ class AllocateEmbeddedImpactForProcess(TestCase):
     )
     def test_get_process_info(self):
 
-        process_details = get_process_info(2310)
+        process_details = get_process_info(70335)
+        for process in process_details:
+            print(process)
+            print(
+                f"{process['resources_usage']['cpu_usage']}{process['resources_usage']['cpu_usage_unit']}"
+            )
         assert type(process_details) is list
+
+    def test_get_total_ram_in_bytes(self):
+
+        total_ram_in_bytes = get_total_ram_in_bytes()
+        assert type(total_ram_in_bytes) is int
+
+    @patch(
+        "boagent.api.api.POWER_DATA_FILE_PATH", mock_formatted_scaphandre_with_processes
+    )
+    def test_get_process_ram_share_by_timestamp(self):
+
+        process_ram_shares = get_process_ram_shares(70335, 8589934592)
+
+        assert type(process_ram_shares) is list
 
 
 loader = TestLoader()
