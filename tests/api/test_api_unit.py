@@ -16,6 +16,7 @@ from boagent.api.api import (
     get_process_info,
     get_total_ram_in_bytes,
     get_process_ram_shares,
+    get_ram_embedded_impact_shares,
 )
 from boagent.api.utils import format_prometheus_output
 
@@ -489,6 +490,9 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         with open(mock_boaviztapi_response_not_verbose, "r") as boaviztapi_data:
             self.boaviztapi_data = json.load(boaviztapi_data)
 
+        with open(mock_get_metrics_verbose) as get_metrics_verbose:
+            self.get_metrics_verbose = json.load(get_metrics_verbose)
+
     @patch("boagent.api.api.query_machine_impact_data")
     def test_get_total_embedded_impacts_for_host(
         self, mocked_query_machine_impact_data
@@ -517,10 +521,7 @@ class AllocateEmbeddedImpactForProcess(TestCase):
 
         process_details = get_process_info(70335)
         for process in process_details:
-            print(process)
-            print(
-                f"{process['resources_usage']['cpu_usage']}{process['resources_usage']['cpu_usage_unit']}"
-            )
+            assert type(process) is dict
         assert type(process_details) is list
 
     def test_get_total_ram_in_bytes(self):
@@ -533,9 +534,31 @@ class AllocateEmbeddedImpactForProcess(TestCase):
     )
     def test_get_process_ram_share_by_timestamp(self):
 
-        process_ram_shares = get_process_ram_shares(70335, 8589934592)
+        process_info = get_process_info(70335)
+        process_ram_shares = get_process_ram_shares(process_info, 8589934592)
 
+        for ram_share in process_ram_shares:
+            assert type(ram_share) is float
         assert type(process_ram_shares) is list
+
+    @patch(
+        "boagent.api.api.POWER_DATA_FILE_PATH", mock_formatted_scaphandre_with_processes
+    )
+    def test_get_embedded_impact_share_for_ram_by_timestamp(self):
+
+        host_ram_embedded_impacts = self.get_metrics_verbose["raw_data"][
+            "boaviztapi_data"
+        ]["verbose"]["RAM-1"]
+        process_info = get_process_info(70335)
+        process_ram_shares = get_process_ram_shares(process_info, 8589934592)
+        embedded_impact_shares = get_ram_embedded_impact_shares(
+            host_ram_embedded_impacts, process_ram_shares
+        )
+
+        for embedded_impact_share in embedded_impact_shares:
+            assert type(embedded_impact_share) is float
+        assert type(embedded_impact_shares) is list
+        assert False is True
 
 
 loader = TestLoader()
