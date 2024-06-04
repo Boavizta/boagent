@@ -1,1 +1,1576 @@
-{"emissions_calculation_data": {"energy_consumption_warning": "The time window is lower than one hour, but the energy consumption estimate is in Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be careful with this data. "}, "location_warning": {"warning_message": "Location is either set as default, or has not been set, and is therefore set to the default BoaviztAPI location. Be aware that the presented results can be drastically different due to location. It is recommended that you set the asset location with the corresponding country code, see: https://doc.api.boavizta.org/Explanations/usage/countries/"}, "total_operational_emissions": {"value": {"value": 38.77, "min": 38.77, "max": 38.77}, "description": "GHG emissions related to usage, from start_time to end_time.", "type": "gauge", "unit": "kg CO2eq", "long_unit": "kilograms CO2 equivalent"}, "total_operational_abiotic_resources_depletion": {"value": {"value": 6.553e-06, "min": 6.553e-06, "max": 6.553e-06}, "description": "Abiotic Resources Depletion (minerals & metals, ADPe) due to the usage phase.", "type": "gauge", "unit": "kgSbeq", "long_unit": "kilograms Antimony equivalent"}, "total_operational_primary_energy_consumed": {"value": {"value": 1313.0, "min": 1313.0, "max": 1313.0}, "description": "Primary Energy consumed due to the usage phase.", "type": "gauge", "unit": "MJ", "long_unit": "Mega Joules"}, "start_time": {"value": 1714047295.6773918, "description": "Start time for the evaluation, in timestamp format (seconds since 1970)", "type": "counter", "unit": "s", "long_unit": "seconds"}, "end_time": {"value": 1714050895.6773918, "description": "End time for the evaluation, in timestamp format (seconds since 1970)", "type": "counter", "unit": "s", "long_unit": "seconds"}, "average_power_measured": {"value": 2.911697275862069, "description": "Average power measured from start_time to end_time", "type": "gauge", "unit": "W", "long_unit": "Watts"}, "embedded_emissions": {"value": 900.0, "description": "Embedded carbon emissions (manufacturing phase)", "type": "gauge", "unit": "kg CO2eq", "long_unit": "kilograms CO2 equivalent"}, "embedded_abiotic_resources_depletion": {"value": 0.14, "description": "Embedded abiotic ressources consumed (manufacturing phase)", "type": "gauge", "unit": "kg Sbeq", "long_unit": "kilograms ADP equivalent"}, "embedded_primary_energy": {"value": 13000.0, "description": "Embedded primary energy consumed (manufacturing phase)", "type": "gauge", "unit": "MJ", "long_unit": "Mega Joules"}, "raw_data": {"hardware_data": {"disks": [{"units": 1, "logicalname": "/dev/nvme0n1", "manufacturer": "samsung", "type": "ssd", "capacity": 184}], "cpus": [{"units": 1, "name": "AMD Ryzen 5 5600H with Radeon Graphics", "vendor": "Advanced Micro Devices [AMD]", "core_units": "6"}], "rams": [{"units": 1, "manufacturer": "Samsung", "capacity": 8}]}, "resources_data": "not implemented yet", "boaviztapi_data": {"impacts": {"gwp": {"unit": "kgCO2eq", "description": "Total climate change", "embedded": {"value": 900.0, "min": 461.8, "max": 2089.0, "warnings": ["End of life is not included in the calculation"]}, "use": {"value": 38.77, "min": 38.77, "max": 38.77}}, "adp": {"unit": "kgSbeq", "description": "Use of minerals and fossil ressources", "embedded": {"value": 0.14, "min": 0.09758, "max": 0.2132, "warnings": ["End of life is not included in the calculation"]}, "use": {"value": 6.553e-06, "min": 6.553e-06, "max": 6.553e-06}}, "pe": {"unit": "MJ", "description": "Consumption of primary energy", "embedded": {"value": 13000.0, "min": 6138.0, "max": 27090.0, "warnings": ["End of life is not included in the calculation"]}, "use": {"value": 1313.0, "min": 1313.0, "max": 1313.0}}}, "verbose": {"duration": {"value": 35040.0, "unit": "hours"}, "ASSEMBLY-1": {"impacts": {"gwp": {"unit": "kgCO2eq", "description": "Total climate change", "embedded": {"value": 6.68, "min": 6.68, "max": 6.68, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}, "adp": {"unit": "kgSbeq", "description": "Use of minerals and fossil ressources", "embedded": {"value": 1.41e-06, "min": 1.41e-06, "max": 1.41e-06, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}, "pe": {"unit": "MJ", "description": "Consumption of primary energy", "embedded": {"value": 68.6, "min": 68.6, "max": 68.6, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}}, "units": {"value": 1, "status": "ARCHETYPE", "min": 1, "max": 1}, "duration": {"value": 35040.0, "unit": "hours"}}, "CPU-1": {"impacts": {"gwp": {"unit": "kgCO2eq", "description": "Total climate change", "embedded": {"value": 40.0, "min": 21.84, "max": 163.6, "warnings": ["End of life is not included in the calculation"]}, "use": {"value": 10000.0, "min": 587.5, "max": 28900.0}}, "adp": {"unit": "kgSbeq", "description": "Use of minerals and fossil ressources", "embedded": {"value": 0.04081, "min": 0.0408, "max": 0.04084, "warnings": ["End of life is not included in the calculation"]}, "use": {"value": 0.0016, "min": 0.0003382, "max": 0.006783}}, "pe": {"unit": "MJ", "description": "Consumption of primary energy", "embedded": {"value": 600.0, "min": 359.9, "max": 2267.0, "warnings": ["End of life is not included in the calculation"]}, "use": {"value": 300000.0, "min": 332.0, "max": 11960000.0, "warnings": ["Uncertainty from technical characteristics is very important. Results should be interpreted with caution (see min and max values)"]}}}, "units": {"value": 2.0, "status": "ARCHETYPE", "min": 2.0, "max": 2.0}, "die_size": {"value": 521.0, "status": "COMPLETED", "unit": "mm2", "source": "Average value for all families", "min": 41.2, "max": 3640.0}, "duration": {"value": 35040.0, "unit": "hours"}, "avg_power": {"value": 364.46, "status": "COMPLETED", "unit": "W", "min": 364.46, "max": 364.46}, "time_workload": {"value": 50.0, "status": "ARCHETYPE", "unit": "%", "min": 0.0, "max": 100.0}, "usage_location": {"value": "EEE", "status": "DEFAULT", "unit": "CodSP3 - NCS Country Codes - NATO"}, "use_time_ratio": {"value": 1.0, "status": "ARCHETYPE", "unit": "/1", "min": 1.0, "max": 1.0}, "hours_life_time": {"value": 35040.0, "status": "COMPLETED", "unit": "hours", "source": "from device", "min": 35040.0, "max": 35040.0}, "params": {"value": {"a": 171.2, "b": 0.0354, "c": 36.89, "d": -10.13}, "status": "ARCHETYPE"}, "gwp_factor": {"value": 0.38, "status": "DEFAULT", "unit": "kg CO2eq/kWh", "source": "https://www.sciencedirect.com/science/article/pii/S0306261921012149", "min": 0.023, "max": 1.13161}, "adp_factor": {"value": 6.42317e-08, "status": "DEFAULT", "unit": "kg Sbeq/kWh", "source": "ADEME Base IMPACTS \u00ae", "min": 1.324e-08, "max": 2.65575e-07}, "pe_factor": {"value": 12.873, "status": "DEFAULT", "unit": "MJ/kWh", "source": "ADPf / (1-%renewable_energy)", "min": 0.013, "max": 468.15}}, "RAM-1": {"impacts": {"gwp": {"unit": "kgCO2eq", "description": "Total climate change", "embedded": {"value": 490.0, "min": 209.2, "max": 1179.0, "warnings": ["End of life is not included in the calculation"]}, "use": {"value": 8000.0, "min": 263.7, "max": 36040.0}}, "adp": {"unit": "kgSbeq", "description": "Use of minerals and fossil ressources", "embedded": {"value": 0.026, "min": 0.01523, "max": 0.04916, "warnings": ["End of life is not included in the calculation"]}, "use": {"value": 0.0013, "min": 0.0001518, "max": 0.008457}}, "pe": {"unit": "MJ", "description": "Consumption of primary energy", "embedded": {"value": 6000.0, "min": 2651.0, "max": 14720.0, "warnings": ["End of life is not included in the calculation"]}, "use": {"value": 300000.0, "min": 149.0, "max": 14910000.0, "warnings": ["Uncertainty from technical characteristics is very important. Results should be interpreted with caution (see min and max values)"]}}}, "units": {"value": 8.0, "status": "ARCHETYPE", "min": 6.0, "max": 10.0}, "capacity": {"value": 32.0, "status": "ARCHETYPE", "unit": "GB", "min": 32.0, "max": 32.0}, "density": {"value": 1.2443636363636363, "status": "COMPLETED", "unit": "GB/cm2", "source": "Average of 11 rows", "min": 0.625, "max": 2.375}, "duration": {"value": 35040.0, "unit": "hours"}, "avg_power": {"value": 72.704, "status": "COMPLETED", "unit": "W", "min": 54.52799999999999, "max": 90.88}, "time_workload": {"value": 50.0, "status": "ARCHETYPE", "unit": "%", "min": 0.0, "max": 100.0}, "usage_location": {"value": "EEE", "status": "DEFAULT", "unit": "CodSP3 - NCS Country Codes - NATO"}, "use_time_ratio": {"value": 1.0, "status": "ARCHETYPE", "unit": "/1", "min": 1.0, "max": 1.0}, "hours_life_time": {"value": 35040.0, "status": "COMPLETED", "unit": "hours", "source": "from device", "min": 35040.0, "max": 35040.0}, "params": {"value": {"a": 9.088}, "status": "COMPLETED", "source": "(ram_electrical_factor_per_go : 0.284) * (ram_capacity: 32.0) "}, "gwp_factor": {"value": 0.38, "status": "DEFAULT", "unit": "kg CO2eq/kWh", "source": "https://www.sciencedirect.com/science/article/pii/S0306261921012149", "min": 0.023, "max": 1.13161}, "adp_factor": {"value": 6.42317e-08, "status": "DEFAULT", "unit": "kg Sbeq/kWh", "source": "ADEME Base IMPACTS \u00ae", "min": 1.324e-08, "max": 2.65575e-07}, "pe_factor": {"value": 12.873, "status": "DEFAULT", "unit": "MJ/kWh", "source": "ADPf / (1-%renewable_energy)", "min": 0.013, "max": 468.15}}, "SSD-1": {"impacts": {"gwp": {"unit": "kgCO2eq", "description": "Total climate change", "embedded": {"value": 50.0, "min": 23.53, "max": 281.0, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}, "adp": {"unit": "kgSbeq", "description": "Use of minerals and fossil ressources", "embedded": {"value": 0.0017, "min": 0.001055, "max": 0.008809, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}, "pe": {"unit": "MJ", "description": "Consumption of primary energy", "embedded": {"value": 600.0, "min": 290.2, "max": 3483.0, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}}, "units": {"value": 1.0, "status": "ARCHETYPE", "min": 1.0, "max": 2.0}, "capacity": {"value": 1000.0, "status": "ARCHETYPE", "unit": "GB", "min": 1000.0, "max": 1000.0}, "density": {"value": 54.8842105263158, "status": "COMPLETED", "unit": "GB/cm2", "source": "Average of 19 rows", "min": 16.4, "max": 128.0}, "duration": {"value": 35040.0, "unit": "hours"}}, "POWER_SUPPLY-1": {"impacts": {"gwp": {"unit": "kgCO2eq", "description": "Total climate change", "embedded": {"value": 150.0, "min": 48.6, "max": 243.0, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}, "adp": {"unit": "kgSbeq", "description": "Use of minerals and fossil ressources", "embedded": {"value": 0.05, "min": 0.0166, "max": 0.083, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}, "pe": {"unit": "MJ", "description": "Consumption of primary energy", "embedded": {"value": 2100.0, "min": 704.0, "max": 3520.0, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}}, "units": {"value": 2.0, "status": "ARCHETYPE", "min": 2.0, "max": 2.0}, "unit_weight": {"value": 2.99, "status": "ARCHETYPE", "unit": "kg", "min": 1.0, "max": 5.0}, "duration": {"value": 35040.0, "unit": "hours"}}, "CASE-1": {"impacts": {"gwp": {"unit": "kgCO2eq", "description": "Total climate change", "embedded": {"value": 150.0, "min": 85.9, "max": 150.0, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}, "adp": {"unit": "kgSbeq", "description": "Use of minerals and fossil ressources", "embedded": {"value": 0.0202, "min": 0.0202, "max": 0.02767, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}, "pe": {"unit": "MJ", "description": "Consumption of primary energy", "embedded": {"value": 2200.0, "min": 1229.0, "max": 2200.0, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}}, "units": {"value": 1, "status": "ARCHETYPE", "min": 1, "max": 1}, "case_type": {"value": "rack", "status": "ARCHETYPE"}, "duration": {"value": 35040.0, "unit": "hours"}}, "MOTHERBOARD-1": {"impacts": {"gwp": {"unit": "kgCO2eq", "description": "Total climate change", "embedded": {"value": 66.1, "min": 66.1, "max": 66.1, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}, "adp": {"unit": "kgSbeq", "description": "Use of minerals and fossil ressources", "embedded": {"value": 0.00369, "min": 0.00369, "max": 0.00369, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}, "pe": {"unit": "MJ", "description": "Consumption of primary energy", "embedded": {"value": 836.0, "min": 836.0, "max": 836.0, "warnings": ["End of life is not included in the calculation"]}, "use": "not implemented"}}, "units": {"value": 1, "status": "ARCHETYPE", "min": 1, "max": 1}, "duration": {"value": 35040.0, "unit": "hours"}}, "avg_power": {"value": 2.911697275862069, "status": "INPUT", "unit": "W"}, "usage_location": {"value": "EEE", "status": "INPUT", "unit": "CodSP3 - NCS Country Codes - NATO"}, "use_time_ratio": {"value": 1.0, "status": "ARCHETYPE", "unit": "/1", "min": 1.0, "max": 1.0}, "hours_life_time": {"value": 35040.0, "status": "COMPLETED", "unit": "hours", "source": "from device", "min": 35040.0, "max": 35040.0}, "gwp_factor": {"value": 0.38, "status": "COMPLETED", "unit": "kg CO2eq/kWh", "source": "https://www.sciencedirect.com/science/article/pii/S0306261921012149", "min": 0.38, "max": 0.38}, "adp_factor": {"value": 6.42317e-08, "status": "COMPLETED", "unit": "kg Sbeq/kWh", "source": "ADEME Base IMPACTS \u00ae", "min": 6.42317e-08, "max": 6.42317e-08}, "pe_factor": {"value": 12.873, "status": "COMPLETED", "unit": "MJ/kWh", "source": "ADPf / (1-%renewable_energy)", "min": 12.873, "max": 12.873}, "units": {"value": 1, "status": "ARCHETYPE", "min": 1, "max": 1}}}, "start_time": 1714047295.6773918, "end_time": 1714050895.6773918, "power_data": {"raw_data": [{"host": {"consumption": 0.0, "timestamp": 1714050609.5303588, "components": {"disks": []}}, "consumers": [], "sockets": []}, {"host": {"consumption": 4837934.0, "timestamp": 1714050619.5760736, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3258818560", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 4829128.0, "domains": [{"name": "core", "consumption": 861910.0, "timestamp": 1714050619.534158}], "timestamp": 1714050619.5333738}]}, {"host": {"consumption": 4336772.0, "timestamp": 1714050629.6196637, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3257823232", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 4340778.0, "domains": [{"name": "core", "consumption": 340552.0, "timestamp": 1714050629.583029}], "timestamp": 1714050629.5823667}]}, {"host": {"consumption": 3959597.0, "timestamp": 1714050639.6662745, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3257794560", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 3963287.0, "domains": [{"name": "core", "consumption": 233109.0, "timestamp": 1714050639.626042}], "timestamp": 1714050639.6253095}]}, {"host": {"consumption": 2875749.0, "timestamp": 1714050649.7136774, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3257761792", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2880442.0, "domains": [{"name": "core", "consumption": 150432.0, "timestamp": 1714050649.673646}], "timestamp": 1714050649.6729755}]}, {"host": {"consumption": 2344716.0, "timestamp": 1714050659.7682877, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3257769984", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2342969.0, "domains": [{"name": "core", "consumption": 108567.0, "timestamp": 1714050659.7204263}], "timestamp": 1714050659.719766}]}, {"host": {"consumption": 2423952.0, "timestamp": 1714050669.8246953, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3256954880", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2424140.0, "domains": [{"name": "core", "consumption": 157851.0, "timestamp": 1714050669.776394}], "timestamp": 1714050669.7757287}]}, {"host": {"consumption": 2386135.0, "timestamp": 1714050679.8799796, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3256950784", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2384340.0, "domains": [{"name": "core", "consumption": 112721.0, "timestamp": 1714050679.8309493}], "timestamp": 1714050679.8301027}]}, {"host": {"consumption": 2422960.0, "timestamp": 1714050689.9413106, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3257040896", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2425202.0, "domains": [{"name": "core", "consumption": 88030.0, "timestamp": 1714050689.8877292}], "timestamp": 1714050689.8870673}]}, {"host": {"consumption": 2400792.0, "timestamp": 1714050699.9988215, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3257040896", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2400337.0, "domains": [{"name": "core", "consumption": 108788.0, "timestamp": 1714050699.9487965}], "timestamp": 1714050699.9480736}]}, {"host": {"consumption": 2377137.0, "timestamp": 1714050710.0650983, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3256233984", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2378404.0, "domains": [{"name": "core", "consumption": 80929.0, "timestamp": 1714050710.0126016}], "timestamp": 1714050710.0119147}]}, {"host": {"consumption": 3453613.0, "timestamp": 1714050720.1119895, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3256233984", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 3451031.0, "domains": [{"name": "core", "consumption": 143623.0, "timestamp": 1714050720.0730257}], "timestamp": 1714050720.072306}]}, {"host": {"consumption": 2391053.0, "timestamp": 1714050730.1596022, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3256512512", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2390881.0, "domains": [{"name": "core", "consumption": 87937.0, "timestamp": 1714050730.119086}], "timestamp": 1714050730.1183357}]}, {"host": {"consumption": 2373410.0, "timestamp": 1714050740.2157648, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3256500224", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2374401.0, "domains": [{"name": "core", "consumption": 85716.0, "timestamp": 1714050740.1680138}], "timestamp": 1714050740.1670768}]}, {"host": {"consumption": 3619855.0, "timestamp": 1714050750.2727349, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3256270848", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 3618308.0, "domains": [{"name": "core", "consumption": 402310.0, "timestamp": 1714050750.223619}], "timestamp": 1714050750.2229202}]}, {"host": {"consumption": 2561285.0, "timestamp": 1714050760.3367336, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3255484416", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2548108.0, "domains": [{"name": "core", "consumption": 132357.0, "timestamp": 1714050760.283399}], "timestamp": 1714050760.2826276}]}, {"host": {"consumption": 2390917.0, "timestamp": 1714050770.399907, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3255496704", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2404677.0, "domains": [{"name": "core", "consumption": 73807.0, "timestamp": 1714050770.3503423}], "timestamp": 1714050770.3490674}]}, {"host": {"consumption": 2503232.0, "timestamp": 1714050780.452806, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3255484416", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2502490.0, "domains": [{"name": "core", "consumption": 104714.0, "timestamp": 1714050780.4068437}], "timestamp": 1714050780.4061348}]}, {"host": {"consumption": 2353636.0, "timestamp": 1714050790.5184891, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3255484416", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2347337.0, "domains": [{"name": "core", "consumption": 88720.0, "timestamp": 1714050790.4598715}], "timestamp": 1714050790.4591603}]}, {"host": {"consumption": 2576118.0, "timestamp": 1714050800.5747895, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3256954880", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2583281.0, "domains": [{"name": "core", "consumption": 182473.0, "timestamp": 1714050800.5264494}], "timestamp": 1714050800.5257907}]}, {"host": {"consumption": 2406927.0, "timestamp": 1714050810.6301062, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3256135680", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2406472.0, "domains": [{"name": "core", "consumption": 559061.0, "timestamp": 1714050810.581942}], "timestamp": 1714050810.5812838}]}, {"host": {"consumption": 3958908.0, "timestamp": 1714050820.685751, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3251761152", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 3950184.0, "domains": [{"name": "core", "consumption": 884193.0, "timestamp": 1714050820.6366255}], "timestamp": 1714050820.6359894}]}, {"host": {"consumption": 5963138.0, "timestamp": 1714050830.7515006, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3255197696", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 5974054.0, "domains": [{"name": "core", "consumption": 645767.0, "timestamp": 1714050830.6936398}], "timestamp": 1714050830.692971}]}, {"host": {"consumption": 2465605.0, "timestamp": 1714050840.8065033, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3255209984", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2466516.0, "domains": [{"name": "core", "consumption": 824598.0, "timestamp": 1714050840.758721}], "timestamp": 1714050840.7579138}]}, {"host": {"consumption": 2429380.0, "timestamp": 1714050850.8606722, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3255209984", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2430564.0, "domains": [{"name": "core", "consumption": 356691.0, "timestamp": 1714050850.8141007}], "timestamp": 1714050850.8134236}]}, {"host": {"consumption": 2520553.0, "timestamp": 1714050860.9165232, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3254431744", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 2519423.0, "domains": [{"name": "core", "consumption": 975977.0, "timestamp": 1714050860.8676693}], "timestamp": 1714050860.8669431}]}, {"host": {"consumption": 3092541.0, "timestamp": 1714050870.9734244, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3254419456", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 3082233.0, "domains": [{"name": "core", "consumption": 369003.0, "timestamp": 1714050870.9234526}], "timestamp": 1714050870.922792}]}, {"host": {"consumption": 3812342.0, "timestamp": 1714050881.031177, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3254419456", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 3816419.0, "domains": [{"name": "core", "consumption": 173603.0, "timestamp": 1714050880.9800797}], "timestamp": 1714050880.9794118}]}, {"host": {"consumption": 3200964.0, "timestamp": 1714050891.0927029, "components": {"disks": [{"disk_type": "SSD", "disk_mount_point": "/etc/hosts", "disk_is_removable": false, "disk_file_system": "ext4", "disk_total_bytes": "153681051648", "disk_available_bytes": "3254415360", "disk_name": "/dev/nvme0n1p5"}]}}, "consumers": [], "sockets": [{"id": 0, "consumption": 3206864.0, "domains": [{"name": "core", "consumption": 102793.0, "timestamp": 1714050891.040935}], "timestamp": 1714050891.040277}]}], "avg_power": 2.911697275862069, "warning": "The time window is lower than one hour, but the energy consumption estimate is in Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be careful with this data. "}}, "electricity_carbon_intensity": {"value": 0.38, "description": "Carbon intensity of the electricity mix. Mix considered : EEE", "type": "gauge", "unit": "kg CO2eq / kWh", "long_unit": "Kilograms CO2 equivalent per KiloWattHour"}}
+{
+  "emissions_calculation_data": {
+    "energy_consumption_warning": "The time window is lower than one hour, but the energy consumption estimate is in Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be careful with this data. "
+  },
+  "location_warning": {
+    "warning_message": "Location is either set as default, or has not been set, and is therefore set to the default BoaviztAPI location. Be aware that the presented results can be drastically different due to location. It is recommended that you set the asset location with the corresponding country code, see: https://doc.api.boavizta.org/Explanations/usage/countries/"
+  },
+  "total_operational_emissions": {
+    "value": {
+      "value": 138.6,
+      "min": 138.6,
+      "max": 138.6
+    },
+    "description": "GHG emissions related to usage, from start_time to end_time.",
+    "type": "gauge",
+    "unit": "kg CO2eq",
+    "long_unit": "kilograms CO2 equivalent"
+  },
+  "total_operational_abiotic_resources_depletion": {
+    "value": {
+      "value": 0.00002342,
+      "min": 0.00002342,
+      "max": 0.00002342
+    },
+    "description": "Abiotic Resources Depletion (minerals & metals, ADPe) due to the usage phase.",
+    "type": "gauge",
+    "unit": "kgSbeq",
+    "long_unit": "kilograms Antimony equivalent"
+  },
+  "total_operational_primary_energy_consumed": {
+    "value": {
+      "value": 4694,
+      "min": 4694,
+      "max": 4694
+    },
+    "description": "Primary Energy consumed due to the usage phase.",
+    "type": "gauge",
+    "unit": "MJ",
+    "long_unit": "Mega Joules"
+  },
+  "start_time": {
+    "value": 1717500637.2979465,
+    "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
+    "type": "counter",
+    "unit": "s",
+    "long_unit": "seconds"
+  },
+  "end_time": {
+    "value": 1717504237.2979465,
+    "description": "End time for the evaluation, in timestamp format (seconds since 1970)",
+    "type": "counter",
+    "unit": "s",
+    "long_unit": "seconds"
+  },
+  "average_power_measured": {
+    "value": 10.4062055,
+    "description": "Average power measured from start_time to end_time",
+    "type": "gauge",
+    "unit": "W",
+    "long_unit": "Watts"
+  },
+  "embedded_emissions": {
+    "value": 900,
+    "description": "Embedded carbon emissions (manufacturing phase)",
+    "type": "gauge",
+    "unit": "kg CO2eq",
+    "long_unit": "kilograms CO2 equivalent"
+  },
+  "embedded_abiotic_resources_depletion": {
+    "value": 0.14,
+    "description": "Embedded abiotic ressources consumed (manufacturing phase)",
+    "type": "gauge",
+    "unit": "kg Sbeq",
+    "long_unit": "kilograms ADP equivalent"
+  },
+  "embedded_primary_energy": {
+    "value": 13000,
+    "description": "Embedded primary energy consumed (manufacturing phase)",
+    "type": "gauge",
+    "unit": "MJ",
+    "long_unit": "Mega Joules"
+  },
+  "raw_data": {
+    "hardware_data": {
+      "disks": [
+        {
+          "units": 1,
+          "logicalname": "/dev/nvme0n1",
+          "manufacturer": "toshiba",
+          "type": "ssd",
+          "capacity": 238
+        }
+      ],
+      "cpus": [
+        {
+          "units": 1,
+          "name": "Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz",
+          "vendor": "Intel Corp.",
+          "core_units": "4"
+        }
+      ],
+      "rams": [
+        {
+          "units": 1,
+          "manufacturer": "Micron",
+          "capacity": 4
+        },
+        {
+          "units": 1,
+          "manufacturer": "Micron",
+          "capacity": 4
+        }
+      ]
+    },
+    "resources_data": "not implemented yet",
+    "boaviztapi_data": {
+      "impacts": {
+        "gwp": {
+          "unit": "kgCO2eq",
+          "description": "Total climate change",
+          "embedded": {
+            "value": 900,
+            "min": 461.8,
+            "max": 2089,
+            "warnings": [
+              "End of life is not included in the calculation"
+            ]
+          },
+          "use": {
+            "value": 138.6,
+            "min": 138.6,
+            "max": 138.6
+          }
+        },
+        "adp": {
+          "unit": "kgSbeq",
+          "description": "Use of minerals and fossil ressources",
+          "embedded": {
+            "value": 0.14,
+            "min": 0.09758,
+            "max": 0.2132,
+            "warnings": [
+              "End of life is not included in the calculation"
+            ]
+          },
+          "use": {
+            "value": 0.00002342,
+            "min": 0.00002342,
+            "max": 0.00002342
+          }
+        },
+        "pe": {
+          "unit": "MJ",
+          "description": "Consumption of primary energy",
+          "embedded": {
+            "value": 13000,
+            "min": 6138,
+            "max": 27090,
+            "warnings": [
+              "End of life is not included in the calculation"
+            ]
+          },
+          "use": {
+            "value": 4694,
+            "min": 4694,
+            "max": 4694
+          }
+        }
+      },
+      "verbose": {
+        "duration": {
+          "value": 35040,
+          "unit": "hours"
+        },
+        "ASSEMBLY-1": {
+          "impacts": {
+            "gwp": {
+              "unit": "kgCO2eq",
+              "description": "Total climate change",
+              "embedded": {
+                "value": 6.68,
+                "min": 6.68,
+                "max": 6.68,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            },
+            "adp": {
+              "unit": "kgSbeq",
+              "description": "Use of minerals and fossil ressources",
+              "embedded": {
+                "value": 0.00000141,
+                "min": 0.00000141,
+                "max": 0.00000141,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            },
+            "pe": {
+              "unit": "MJ",
+              "description": "Consumption of primary energy",
+              "embedded": {
+                "value": 68.6,
+                "min": 68.6,
+                "max": 68.6,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            }
+          },
+          "units": {
+            "value": 1,
+            "status": "ARCHETYPE",
+            "min": 1,
+            "max": 1
+          },
+          "duration": {
+            "value": 35040,
+            "unit": "hours"
+          }
+        },
+        "CPU-1": {
+          "impacts": {
+            "gwp": {
+              "unit": "kgCO2eq",
+              "description": "Total climate change",
+              "embedded": {
+                "value": 40,
+                "min": 21.84,
+                "max": 163.6,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": {
+                "value": 10000,
+                "min": 587.5,
+                "max": 28900
+              }
+            },
+            "adp": {
+              "unit": "kgSbeq",
+              "description": "Use of minerals and fossil ressources",
+              "embedded": {
+                "value": 0.04081,
+                "min": 0.0408,
+                "max": 0.04084,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": {
+                "value": 0.0016,
+                "min": 0.0003382,
+                "max": 0.006783
+              }
+            },
+            "pe": {
+              "unit": "MJ",
+              "description": "Consumption of primary energy",
+              "embedded": {
+                "value": 600,
+                "min": 359.9,
+                "max": 2267,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": {
+                "value": 300000,
+                "min": 332,
+                "max": 11960000,
+                "warnings": [
+                  "Uncertainty from technical characteristics is very important. Results should be interpreted with caution (see min and max values)"
+                ]
+              }
+            }
+          },
+          "units": {
+            "value": 2,
+            "status": "ARCHETYPE",
+            "min": 2,
+            "max": 2
+          },
+          "die_size": {
+            "value": 521,
+            "status": "COMPLETED",
+            "unit": "mm2",
+            "source": "Average value for all families",
+            "min": 41.2,
+            "max": 3640
+          },
+          "duration": {
+            "value": 35040,
+            "unit": "hours"
+          },
+          "avg_power": {
+            "value": 364.46,
+            "status": "COMPLETED",
+            "unit": "W",
+            "min": 364.46,
+            "max": 364.46
+          },
+          "time_workload": {
+            "value": 50,
+            "status": "ARCHETYPE",
+            "unit": "%",
+            "min": 0,
+            "max": 100
+          },
+          "usage_location": {
+            "value": "EEE",
+            "status": "DEFAULT",
+            "unit": "CodSP3 - NCS Country Codes - NATO"
+          },
+          "use_time_ratio": {
+            "value": 1,
+            "status": "ARCHETYPE",
+            "unit": "/1",
+            "min": 1,
+            "max": 1
+          },
+          "hours_life_time": {
+            "value": 35040,
+            "status": "COMPLETED",
+            "unit": "hours",
+            "source": "from device",
+            "min": 35040,
+            "max": 35040
+          },
+          "params": {
+            "value": {
+              "a": 171.2,
+              "b": 0.0354,
+              "c": 36.89,
+              "d": -10.13
+            },
+            "status": "ARCHETYPE"
+          },
+          "gwp_factor": {
+            "value": 0.38,
+            "status": "DEFAULT",
+            "unit": "kg CO2eq/kWh",
+            "source": "https://www.sciencedirect.com/science/article/pii/S0306261921012149",
+            "min": 0.023,
+            "max": 1.13161
+          },
+          "adp_factor": {
+            "value": 6.42317e-8,
+            "status": "DEFAULT",
+            "unit": "kg Sbeq/kWh",
+            "source": "ADEME Base IMPACTS ®",
+            "min": 1.324e-8,
+            "max": 2.65575e-7
+          },
+          "pe_factor": {
+            "value": 12.873,
+            "status": "DEFAULT",
+            "unit": "MJ/kWh",
+            "source": "ADPf / (1-%renewable_energy)",
+            "min": 0.013,
+            "max": 468.15
+          }
+        },
+        "RAM-1": {
+          "impacts": {
+            "gwp": {
+              "unit": "kgCO2eq",
+              "description": "Total climate change",
+              "embedded": {
+                "value": 490,
+                "min": 209.2,
+                "max": 1179,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": {
+                "value": 8000,
+                "min": 263.7,
+                "max": 36040
+              }
+            },
+            "adp": {
+              "unit": "kgSbeq",
+              "description": "Use of minerals and fossil ressources",
+              "embedded": {
+                "value": 0.026,
+                "min": 0.01523,
+                "max": 0.04916,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": {
+                "value": 0.0013,
+                "min": 0.0001518,
+                "max": 0.008457
+              }
+            },
+            "pe": {
+              "unit": "MJ",
+              "description": "Consumption of primary energy",
+              "embedded": {
+                "value": 6000,
+                "min": 2651,
+                "max": 14720,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": {
+                "value": 300000,
+                "min": 149,
+                "max": 14910000,
+                "warnings": [
+                  "Uncertainty from technical characteristics is very important. Results should be interpreted with caution (see min and max values)"
+                ]
+              }
+            }
+          },
+          "units": {
+            "value": 8,
+            "status": "ARCHETYPE",
+            "min": 6,
+            "max": 10
+          },
+          "capacity": {
+            "value": 32,
+            "status": "ARCHETYPE",
+            "unit": "GB",
+            "min": 32,
+            "max": 32
+          },
+          "density": {
+            "value": 1.2443636363636363,
+            "status": "COMPLETED",
+            "unit": "GB/cm2",
+            "source": "Average of 11 rows",
+            "min": 0.625,
+            "max": 2.375
+          },
+          "duration": {
+            "value": 35040,
+            "unit": "hours"
+          },
+          "avg_power": {
+            "value": 72.704,
+            "status": "COMPLETED",
+            "unit": "W",
+            "min": 54.52799999999999,
+            "max": 90.88
+          },
+          "time_workload": {
+            "value": 50,
+            "status": "ARCHETYPE",
+            "unit": "%",
+            "min": 0,
+            "max": 100
+          },
+          "usage_location": {
+            "value": "EEE",
+            "status": "DEFAULT",
+            "unit": "CodSP3 - NCS Country Codes - NATO"
+          },
+          "use_time_ratio": {
+            "value": 1,
+            "status": "ARCHETYPE",
+            "unit": "/1",
+            "min": 1,
+            "max": 1
+          },
+          "hours_life_time": {
+            "value": 35040,
+            "status": "COMPLETED",
+            "unit": "hours",
+            "source": "from device",
+            "min": 35040,
+            "max": 35040
+          },
+          "params": {
+            "value": {
+              "a": 9.088
+            },
+            "status": "COMPLETED",
+            "source": "(ram_electrical_factor_per_go : 0.284) * (ram_capacity: 32.0) "
+          },
+          "gwp_factor": {
+            "value": 0.38,
+            "status": "DEFAULT",
+            "unit": "kg CO2eq/kWh",
+            "source": "https://www.sciencedirect.com/science/article/pii/S0306261921012149",
+            "min": 0.023,
+            "max": 1.13161
+          },
+          "adp_factor": {
+            "value": 6.42317e-8,
+            "status": "DEFAULT",
+            "unit": "kg Sbeq/kWh",
+            "source": "ADEME Base IMPACTS ®",
+            "min": 1.324e-8,
+            "max": 2.65575e-7
+          },
+          "pe_factor": {
+            "value": 12.873,
+            "status": "DEFAULT",
+            "unit": "MJ/kWh",
+            "source": "ADPf / (1-%renewable_energy)",
+            "min": 0.013,
+            "max": 468.15
+          }
+        },
+        "SSD-1": {
+          "impacts": {
+            "gwp": {
+              "unit": "kgCO2eq",
+              "description": "Total climate change",
+              "embedded": {
+                "value": 50,
+                "min": 23.53,
+                "max": 281,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            },
+            "adp": {
+              "unit": "kgSbeq",
+              "description": "Use of minerals and fossil ressources",
+              "embedded": {
+                "value": 0.0017,
+                "min": 0.001055,
+                "max": 0.008809,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            },
+            "pe": {
+              "unit": "MJ",
+              "description": "Consumption of primary energy",
+              "embedded": {
+                "value": 600,
+                "min": 290.2,
+                "max": 3483,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            }
+          },
+          "units": {
+            "value": 1,
+            "status": "ARCHETYPE",
+            "min": 1,
+            "max": 2
+          },
+          "capacity": {
+            "value": 1000,
+            "status": "ARCHETYPE",
+            "unit": "GB",
+            "min": 1000,
+            "max": 1000
+          },
+          "density": {
+            "value": 54.8842105263158,
+            "status": "COMPLETED",
+            "unit": "GB/cm2",
+            "source": "Average of 19 rows",
+            "min": 16.4,
+            "max": 128
+          },
+          "duration": {
+            "value": 35040,
+            "unit": "hours"
+          }
+        },
+        "POWER_SUPPLY-1": {
+          "impacts": {
+            "gwp": {
+              "unit": "kgCO2eq",
+              "description": "Total climate change",
+              "embedded": {
+                "value": 150,
+                "min": 48.6,
+                "max": 243,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            },
+            "adp": {
+              "unit": "kgSbeq",
+              "description": "Use of minerals and fossil ressources",
+              "embedded": {
+                "value": 0.05,
+                "min": 0.0166,
+                "max": 0.083,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            },
+            "pe": {
+              "unit": "MJ",
+              "description": "Consumption of primary energy",
+              "embedded": {
+                "value": 2100,
+                "min": 704,
+                "max": 3520,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            }
+          },
+          "units": {
+            "value": 2,
+            "status": "ARCHETYPE",
+            "min": 2,
+            "max": 2
+          },
+          "unit_weight": {
+            "value": 2.99,
+            "status": "ARCHETYPE",
+            "unit": "kg",
+            "min": 1,
+            "max": 5
+          },
+          "duration": {
+            "value": 35040,
+            "unit": "hours"
+          }
+        },
+        "CASE-1": {
+          "impacts": {
+            "gwp": {
+              "unit": "kgCO2eq",
+              "description": "Total climate change",
+              "embedded": {
+                "value": 150,
+                "min": 85.9,
+                "max": 150,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            },
+            "adp": {
+              "unit": "kgSbeq",
+              "description": "Use of minerals and fossil ressources",
+              "embedded": {
+                "value": 0.0202,
+                "min": 0.0202,
+                "max": 0.02767,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            },
+            "pe": {
+              "unit": "MJ",
+              "description": "Consumption of primary energy",
+              "embedded": {
+                "value": 2200,
+                "min": 1229,
+                "max": 2200,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            }
+          },
+          "units": {
+            "value": 1,
+            "status": "ARCHETYPE",
+            "min": 1,
+            "max": 1
+          },
+          "case_type": {
+            "value": "rack",
+            "status": "ARCHETYPE"
+          },
+          "duration": {
+            "value": 35040,
+            "unit": "hours"
+          }
+        },
+        "MOTHERBOARD-1": {
+          "impacts": {
+            "gwp": {
+              "unit": "kgCO2eq",
+              "description": "Total climate change",
+              "embedded": {
+                "value": 66.1,
+                "min": 66.1,
+                "max": 66.1,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            },
+            "adp": {
+              "unit": "kgSbeq",
+              "description": "Use of minerals and fossil ressources",
+              "embedded": {
+                "value": 0.00369,
+                "min": 0.00369,
+                "max": 0.00369,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            },
+            "pe": {
+              "unit": "MJ",
+              "description": "Consumption of primary energy",
+              "embedded": {
+                "value": 836,
+                "min": 836,
+                "max": 836,
+                "warnings": [
+                  "End of life is not included in the calculation"
+                ]
+              },
+              "use": "not implemented"
+            }
+          },
+          "units": {
+            "value": 1,
+            "status": "ARCHETYPE",
+            "min": 1,
+            "max": 1
+          },
+          "duration": {
+            "value": 35040,
+            "unit": "hours"
+          }
+        },
+        "avg_power": {
+          "value": 10.4062055,
+          "status": "INPUT",
+          "unit": "W"
+        },
+        "usage_location": {
+          "value": "EEE",
+          "status": "INPUT",
+          "unit": "CodSP3 - NCS Country Codes - NATO"
+        },
+        "use_time_ratio": {
+          "value": 1,
+          "status": "ARCHETYPE",
+          "unit": "/1",
+          "min": 1,
+          "max": 1
+        },
+        "hours_life_time": {
+          "value": 35040,
+          "status": "COMPLETED",
+          "unit": "hours",
+          "source": "from device",
+          "min": 35040,
+          "max": 35040
+        },
+        "gwp_factor": {
+          "value": 0.38,
+          "status": "COMPLETED",
+          "unit": "kg CO2eq/kWh",
+          "source": "https://www.sciencedirect.com/science/article/pii/S0306261921012149",
+          "min": 0.38,
+          "max": 0.38
+        },
+        "adp_factor": {
+          "value": 6.42317e-8,
+          "status": "COMPLETED",
+          "unit": "kg Sbeq/kWh",
+          "source": "ADEME Base IMPACTS ®",
+          "min": 6.42317e-8,
+          "max": 6.42317e-8
+        },
+        "pe_factor": {
+          "value": 12.873,
+          "status": "COMPLETED",
+          "unit": "MJ/kWh",
+          "source": "ADPf / (1-%renewable_energy)",
+          "min": 12.873,
+          "max": 12.873
+        },
+        "units": {
+          "value": 1,
+          "status": "ARCHETYPE",
+          "min": 1,
+          "max": 1
+        }
+      }
+    },
+    "start_time": 1717500637.2979465,
+    "end_time": 1717504237.2979465,
+    "power_data": {
+      "raw_data": [
+        {
+          "host": {
+            "consumption": 0,
+            "timestamp": 1717504204.5280154,
+            "components": {
+              "disks": []
+            }
+          },
+          "consumers": [],
+          "sockets": []
+        },
+        {
+          "host": {
+            "consumption": 20309356,
+            "timestamp": 1717504214.5485115,
+            "components": {
+              "disks": [
+                {
+                  "disk_type": "SSD",
+                  "disk_mount_point": "/etc/hosts",
+                  "disk_is_removable": false,
+                  "disk_file_system": "ext4",
+                  "disk_total_bytes": "250375106560",
+                  "disk_available_bytes": "165655085056",
+                  "disk_name": "/dev/nvme0n1p2"
+                }
+              ]
+            }
+          },
+          "consumers": [
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "pid": 3099,
+              "resources_usage": {
+                "cpu_usage": "5.9772415",
+                "cpu_usage_unit": "%",
+                "memory_usage": "508436480",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 1213939.2,
+              "timestamp": 1717504214.5484614,
+              "container": null
+            },
+            {
+              "exe": "/usr/bin/python3.9",
+              "cmdline": "/usr/bin/python3.9./uvicornboaviztapi.main:app--host0.0.0.0--port5000",
+              "pid": 176778,
+              "resources_usage": {
+                "cpu_usage": "5.3645115",
+                "cpu_usage_unit": "%",
+                "memory_usage": "131502080",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "751403008",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 1089497.6,
+              "timestamp": 1717504214.54841,
+              "container": null
+            },
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox-contentproc-childID58-isForBrowser-prefsLen32076-prefMapSize244787-jsInitLen231800-parentBuildID20240527194810-greomni/snap/firefox/4336/usr/lib/firefox/omni.ja-appomni/snap/firefox/4336/usr/lib/firefox/browser/omni.ja-appDir/snap/firefox/4336/usr/lib/firefox/browser{1e76e076-a55a-41cf-bf27-94855c01b247}3099truetab",
+              "pid": 101097,
+              "resources_usage": {
+                "cpu_usage": "2.813555",
+                "cpu_usage_unit": "%",
+                "memory_usage": "262508544",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 571414.9,
+              "timestamp": 1717504214.5484433,
+              "container": null
+            },
+            {
+              "exe": "/usr/bin/gnome-shell",
+              "cmdline": "/usr/bin/gnome-shell",
+              "pid": 2063,
+              "resources_usage": {
+                "cpu_usage": "1.9507315",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 396181,
+              "timestamp": 1717504214.5483658,
+              "container": null
+            },
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox-contentproc-childID2-isForBrowser-prefsLen41490-prefMapSize244787-jsInitLen231800-parentBuildID20240527194810-greomni/snap/firefox/4336/usr/lib/firefox/omni.ja-appomni/snap/firefox/4336/usr/lib/firefox/browser/omni.ja-appDir/snap/firefox/4336/usr/lib/firefox/browser{87653da9-ac6d-4c8e-bd74-4723d5684bc9}3099truetab",
+              "pid": 3811,
+              "resources_usage": {
+                "cpu_usage": "0.887833",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 180313.16,
+              "timestamp": 1717504214.548356,
+              "container": null
+            },
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox-contentproc-childID152-isForBrowser-prefsLen32076-prefMapSize244787-jsInitLen231800-parentBuildID20240527194810-greomni/snap/firefox/4336/usr/lib/firefox/omni.ja-appomni/snap/firefox/4336/usr/lib/firefox/browser/omni.ja-appDir/snap/firefox/4336/usr/lib/firefox/browser{c4b6e702-62e0-4c2c-b312-b639f3da3c1c}3099truetab",
+              "pid": 173787,
+              "resources_usage": {
+                "cpu_usage": "0.52519697",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 106664.12,
+              "timestamp": 1717504214.5483842,
+              "container": null
+            },
+            {
+              "exe": "/",
+              "cmdline": "runcinit",
+              "pid": 176900,
+              "resources_usage": {
+                "cpu_usage": "0.46267352",
+                "cpu_usage_unit": "%",
+                "memory_usage": "24141824",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 93966.01,
+              "timestamp": 1717504214.5483909,
+              "container": null
+            },
+            {
+              "exe": "/usr/libexec/gnome-terminal-server",
+              "cmdline": "/usr/libexec/gnome-terminal-server",
+              "pid": 4836,
+              "resources_usage": {
+                "cpu_usage": "0.28760785",
+                "cpu_usage_unit": "%",
+                "memory_usage": "76136448",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 58411.3,
+              "timestamp": 1717504214.54837,
+              "container": null
+            },
+            {
+              "exe": "/squashfs-root/usr/bin/nvim",
+              "cmdline": "/squashfs-root/usr/bin/nvim--embed-u/home/repair/.local/share/lunarvim/lvim/init.lua.",
+              "pid": 96283,
+              "resources_usage": {
+                "cpu_usage": "0.21257971",
+                "cpu_usage_unit": "%",
+                "memory_usage": "227631104",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 43173.57,
+              "timestamp": 1717504214.548365,
+              "container": null
+            },
+            {
+              "exe": "/usr/bin/ibus-daemon",
+              "cmdline": "/usr/bin/ibus-daemon--paneldisable",
+              "pid": 2598,
+              "resources_usage": {
+                "cpu_usage": "0.112542205",
+                "cpu_usage_unit": "%",
+                "memory_usage": "12480512",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 22856.596,
+              "timestamp": 1717504214.5483723,
+              "container": null
+            }
+          ],
+          "sockets": [
+            {
+              "id": 0,
+              "consumption": 11652205,
+              "domains": [
+                {
+                  "name": "uncore",
+                  "consumption": 180098,
+                  "timestamp": 1717504214.530277
+                },
+                {
+                  "name": "core",
+                  "consumption": 8775168,
+                  "timestamp": 1717504214.530263
+                },
+                {
+                  "name": "dram",
+                  "consumption": 1111438,
+                  "timestamp": 1717504214.5302465
+                }
+              ],
+              "timestamp": 1717504214.5299857
+            }
+          ]
+        },
+        {
+          "host": {
+            "consumption": 11439694,
+            "timestamp": 1717504224.6661015,
+            "components": {
+              "disks": [
+                {
+                  "disk_type": "SSD",
+                  "disk_mount_point": "/etc/hosts",
+                  "disk_is_removable": false,
+                  "disk_file_system": "ext4",
+                  "disk_total_bytes": "250375106560",
+                  "disk_available_bytes": "165655097344",
+                  "disk_name": "/dev/nvme0n1p2"
+                }
+              ]
+            }
+          },
+          "consumers": [
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "pid": 3099,
+              "resources_usage": {
+                "cpu_usage": "5.2776732",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 603749.7,
+              "timestamp": 1717504224.6659212,
+              "container": null
+            },
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox-contentproc-childID152-isForBrowser-prefsLen32076-prefMapSize244787-jsInitLen231800-parentBuildID20240527194810-greomni/snap/firefox/4336/usr/lib/firefox/omni.ja-appomni/snap/firefox/4336/usr/lib/firefox/browser/omni.ja-appDir/snap/firefox/4336/usr/lib/firefox/browser{c4b6e702-62e0-4c2c-b312-b639f3da3c1c}3099truetab",
+              "pid": 173787,
+              "resources_usage": {
+                "cpu_usage": "3.1340103",
+                "cpu_usage_unit": "%",
+                "memory_usage": "174120960",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 358521.2,
+              "timestamp": 1717504224.6657825,
+              "container": null
+            },
+            {
+              "exe": "/usr/bin/gnome-shell",
+              "cmdline": "/usr/bin/gnome-shell",
+              "pid": 2063,
+              "resources_usage": {
+                "cpu_usage": "2.5322802",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 289685.1,
+              "timestamp": 1717504224.665756,
+              "container": null
+            },
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox-contentproc-childID58-isForBrowser-prefsLen32076-prefMapSize244787-jsInitLen231800-parentBuildID20240527194810-greomni/snap/firefox/4336/usr/lib/firefox/omni.ja-appomni/snap/firefox/4336/usr/lib/firefox/browser/omni.ja-appDir/snap/firefox/4336/usr/lib/firefox/browser{1e76e076-a55a-41cf-bf27-94855c01b247}3099truetab",
+              "pid": 101097,
+              "resources_usage": {
+                "cpu_usage": "1.6547574",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 189299.19,
+              "timestamp": 1717504224.6658857,
+              "container": null
+            },
+            {
+              "exe": "/squashfs-root/usr/bin/nvim",
+              "cmdline": "/squashfs-root/usr/bin/nvim--embed-u/home/repair/.local/share/lunarvim/lvim/init.lua.",
+              "pid": 96283,
+              "resources_usage": {
+                "cpu_usage": "0.23818476",
+                "cpu_usage_unit": "%",
+                "memory_usage": "227631104",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 27247.607,
+              "timestamp": 1717504224.6657548,
+              "container": null
+            },
+            {
+              "exe": "/usr/local/bin/scaphandre",
+              "cmdline": "/usr/local/bin/scaphandre--no-headerjson-s10--resources-f/app/data/power_data.json",
+              "pid": 176771,
+              "resources_usage": {
+                "cpu_usage": "0.1504325",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 17209.018,
+              "timestamp": 1717504224.6657345,
+              "container": null
+            },
+            {
+              "exe": "/usr/libexec/gsd-media-keys",
+              "cmdline": "/usr/libexec/gsd-media-keys",
+              "pid": 2610,
+              "resources_usage": {
+                "cpu_usage": "0.06268021",
+                "cpu_usage_unit": "%",
+                "memory_usage": "27652096",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "887459840",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 7170.424,
+              "timestamp": 1717504224.665734,
+              "container": null
+            },
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox-contentproc-childID2-isForBrowser-prefsLen41490-prefMapSize244787-jsInitLen231800-parentBuildID20240527194810-greomni/snap/firefox/4336/usr/lib/firefox/omni.ja-appomni/snap/firefox/4336/usr/lib/firefox/browser/omni.ja-appDir/snap/firefox/4336/usr/lib/firefox/browser{87653da9-ac6d-4c8e-bd74-4723d5684bc9}3099truetab",
+              "pid": 3811,
+              "resources_usage": {
+                "cpu_usage": "0.050144166",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 5736.3394,
+              "timestamp": 1717504224.6657436,
+              "container": null
+            },
+            {
+              "exe": "/usr/libexec/gnome-terminal-server",
+              "cmdline": "/usr/libexec/gnome-terminal-server",
+              "pid": 4836,
+              "resources_usage": {
+                "cpu_usage": "0.050144166",
+                "cpu_usage_unit": "%",
+                "memory_usage": "76136448",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "638849024",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 5736.3394,
+              "timestamp": 1717504224.6657631,
+              "container": null
+            },
+            {
+              "exe": "/usr/bin/containerd",
+              "cmdline": "/usr/bin/containerd",
+              "pid": 699,
+              "resources_usage": {
+                "cpu_usage": "0.025072083",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 2868.1697,
+              "timestamp": 1717504224.6657722,
+              "container": null
+            }
+          ],
+          "sockets": [
+            {
+              "id": 0,
+              "consumption": 4396806,
+              "domains": [
+                {
+                  "name": "uncore",
+                  "consumption": 133312,
+                  "timestamp": 1717504224.5596187
+                },
+                {
+                  "name": "core",
+                  "consumption": 1916276,
+                  "timestamp": 1717504224.5595467
+                },
+                {
+                  "name": "dram",
+                  "consumption": 895722,
+                  "timestamp": 1717504224.5594404
+                }
+              ],
+              "timestamp": 1717504224.5583096
+            }
+          ]
+        },
+        {
+          "host": {
+            "consumption": 9875772,
+            "timestamp": 1717504234.7663224,
+            "components": {
+              "disks": [
+                {
+                  "disk_type": "SSD",
+                  "disk_mount_point": "/etc/hosts",
+                  "disk_is_removable": false,
+                  "disk_file_system": "ext4",
+                  "disk_total_bytes": "250375106560",
+                  "disk_available_bytes": "165655089152",
+                  "disk_name": "/dev/nvme0n1p2"
+                }
+              ]
+            }
+          },
+          "consumers": [
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "pid": 3099,
+              "resources_usage": {
+                "cpu_usage": "2.9987452",
+                "cpu_usage_unit": "%",
+                "memory_usage": "508329984",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 296149.25,
+              "timestamp": 1717504234.76627,
+              "container": null
+            },
+            {
+              "exe": "/usr/bin/gnome-shell",
+              "cmdline": "/usr/bin/gnome-shell",
+              "pid": 2063,
+              "resources_usage": {
+                "cpu_usage": "2.158093",
+                "cpu_usage_unit": "%",
+                "memory_usage": "308137984",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 213128.34,
+              "timestamp": 1717504234.7661667,
+              "container": null
+            },
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox-contentproc-childID58-isForBrowser-prefsLen32076-prefMapSize244787-jsInitLen231800-parentBuildID20240527194810-greomni/snap/firefox/4336/usr/lib/firefox/omni.ja-appomni/snap/firefox/4336/usr/lib/firefox/browser/omni.ja-appDir/snap/firefox/4336/usr/lib/firefox/browser{1e76e076-a55a-41cf-bf27-94855c01b247}3099truetab",
+              "pid": 101097,
+              "resources_usage": {
+                "cpu_usage": "1.7565873",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 173476.55,
+              "timestamp": 1717504234.7662466,
+              "container": null
+            },
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox-contentproc-childID152-isForBrowser-prefsLen32076-prefMapSize244787-jsInitLen231800-parentBuildID20240527194810-greomni/snap/firefox/4336/usr/lib/firefox/omni.ja-appomni/snap/firefox/4336/usr/lib/firefox/browser/omni.ja-appDir/snap/firefox/4336/usr/lib/firefox/browser{c4b6e702-62e0-4c2c-b312-b639f3da3c1c}3099truetab",
+              "pid": 173787,
+              "resources_usage": {
+                "cpu_usage": "1.4303639",
+                "cpu_usage_unit": "%",
+                "memory_usage": "164651008",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "2636976128",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 141259.48,
+              "timestamp": 1717504234.7661831,
+              "container": null
+            },
+            {
+              "exe": "/usr/local/bin/scaphandre",
+              "cmdline": "/usr/local/bin/scaphandre--no-headerjson-s10--resources-f/app/data/power_data.json",
+              "pid": 176771,
+              "resources_usage": {
+                "cpu_usage": "0.22584693",
+                "cpu_usage_unit": "%",
+                "memory_usage": "33337344",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 22304.129,
+              "timestamp": 1717504234.766153,
+              "container": null
+            },
+            {
+              "exe": "/squashfs-root/usr/bin/nvim",
+              "cmdline": "/squashfs-root/usr/bin/nvim--embed-u/home/repair/.local/share/lunarvim/lvim/init.lua.",
+              "pid": 96283,
+              "resources_usage": {
+                "cpu_usage": "0.22584693",
+                "cpu_usage_unit": "%",
+                "memory_usage": "227631104",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 22304.129,
+              "timestamp": 1717504234.766166,
+              "container": null
+            },
+            {
+              "exe": "/usr/libexec/gsd-media-keys",
+              "cmdline": "/usr/libexec/gsd-media-keys",
+              "pid": 2610,
+              "resources_usage": {
+                "cpu_usage": "0.06273526",
+                "cpu_usage_unit": "%",
+                "memory_usage": "27652096",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "887459840",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 6195.5913,
+              "timestamp": 1717504234.7661529,
+              "container": null
+            },
+            {
+              "exe": "/usr/lib/systemd/systemd-oomd",
+              "cmdline": "/lib/systemd/systemd-oomd",
+              "pid": 460,
+              "resources_usage": {
+                "cpu_usage": "0.037641153",
+                "cpu_usage_unit": "%",
+                "memory_usage": "6680576",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 3717.3545,
+              "timestamp": 1717504234.7661595,
+              "container": null
+            },
+            {
+              "exe": "/snap/firefox/4336/usr/lib/firefox/firefox",
+              "cmdline": "/snap/firefox/4336/usr/lib/firefox/firefox-contentproc-childID2-isForBrowser-prefsLen41490-prefMapSize244787-jsInitLen231800-parentBuildID20240527194810-greomni/snap/firefox/4336/usr/lib/firefox/omni.ja-appomni/snap/firefox/4336/usr/lib/firefox/browser/omni.ja-appDir/snap/firefox/4336/usr/lib/firefox/browser{87653da9-ac6d-4c8e-bd74-4723d5684bc9}3099truetab",
+              "pid": 3811,
+              "resources_usage": {
+                "cpu_usage": "0.037641153",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 3717.3545,
+              "timestamp": 1717504234.7661598,
+              "container": null
+            },
+            {
+              "exe": "/usr/bin/containerd",
+              "cmdline": "/usr/bin/containerd",
+              "pid": 699,
+              "resources_usage": {
+                "cpu_usage": "0.037641153",
+                "cpu_usage_unit": "%",
+                "memory_usage": "0",
+                "memory_usage_unit": "Bytes",
+                "memory_virtual_usage": "0",
+                "memory_virtual_usage_unit": "Bytes",
+                "disk_usage_write": "0",
+                "disk_usage_write_unit": "Bytes",
+                "disk_usage_read": "0",
+                "disk_usage_read_unit": "Bytes"
+              },
+              "consumption": 3717.3545,
+              "timestamp": 1717504234.7661762,
+              "container": null
+            }
+          ],
+          "sockets": [
+            {
+              "id": 0,
+              "consumption": 3165101,
+              "domains": [
+                {
+                  "name": "uncore",
+                  "consumption": 48247,
+                  "timestamp": 1717504234.6836913
+                },
+                {
+                  "name": "core",
+                  "consumption": 878365,
+                  "timestamp": 1717504234.6834612
+                },
+                {
+                  "name": "dram",
+                  "consumption": 776832,
+                  "timestamp": 1717504234.6832268
+                }
+              ],
+              "timestamp": 1717504234.6821008
+            }
+          ]
+        }
+      ],
+      "avg_power": 10.4062055,
+      "warning": "The time window is lower than one hour, but the energy consumption estimate is in Watt.Hour. So this is an extrapolation of the power usage profile on one hour. Be careful with this data. "
+    }
+  },
+  "electricity_carbon_intensity": {
+    "value": 0.38,
+    "description": "Carbon intensity of the electricity mix. Mix considered : EEE",
+    "type": "gauge",
+    "unit": "kg CO2eq / kWh",
+    "long_unit": "Kilograms CO2 equivalent per KiloWattHour"
+  }
+}

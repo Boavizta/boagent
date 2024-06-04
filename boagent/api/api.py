@@ -302,74 +302,7 @@ async def process_embedded_impacts(
         "host_pe_impact": pe_impact,
     }
 
-    # host_ram_embedded_impact = boaviztapi_data["raw_data"]["boaviztapi_data"][
-    #     "verbose"
-    # ]["RAM-1"]
-
-    # process_info = get_process_info(process_id)
-    # host_ram_in_bytes = get_total_ram_in_bytes()
-    # process_ram_shares = get_process_ram_shares(process_info, host_ram_in_bytes)
     return host_impacts
-
-
-def get_process_info(process_id):
-    with open(POWER_DATA_FILE_PATH, "r") as power_data_file:
-        format_data = f"{power_data_file.read()}]"
-        data = json.loads(format_data)
-
-        process_info = list()
-        for category in data:
-            for process in category["consumers"]:
-                if process["pid"] == process_id:
-                    process_info.append(process)
-        return process_info
-
-
-def get_total_ram_in_bytes():
-
-    hardware_data = get_hardware_data(True)
-    total_ram_capacity_in_gigabytes = 0
-
-    for unit in hardware_data["rams"]:
-        total_ram_capacity_in_gigabytes += unit["capacity"]
-
-    total_ram_in_bytes = total_ram_capacity_in_gigabytes * 1073741824
-    return total_ram_in_bytes
-
-
-def get_process_ram_shares(process_info, ram_total):
-
-    process_ram_shares = list()
-    for timestamp in process_info:
-        process_ram_share = (
-            int(timestamp["resources_usage"]["memory_usage"]) / ram_total
-        )
-        process_ram_shares.append(process_ram_share)
-
-    return process_ram_shares
-
-
-def get_ram_embedded_impact_shares(host_ram_embedded_impact, process_ram_shares):
-
-    ram_embedded_impact_shares = list()
-    for impact in host_ram_embedded_impact["impacts"]:
-        impact_embedded_value = host_ram_embedded_impact["impacts"][impact]["embedded"][
-            "value"
-        ]
-        for process_ram_share in process_ram_shares:
-            if process_ram_share == 0.0:
-                ram_embedded_impact = {f"{impact}_embedded_share": process_ram_share}
-                ram_embedded_impact_shares.append(ram_embedded_impact)
-            else:
-                ram_embedded_impact_share = round(
-                    impact_embedded_value * process_ram_share, 2
-                )
-                ram_embedded_impact = {
-                    f"{impact}_embedded_share": ram_embedded_impact_share
-                }
-                ram_embedded_impact_shares.append(ram_embedded_impact)
-    print(ram_embedded_impact_shares)
-    return ram_embedded_impact_shares
 
 
 @app.get("/last_info")
