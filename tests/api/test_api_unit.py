@@ -482,7 +482,7 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         self.measure_power = False
         self.lifetime = 5.0
         self.fetch_hardware = False
-        self.pid = 70335
+        self.pid = 3099
 
         with open(mock_boaviztapi_response_not_verbose, "r") as boaviztapi_data:
             self.boaviztapi_data = json.load(boaviztapi_data)
@@ -528,9 +528,9 @@ class AllocateEmbeddedImpactForProcess(TestCase):
     def test_get_process_ram_share_by_timestamp(self):
 
         process_ram_shares = self.process.ram_shares
-
         for ram_share in process_ram_shares:
             assert type(ram_share) is float
+            assert ram_share >= 0.0
         assert type(process_ram_shares) is list
 
     def test_get_embedded_impact_share_for_ram_by_timestamp(self):
@@ -539,6 +539,8 @@ class AllocateEmbeddedImpactForProcess(TestCase):
 
         for ram_embedded_impact_share in ram_embedded_impact_shares:
             assert type(ram_embedded_impact_share) is dict
+            for value in ram_embedded_impact_share:
+                assert type(ram_embedded_impact_share[value]) is float
         assert type(ram_embedded_impact_shares) is list
 
     def test_get_process_cpu_load_shares_by_timestamp(self):
@@ -556,6 +558,14 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         for cpu_embedded_impact_share in cpu_embedded_impact_shares:
             assert type(cpu_embedded_impact_share) is dict
         assert type(cpu_embedded_impact_shares) is list
+
+    def test_get_average_embedded_impact_share_for_cpu_and_ram(self):
+
+        cpu_average_embedded_impact = self.process.cpu_average_embedded_impacts
+        ram_average_embedded_impact = self.process.ram_average_embedded_impacts
+
+        assert type(cpu_average_embedded_impact) is float
+        assert type(ram_average_embedded_impact) is float
 
 
 loader = TestLoader()
