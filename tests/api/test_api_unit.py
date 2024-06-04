@@ -13,13 +13,9 @@ from boagent.api.api import (
     compute_average_consumption,
     get_power_data,
     get_metrics,
-    get_process_info,
-    get_total_ram_in_bytes,
-    get_process_ram_shares,
-    get_ram_embedded_impact_shares,
 )
 from boagent.api.utils import format_prometheus_output
-
+from boagent.api.process import Process
 
 current_dir = os.path.dirname(__file__)
 mock_power_data = os.path.join(f"{current_dir}", "../mocks/power_data.json")
@@ -486,12 +482,15 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         self.measure_power = False
         self.lifetime = 5.0
         self.fetch_hardware = False
+        self.pid = 70335
 
         with open(mock_boaviztapi_response_not_verbose, "r") as boaviztapi_data:
             self.boaviztapi_data = json.load(boaviztapi_data)
 
         with open(mock_get_metrics_verbose) as get_metrics_verbose:
             self.get_metrics_verbose = json.load(get_metrics_verbose)
+
+        self.process = Process(mock_get_metrics_verbose, self.pid)
 
     @patch("boagent.api.api.query_machine_impact_data")
     def test_get_total_embedded_impacts_for_host(
@@ -514,51 +513,41 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         assert "embedded_abiotic_resources_depletion" in total_embedded_impacts_host
         assert "embedded_primary_energy" in total_embedded_impacts_host
 
-    @patch(
-        "boagent.api.api.POWER_DATA_FILE_PATH", mock_formatted_scaphandre_with_processes
-    )
     def test_get_process_info(self):
 
-        process_details = get_process_info(70335)
+        process_details = self.process.process_info
         for process in process_details:
             assert type(process) is dict
         assert type(process_details) is list
 
     def test_get_total_ram_in_bytes(self):
 
-        total_ram_in_bytes = get_total_ram_in_bytes()
+        total_ram_in_bytes = self.process.total_ram_in_bytes
         assert type(total_ram_in_bytes) is int
 
-    @patch(
-        "boagent.api.api.POWER_DATA_FILE_PATH", mock_formatted_scaphandre_with_processes
-    )
     def test_get_process_ram_share_by_timestamp(self):
 
-        process_info = get_process_info(70335)
-        process_ram_shares = get_process_ram_shares(process_info, 8589934592)
+        process_ram_shares = self.process.ram_shares
 
         for ram_share in process_ram_shares:
             assert type(ram_share) is float
         assert type(process_ram_shares) is list
 
-    @patch(
-        "boagent.api.api.POWER_DATA_FILE_PATH", mock_formatted_scaphandre_with_processes
-    )
     def test_get_embedded_impact_share_for_ram_by_timestamp(self):
 
-        host_ram_embedded_impacts = self.get_metrics_verbose["raw_data"][
-            "boaviztapi_data"
-        ]["verbose"]["RAM-1"]
-        process_info = get_process_info(70335)
-        process_ram_shares = get_process_ram_shares(process_info, 8589934592)
-        embedded_impact_shares = get_ram_embedded_impact_shares(
-            host_ram_embedded_impacts, process_ram_shares
-        )
+        embedded_impact_shares = self.process.ram_embedded_impact_shares
 
         for embedded_impact_share in embedded_impact_shares:
-            assert type(embedded_impact_share) is float
+            assert type(embedded_impact_share) is dict
         assert type(embedded_impact_shares) is list
-        assert False is True
+
+    def test_get_process_cpu_load_shares_by_timestamp(self):
+
+        process_cpu_load_shares = self.process.cpu_load_shares
+
+        for cpu_load_share in process_cpu_load_shares:
+            assert type(cpu_load_share) is float
+        assert type(process_cpu_load_shares) is list
 
 
 loader = TestLoader()
