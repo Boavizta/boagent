@@ -522,15 +522,18 @@ class AllocateEmbeddedImpactForProcess(TestCase):
 
     def test_get_total_ram_in_bytes(self):
 
+        expected_ram_total = 8589934592
         total_ram_in_bytes = self.process.total_ram_in_bytes
         assert type(total_ram_in_bytes) is int
+        self.assertEqual(total_ram_in_bytes, expected_ram_total)
 
     def test_get_process_ram_share_by_timestamp(self):
 
+        expected_ram_shares = [5.918979644775391, 0.0, 5.9177398681640625]
         process_ram_shares = self.process.ram_shares
-        for ram_share in process_ram_shares:
+        for index, ram_share in enumerate(process_ram_shares):
             assert type(ram_share) is float
-            assert ram_share >= 0.0
+            self.assertEqual(ram_share, expected_ram_shares[index])
         assert type(process_ram_shares) is list
 
     def test_get_embedded_impact_share_for_ram_by_timestamp(self):
@@ -538,17 +541,19 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         ram_embedded_impact_shares = self.process.ram_embedded_impact_shares
 
         for ram_embedded_impact_share in ram_embedded_impact_shares:
-            assert type(ram_embedded_impact_share) is dict
+            assert type(ram_embedded_impact_share) is tuple
             for value in ram_embedded_impact_share:
-                assert type(ram_embedded_impact_share[value]) is float
+                assert type(ram_embedded_impact_share[1]) is float
         assert type(ram_embedded_impact_shares) is list
 
     def test_get_process_cpu_load_shares_by_timestamp(self):
 
+        expected_cpu_load_shares = [5.9772415, 5.2776732, 2.9987452]
         process_cpu_load_shares = self.process.cpu_load_shares
 
-        for cpu_load_share in process_cpu_load_shares:
+        for index, cpu_load_share in enumerate(process_cpu_load_shares):
             assert type(cpu_load_share) is float
+            self.assertEqual(cpu_load_share, expected_cpu_load_shares[index])
         assert type(process_cpu_load_shares) is list
 
     def test_get_embedded_impact_share_for_cpu_by_timestamp(self):
@@ -556,16 +561,20 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         cpu_embedded_impact_shares = self.process.cpu_embedded_impact_shares
 
         for cpu_embedded_impact_share in cpu_embedded_impact_shares:
-            assert type(cpu_embedded_impact_share) is dict
+            assert type(cpu_embedded_impact_share) is tuple
         assert type(cpu_embedded_impact_shares) is list
 
     def test_get_average_embedded_impact_share_for_cpu_and_ram(self):
 
-        cpu_average_embedded_impact = self.process.cpu_average_embedded_impacts
-        ram_average_embedded_impact = self.process.ram_average_embedded_impacts
+        impact_criterias = ["gwp", "adp", "pe"]
+        cpu_average_embedded_impacts = self.process.cpu_average_embedded_impacts
+        ram_average_embedded_impacts = self.process.ram_average_embedded_impacts
 
-        assert type(cpu_average_embedded_impact) is float
-        assert type(ram_average_embedded_impact) is float
+        assert type(cpu_average_embedded_impacts) is dict
+        assert type(ram_average_embedded_impacts) is dict
+        for criteria in impact_criterias:
+            assert f"{criteria}_cpu_average_impact" in cpu_average_embedded_impacts
+            assert f"{criteria}_ram_average_impact" in ram_average_embedded_impacts
 
 
 loader = TestLoader()
