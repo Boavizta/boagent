@@ -520,10 +520,17 @@ class AllocateEmbeddedImpactForProcess(TestCase):
             assert type(process) is dict
         assert type(process_details) is list
 
+    def test_get_process_name(self):
+
+        expected_process_name = "firefox"
+        process_name = self.process.get_process_name()
+
+        self.assertEqual(expected_process_name, process_name)
+
     def test_get_total_ram_in_bytes(self):
 
         expected_ram_total = 8589934592
-        total_ram_in_bytes = self.process.total_ram_in_bytes
+        total_ram_in_bytes = self.process.get_total_ram_in_bytes()
         assert type(total_ram_in_bytes) is int
         self.assertEqual(total_ram_in_bytes, expected_ram_total)
 
@@ -538,7 +545,9 @@ class AllocateEmbeddedImpactForProcess(TestCase):
 
     def test_get_embedded_impact_share_for_ram_by_timestamp(self):
 
-        ram_embedded_impact_shares = self.process.ram_embedded_impact_shares
+        ram_embedded_impact_shares = self.process.get_component_embedded_impact_shares(
+            "RAM", self.process.ram_shares
+        )
 
         for ram_embedded_impact_share in ram_embedded_impact_shares:
             assert type(ram_embedded_impact_share) is tuple
@@ -558,23 +567,33 @@ class AllocateEmbeddedImpactForProcess(TestCase):
 
     def test_get_embedded_impact_share_for_cpu_by_timestamp(self):
 
-        cpu_embedded_impact_shares = self.process.cpu_embedded_impact_shares
+        cpu_embedded_impact_shares = self.process.get_component_embedded_impact_shares(
+            "CPU", self.process.cpu_load_shares
+        )
 
         for cpu_embedded_impact_share in cpu_embedded_impact_shares:
             assert type(cpu_embedded_impact_share) is tuple
         assert type(cpu_embedded_impact_shares) is list
 
-    def test_get_average_embedded_impact_share_for_cpu_and_ram(self):
+    def test_get_avg_min_max_embedded_impact_shares_for_cpu_and_ram(self):
 
         impact_criterias = ["gwp", "adp", "pe"]
-        cpu_average_embedded_impacts = self.process.cpu_average_embedded_impacts
-        ram_average_embedded_impacts = self.process.ram_average_embedded_impacts
+        cpu_embedded_impact_values = self.process.get_component_embedded_impact_values(
+            "cpu"
+        )
+        ram_embedded_impact_values = self.process.get_component_embedded_impact_values(
+            "ram"
+        )
 
-        assert type(cpu_average_embedded_impacts) is dict
-        assert type(ram_average_embedded_impacts) is dict
+        assert type(cpu_embedded_impact_values) is dict
+        assert type(ram_embedded_impact_values) is dict
         for criteria in impact_criterias:
-            assert f"{criteria}_cpu_average_impact" in cpu_average_embedded_impacts
-            assert f"{criteria}_ram_average_impact" in ram_average_embedded_impacts
+            assert f"{criteria}_cpu_average_impact" in cpu_embedded_impact_values
+            assert f"{criteria}_cpu_max_impact" in cpu_embedded_impact_values
+            assert f"{criteria}_cpu_min_impact" in cpu_embedded_impact_values
+            assert f"{criteria}_ram_average_impact" in ram_embedded_impact_values
+            assert f"{criteria}_ram_max_impact" in ram_embedded_impact_values
+            assert f"{criteria}_ram_min_impact" in ram_embedded_impact_values
 
 
 loader = TestLoader()
