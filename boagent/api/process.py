@@ -7,6 +7,7 @@ class Process:
         self.metrics_data = metrics_data
         self.pid = pid
         self.processed_metrics = self.process_metrics()
+        self.validated_pid = self.validate_pid()
         self.process_info = self.get_process_info()
         self.process_name = self.get_process_name()
         self.ram_shares = self.get_ram_shares()
@@ -16,8 +17,10 @@ class Process:
 
         with open(self.metrics_data, "r") as metrics_data_file:
             metrics_data = load(metrics_data_file)
-
         return metrics_data
+
+    def validate_pid(self):
+        pass
 
     def get_process_info(self):
 

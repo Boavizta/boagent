@@ -24,6 +24,7 @@ from .utils import (
 )
 
 from .config import Settings
+from .process import Process
 
 from .database import (
     get_session,
@@ -283,7 +284,7 @@ async def process_embedded_impacts(
     fetch_hardware: bool = True,
 ):
 
-    boaviztapi_data = get_metrics(
+    metrics_data = get_metrics(
         iso8601_or_timestamp_as_timestamp(start_time),
         iso8601_or_timestamp_as_timestamp(end_time),
         verbose,
@@ -292,17 +293,23 @@ async def process_embedded_impacts(
         lifetime,
         fetch_hardware,
     )
+    try:
+        queried_process = Process(metrics_data, process_id)
+    except Exception as error:
+        print(error)
+    else:
+        process_cpu_embedded_impact_values = (
+            queried_process.get_component_embedded_impact_values("cpu")
+        )
+        process_ram_embedded_impact_values = (
+            queried_process.get_component_embedded_impact_values("ram")
+        )
 
-    gwp_impact = boaviztapi_data["embedded_emissions"]["value"]
-    adp_impact = boaviztapi_data["embedded_abiotic_resources_depletion"]["value"]
-    pe_impact = boaviztapi_data["embedded_primary_energy"]["value"]
-    host_impacts = {
-        "host_gwp_impact": gwp_impact,
-        "host_adp_impact": adp_impact,
-        "host_pe_impact": pe_impact,
-    }
-
-    return host_impacts
+        process_embedded_impact_values = [
+            process_cpu_embedded_impact_values,
+            process_ram_embedded_impact_values,
+        ]
+        return process_embedded_impact_values
 
 
 @app.get("/last_info")
