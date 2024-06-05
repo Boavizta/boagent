@@ -35,6 +35,10 @@ mock_get_metrics_verbose = os.path.join(
 
 client = TestClient(app)
 
+mock_get_metrics_verbose = os.path.join(
+    f"{current_dir}", "../mocks/get_metrics_verbose.json"
+)
+
 
 class ApiEndpointsTest(TestCase):
     def setUp(self):
@@ -192,10 +196,40 @@ class ApiEndpointsTest(TestCase):
         assert response.status_code == 200
 
     @patch("boagent.api.api.get_metrics")
-    def test_read_process_embedded_impacts(self, mocked_get_metrics):
-        mocked_get_metrics.return_value = self.get_metrics_not_verbose
-        response = client.get("/process_embedded_impacts")
+    def test_get_process_embedded_impacts_with_success(self, mocked_get_metrics):
+        mocked_get_metrics.return_value = mock_get_metrics_verbose
+        params = {
+            "process_id": 3099,
+            "start_time": "1717500637.2979465",
+            "end_time": "1717504237.2979465",
+            "verbose": "true",
+            "location": "FRA",
+            "measure_power": "true",
+            "lifetime": 5,
+            "fetch_hardware": "true",
+        }
+        response = client.get("/process_embedded_impacts", params=params)
         assert response.status_code == 200
+
+    @patch("boagent.api.api.get_metrics")
+    def test_get_process_embedded_impacts_with_error_if_pid_not_found_in_metrics_data(
+        self, mocked_get_metrics
+    ):
+
+        mocked_get_metrics.return_value = mock_get_metrics_verbose
+        params = {
+            "process_id": 1234,
+            "start_time": "1717500637.2979465",
+            "end_time": "1717504237.2979465",
+            "verbose": "true",
+            "location": "FRA",
+            "measure_power": "true",
+            "lifetime": 5,
+            "fetch_hardware": "true",
+        }
+
+        response = client.get("/process_embedded_impacts", params=params)
+        assert response.status_code == 400
 
     def test_read_yearly_embedded(self):
         response = client.get("/yearly_embedded")
