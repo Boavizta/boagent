@@ -527,6 +527,15 @@ class AllocateEmbeddedImpactForProcess(TestCase):
 
         self.assertEqual(expected_process_name, process_name)
 
+    def test_validate_pid(self):
+
+        self.process = Process(mock_get_metrics_verbose, 1234)
+        with self.assertRaises(Exception) as context_manager:
+            self.process.validate_pid()
+
+        exception = context_manager.exception
+        print(exception)
+
     def test_get_total_ram_in_bytes(self):
 
         expected_ram_total = 8589934592
