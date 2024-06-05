@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 
 
 class Process:
@@ -54,9 +55,8 @@ class Process:
             process_ram_share = (
                 int(timestamp["resources_usage"]["memory_usage"])
                 / self.total_ram_in_bytes
-            )
+            ) * 100
             process_ram_shares.append(process_ram_share)
-
         return process_ram_shares
 
     def get_cpu_load_shares(self):
@@ -65,7 +65,6 @@ class Process:
         for timestamp in self.process_info:
             process_cpu_load_share = float(timestamp["resources_usage"]["cpu_usage"])
             process_cpu_load_shares.append(process_cpu_load_share)
-
         return process_cpu_load_shares
 
     def get_component_embedded_impact_shares(self, queried_component, component_shares):
@@ -79,41 +78,53 @@ class Process:
             impact_embedded_value = component_impacts_data[impact]["embedded"]["value"]
             for process_component_share in component_shares:
                 if process_component_share == 0.0:
-                    component_embedded_impact = {
-                        f"{impact}_embedded_share": float(process_component_share)
-                    }
+                    component_embedded_impact = (
+                        f"{impact}_embedded_share",
+                        float(process_component_share),
+                    )
                     component_embedded_impact_shares.append(component_embedded_impact)
                 else:
-                    component_embedded_impact_share = round(
-                        float(impact_embedded_value) * float(process_component_share), 2
+                    component_embedded_impact_share = (
+                        float(impact_embedded_value) * float(process_component_share)
+                    ) / 100
+                    component_embedded_impact = (
+                        f"{impact}_embedded_share",
+                        float(component_embedded_impact_share),
                     )
-                    component_embedded_impact = {
-                        f"{impact}_embedded_share": float(
-                            component_embedded_impact_share
-                        )
-                    }
                     component_embedded_impact_shares.append(component_embedded_impact)
         return component_embedded_impact_shares
 
     def get_component_average_embedded_impact(self, queried_component):
+        gwp_list = defaultdict(list)
+        adp_list = defaultdict(list)
+        pe_list = defaultdict(list)
 
-        embedded_impacts_sums = {
-            impact_criteria: sum(
-                impact_dictionary[impact_criteria]
-                for impact_dictionary in self.ram_embedded_impact_shares
-                if impact_criteria in impact_dictionary
-            )
-            for impact_criteria in set(
-                impact_criteria
-                for impact_dictionary in self.ram_embedded_impact_shares
-                for impact_criteria in impact_dictionary
-            )
+        if queried_component == "cpu":
+            component_impact_shares = self.cpu_embedded_impact_shares
+        if queried_component == "ram":
+            component_impact_shares = self.ram_embedded_impact_shares
+
+        for impact_key, impact_value in component_impact_shares:
+            if impact_key == "gwp_embedded_share":
+                gwp_list[impact_key].append(impact_value)
+            if impact_key == "adp_embedded_share":
+                adp_list[impact_key].append(impact_value)
+            if impact_key == "pe_embedded_share":
+                pe_list[impact_key].append(impact_value)
+
+        gwp_average = sum(gwp_list["gwp_embedded_share"]) / len(
+            gwp_list["gwp_embedded_share"]
+        )
+        adp_average = sum(adp_list["adp_embedded_share"]) / len(
+            adp_list["adp_embedded_share"]
+        )
+        pe_average = sum(pe_list["pe_embedded_share"]) / len(
+            pe_list["pe_embedded_share"]
+        )
+
+        component_average_impacts = {
+            f"gwp_{queried_component}_average_impact": gwp_average,
+            f"adp_{queried_component}_average_impact": adp_average,
+            f"pe_{queried_component}_average_impact": pe_average,
         }
-
-        average_values = list()
-        for impact_criteria in embedded_impacts_sums:
-            average_result = embedded_impacts_sums[impact_criteria] / (
-                len(self.ram_embedded_impact_shares) / 3
-            )
-            average_value = {f"{impact_criteria}_average": average_result}
-            average_values.append(average_value)
+        return component_average_impacts
