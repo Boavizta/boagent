@@ -1,5 +1,6 @@
 from json import load
 from collections import defaultdict
+from .exceptions import InvalidPIDException
 
 
 class Process:
@@ -20,15 +21,34 @@ class Process:
         return metrics_data
 
     def validate_pid(self):
-        pass
+        timestamps = [
+            timestamp
+            for timestamp in self.processed_metrics["raw_data"]["power_data"][
+                "raw_data"
+            ]
+        ]
+        consumers = [timestamp["consumers"] for timestamp in timestamps]
+        pids = [process["pid"] for consumer in consumers for process in consumer]
+        if self.pid not in pids:
+            raise InvalidPIDException(self.pid)
+        else:
+            return True
 
     def get_process_info(self):
 
-        process_info = list()
-        for timestamp in self.processed_metrics["raw_data"]["power_data"]["raw_data"]:
-            for process in timestamp["consumers"]:
-                if process["pid"] == self.pid:
-                    process_info.append(process)
+        timestamps = [
+            timestamp
+            for timestamp in self.processed_metrics["raw_data"]["power_data"][
+                "raw_data"
+            ]
+        ]
+        consumers = [timestamp["consumers"] for timestamp in timestamps]
+        process_info = [
+            process
+            for consumer in consumers
+            for process in consumer
+            if process["pid"] == self.pid
+        ]
         return process_info
 
     def get_process_name(self):
