@@ -15,7 +15,7 @@ from boagent.api.api import (
     get_metrics,
 )
 from boagent.api.utils import format_prometheus_output
-from boagent.api.process import Process
+from boagent.api.process import Process, InvalidPIDException
 
 current_dir = os.path.dirname(__file__)
 mock_power_data = os.path.join(f"{current_dir}", "../mocks/power_data.json")
@@ -527,14 +527,16 @@ class AllocateEmbeddedImpactForProcess(TestCase):
 
         self.assertEqual(expected_process_name, process_name)
 
-    def test_validate_pid(self):
+    def test_validate_pid_with_error_if_process_id_not_in_metrics(self):
 
-        self.process = Process(mock_get_metrics_verbose, 1234)
-        with self.assertRaises(Exception) as context_manager:
-            self.process.validate_pid()
+        expected_error_message = (
+            "Process_id 1234 has not been found in metrics data. Check the queried PID"
+        )
 
-        exception = context_manager.exception
-        print(exception)
+        with self.assertRaises(InvalidPIDException) as context_manager:
+            self.process = Process(mock_get_metrics_verbose, 1234)
+
+        self.assertEqual(context_manager.exception.message, expected_error_message)
 
     def test_get_total_ram_in_bytes(self):
 
