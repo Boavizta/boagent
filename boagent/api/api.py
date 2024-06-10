@@ -223,7 +223,7 @@ async def query(
     verbose: Get detailled metrics with extra information.\n
     location: Country code to configure the local electricity grid to take into account.\n
     measure_power: Get electricity consumption metrics from Scaphandre or not.\n
-    lifetime: Full lifetime of the machine to consider.\n
+    lifetime: Full lifetime of the machine to evaluate.\n
     fetch_hardware: Regenerate hardware.json file with current machine hardware or not.\n
     """
     return get_metrics(
@@ -256,7 +256,7 @@ async def query_with_time_workload(
     verbose: Get detailled metrics with extra information.\n
     location: Country code to configure the local electricity grid to take into account.\n
     measure_power: Get electricity consumption metrics from Scaphandre or not.\n
-    lifetime: Full lifetime of the machine to consider.\n
+    lifetime: Full lifetime of the machine to evaluate.\n
     fetch_hardware: Regenerate hardware.json file with current machine hardware or not.\n
     time_workload: Workload percentage for CPU and RAM. Can be a float or a list of dictionaries with format
     {"time_percentage": float, "load_percentage": float}
@@ -278,12 +278,20 @@ async def process_embedded_impacts(
     process_id: int = 0,
     start_time: str = "0.0",
     end_time: str = "0.0",
-    verbose: bool = True,
     location: str = "EEE",
-    measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
-    fetch_hardware: bool = True,
 ):
+    """
+    process_id: The process ID queried to be evaluated for embedded impacts for each available component.
+    start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
+    end_time: End time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
+    location: Country code to configure the local electricity grid to take into account.\n
+    lifetime: Full lifetime of the machine to evaluate.\n
+    """
+
+    verbose = True
+    measure_power = True
+    fetch_hardware = True
 
     metrics_data = get_metrics(
         iso8601_or_timestamp_as_timestamp(start_time),
