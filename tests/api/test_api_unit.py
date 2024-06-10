@@ -518,6 +518,10 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         process_details = self.process.process_info
         for process in process_details:
             assert type(process) is dict
+            self.assertEqual(process["pid"], 3099)
+            self.assertEqual(
+                process["exe"], "/snap/firefox/4336/usr/lib/firefox/firefox"
+            )
         assert type(process_details) is list
 
     def test_get_process_name(self):
