@@ -28,11 +28,11 @@ class Process:
             ]
         ]
         consumers = [timestamp["consumers"] for timestamp in timestamps]
-        pids = [process["pid"] for consumer in consumers for process in consumer]
-        if self.pid not in pids:
-            raise InvalidPIDException(self.pid)
-        else:
+        pids = set([process["pid"] for consumer in consumers for process in consumer])
+        if self.pid in pids:
             return True
+        else:
+            raise InvalidPIDException(self.pid)
 
     def get_process_info(self):
 
