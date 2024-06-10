@@ -230,6 +230,10 @@ class ApiEndpointsTest(TestCase):
 
         response = client.get("/process_embedded_impacts", params=params)
         assert response.status_code == 400
+        assert (
+            response.text
+            == "Process_id 1234 has not been found in metrics data. Check the queried PID"
+        )
 
     def test_read_yearly_embedded(self):
         response = client.get("/yearly_embedded")
