@@ -531,6 +531,13 @@ class AllocateEmbeddedImpactForProcess(TestCase):
 
         self.assertEqual(expected_process_name, process_name)
 
+    def test_get_process_exe(self):
+
+        expected_process_exe = "/snap/firefox/4336/usr/lib/firefox/firefox"
+        process_exe = self.process.get_process_exe()
+
+        self.assertEqual(expected_process_exe, process_exe)
+
     def test_validate_pid_with_error_if_process_id_not_in_metrics(self):
 
         expected_error_message = (
@@ -557,6 +564,32 @@ class AllocateEmbeddedImpactForProcess(TestCase):
             assert type(ram_share) is float
             self.assertEqual(ram_share, expected_ram_shares[index])
         assert type(process_ram_shares) is list
+
+    def test_get_process_storage_share_with_process_storage_size_in_megabytes(self):
+
+        # Firefox snap directory occupies 383M according to `du -hs`
+        # Total disk storage in bytes, for reference = 255550554112
+
+        expected_storage_share = [0.15715270483193278]
+        process_storage_share = self.process.storage_share
+        assert type(process_storage_share) is list
+        self.assertEqual(process_storage_share, expected_storage_share)
+
+    def test_get_process_storage_share_with_process_storage_size_in_gigabytes(self):
+
+        with patch.object(self.process, "disk_usage", "1,2G"):
+            expected_storage_share = [0.5042016806722689]
+            process_storage_share = self.process.get_process_storage_share()
+            assert type(process_storage_share) is list
+            self.assertEqual(process_storage_share, expected_storage_share)
+
+    def test_get_process_storage_share_with_process_storage_size_in_kilobytes(self):
+
+        with patch.object(self.process, "disk_usage", "7,3K"):
+            expected_storage_share = [2.9251355083048842e-06]
+            process_storage_share = self.process.get_process_storage_share()
+            assert type(process_storage_share) is list
+            self.assertEqual(process_storage_share, expected_storage_share)
 
     def test_get_embedded_impact_share_for_ram_by_timestamp(self):
 
@@ -609,6 +642,27 @@ class AllocateEmbeddedImpactForProcess(TestCase):
             assert f"{criteria}_ram_average_impact" in ram_embedded_impact_values
             assert f"{criteria}_ram_max_impact" in ram_embedded_impact_values
             assert f"{criteria}_ram_min_impact" in ram_embedded_impact_values
+
+    def test_get_embedded_impact_values_with_error_if_invalid_component_queried(self):
+
+        invalid_component_queried = self.process.get_component_embedded_impact_values(
+            "invalid_component"
+        )
+        assert (
+            invalid_component_queried
+            == "Queried component is not available for evaluation."
+        )
+
+    def test_get_embedded_impact_values_for_ssd(self):
+
+        impact_criterias = ["gwp", "adp", "pe"]
+        storage_embedded_impact_values = (
+            self.process.get_component_embedded_impact_values("ssd")
+        )
+
+        assert type(storage_embedded_impact_values) is dict
+        for criteria in impact_criterias:
+            assert f"{criteria}_ssd_average_impact" in storage_embedded_impact_values
 
 
 loader = TestLoader()
