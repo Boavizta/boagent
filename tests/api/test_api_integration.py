@@ -210,6 +210,8 @@ class ApiEndpointsTest(TestCase):
         }
         response = client.get("/process_embedded_impacts", params=params)
         assert response.status_code == 200
+        self.assertIn("process_cpu_embedded_impact_values", response.json())
+        self.assertIn("process_ram_embedded_impact_values", response.json())
 
     @patch("boagent.api.api.get_metrics")
     def test_get_process_embedded_impacts_with_error_if_pid_not_found_in_metrics_data(
