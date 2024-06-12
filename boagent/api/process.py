@@ -1,5 +1,6 @@
 from json import load
 from collections import defaultdict
+from subprocess import getoutput
 from .exceptions import InvalidPIDException
 
 
@@ -11,8 +12,11 @@ class Process:
         self.validated_pid = self.validate_pid()
         self.process_info = self.get_process_info()
         self.process_name = self.get_process_name()
+        self.process_exe = self.get_process_exe()
+        self.disk_usage = self.get_process_disk_usage()
         self.ram_shares = self.get_ram_shares()
         self.cpu_load_shares = self.get_cpu_load_shares()
+        self.storage_share = self.get_process_storage_share()
 
     def process_metrics(self):
 
@@ -55,6 +59,10 @@ class Process:
         process_name = self.process_info[0]["exe"].split("/")[-1]
         return process_name
 
+    def get_process_exe(self):
+        process_exe = self.process_info[0]["exe"]
+        return process_exe
+
     def get_total_ram_in_bytes(self):
 
         ram_data = self.processed_metrics["raw_data"]["hardware_data"]["rams"]
@@ -86,6 +94,41 @@ class Process:
             for timestamp in self.process_info
         ]
         return process_cpu_load_shares
+
+    def get_process_disk_usage(self):
+
+        process_directory = self.process_exe.rsplit("/", 1)[0]
+        process_disk_usage = getoutput(f"du -hs {process_directory}").split()[0]
+        return process_disk_usage
+
+    def get_process_storage_share(self):
+
+        disks_total_size_in_bytes = (
+            self.processed_metrics["raw_data"]["hardware_data"]["disks"][0]["capacity"]
+            * 1073741824
+        )
+        process_disk_space_unit = self.disk_usage[-1]
+        process_disk_space_size = self.disk_usage[:-1]
+
+        if process_disk_space_unit == "K":
+            formatted_process_size = float(process_disk_space_size.replace(",", "."))
+            process_storage_share = (
+                (formatted_process_size * 1024) / disks_total_size_in_bytes * 100
+            )
+            return [process_storage_share]
+        elif process_disk_space_unit == "M":
+            process_storage_share = (
+                (int(process_disk_space_size) * 1048576)
+                / disks_total_size_in_bytes
+                * 100
+            )
+            return [process_storage_share]
+        elif process_disk_space_unit == "G":
+            formatted_process_size = float(process_disk_space_size.replace(",", "."))
+            process_storage_share = (
+                (formatted_process_size * 1073741824) / disks_total_size_in_bytes * 100
+            )
+            return [process_storage_share]
 
     def get_component_embedded_impact_shares(self, queried_component, component_shares):
 
@@ -122,6 +165,10 @@ class Process:
         elif queried_component == "ram":
             component_impact_shares = self.get_component_embedded_impact_shares(
                 "RAM", self.ram_shares
+            )
+        elif queried_component == "ssd":
+            component_impact_shares = self.get_component_embedded_impact_shares(
+                "SSD", self.storage_share
             )
         else:
             return "Queried component is not available for evaluation."
