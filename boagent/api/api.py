@@ -314,11 +314,12 @@ async def process_embedded_impacts(
             queried_process.get_component_embedded_impact_values("ram")
         )
 
-        process_embedded_impact_values = [
-            process_cpu_embedded_impact_values,
-            process_ram_embedded_impact_values,
-        ]
-        return process_embedded_impact_values
+        process_embedded_impact_values = {
+            "process_cpu_embedded_impact_values": process_cpu_embedded_impact_values,
+            "process_ram_embedded_impact_values": process_ram_embedded_impact_values,
+        }
+        json_content = json.dumps(process_embedded_impact_values)
+        return Response(status_code=200, content=json_content)
 
 
 @app.get("/last_info")
