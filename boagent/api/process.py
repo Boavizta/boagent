@@ -5,26 +5,24 @@ from .exceptions import InvalidPIDException
 
 
 class Process:
-    def __init__(self, metrics_data, pid):
-        self.metrics_data = metrics_data
-        self.pid = pid
-        self.processed_metrics = self.process_metrics()
-        self.validated_pid = self.validate_pid()
+    def __init__(self, metrics_file_path, pid):
+        self.metrics_file_path = metrics_file_path
+        self.validate_pid(pid)
+        self._pid = pid
         self.process_info = self.get_process_info()
-        self.process_name = self.get_process_name()
-        self.process_exe = self.get_process_exe()
         self.disk_usage = self.get_process_disk_usage()
-        self.ram_shares = self.get_ram_shares()
-        self.cpu_load_shares = self.get_cpu_load_shares()
         self.storage_share = self.get_process_storage_share()
 
-    def process_metrics(self):
+    @property
+    def processed_metrics(self):
+        """The metrics in JSON format parsed from the metrics file path."""
 
-        with open(self.metrics_data, "r") as metrics_data_file:
-            metrics_data = load(metrics_data_file)
-        return metrics_data
+        with open(self.metrics_file_path, "r") as metrics_data_file:
+            processed_metrics = load(metrics_data_file)
+        return processed_metrics
 
-    def validate_pid(self):
+    def validate_pid(self, value):
+
         timestamps = [
             timestamp
             for timestamp in self.processed_metrics["raw_data"]["power_data"][
@@ -33,10 +31,19 @@ class Process:
         ]
         consumers = [timestamp["consumers"] for timestamp in timestamps]
         pids = set([process["pid"] for consumer in consumers for process in consumer])
-        if self.pid in pids:
-            return True
+        if value in pids:
+            return value
         else:
-            raise InvalidPIDException(self.pid)
+            raise InvalidPIDException(value)
+
+    @property
+    def pid(self, pid):
+        """The PID queried in data coming from Scaphandre."""
+        return self._pid
+
+    @pid.setter
+    def pid(self, value):
+        self._pid = self.validate_pid(value)
 
     def get_process_info(self):
 
@@ -51,15 +58,17 @@ class Process:
             process
             for consumer in consumers
             for process in consumer
-            if process["pid"] == self.pid
+            if process["pid"] == self._pid
         ]
         return process_info
 
-    def get_process_name(self):
+    @property
+    def process_name(self):
         process_name = self.process_info[0]["exe"].split("/")[-1]
         return process_name
 
-    def get_process_exe(self):
+    @property
+    def process_exe(self):
         process_exe = self.process_info[0]["exe"]
         return process_exe
 
@@ -72,7 +81,8 @@ class Process:
 
         return total_ram_in_bytes
 
-    def get_ram_shares(self):
+    @property
+    def ram_shares(self):
 
         process_ram_shares = [
             (
@@ -87,7 +97,8 @@ class Process:
 
         return process_ram_shares
 
-    def get_cpu_load_shares(self):
+    @property
+    def cpu_load_shares(self):
 
         process_cpu_load_shares = [
             float(timestamp["resources_usage"]["cpu_usage"])
