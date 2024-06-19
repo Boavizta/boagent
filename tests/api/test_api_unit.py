@@ -527,14 +527,14 @@ class AllocateEmbeddedImpactForProcess(TestCase):
     def test_get_process_name(self):
 
         expected_process_name = "firefox"
-        process_name = self.process.get_process_name()
+        process_name = self.process.process_name
 
         self.assertEqual(expected_process_name, process_name)
 
     def test_get_process_exe(self):
 
         expected_process_exe = "/snap/firefox/4336/usr/lib/firefox/firefox"
-        process_exe = self.process.get_process_exe()
+        process_exe = self.process.process_exe
 
         self.assertEqual(expected_process_exe, process_exe)
 
@@ -546,6 +546,11 @@ class AllocateEmbeddedImpactForProcess(TestCase):
 
         with self.assertRaises(InvalidPIDException) as context_manager:
             self.process = Process(mock_get_metrics_verbose, 1234)
+
+        self.assertEqual(context_manager.exception.message, expected_error_message)
+
+        with self.assertRaises(InvalidPIDException) as context_manager:
+            self.process.pid = 1234
 
         self.assertEqual(context_manager.exception.message, expected_error_message)
 
