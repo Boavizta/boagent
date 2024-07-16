@@ -2,20 +2,18 @@ FROM python:3.10-slim
 
 LABEL org.opencontainers.image.authors="bpetit@hubblo.org"
 
-RUN apt update && apt install lshw nvme-cli -y
-
-RUN useradd -ms /bin/bash boagent
-
 WORKDIR /home/boagent
 
-COPY requirements.txt requirements.txt
+RUN python3 -m pip install --upgrade poetry
 
-RUN pip3 install -r requirements.txt
+RUN apt update && apt install lshw nvme-cli -y
 
-ENV PATH $PATH:/home/boagent/.local/bin
+COPY pyproject.toml .
+
+RUN poetry install --only main
 
 COPY . .
 
 EXPOSE 8000
 
-ENTRYPOINT [ "/bin/bash", "-c", "uvicorn --reload boagent.api.api:app --host 0.0.0.0" ]
+ENTRYPOINT ["poetry", "run", "uvicorn", "--reload", "boagent.api.api:app", "--host", "0.0.0.0"]
