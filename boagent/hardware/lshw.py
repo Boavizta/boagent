@@ -155,7 +155,7 @@ class Lshw:
                 {
                     "units": +1,
                     "name": obj["product"],
-                    "vendor": obj["vendor"],
+                    "manufacturer": obj["vendor"],
                     "core_units": obj["configuration"][
                         "cores"
                     ],  # ONLY AVAILABLE AS ROOT
