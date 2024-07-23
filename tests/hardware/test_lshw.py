@@ -33,8 +33,8 @@ class LshwTest(TestCase):
     def test_read_cpus_vendor(self):
 
         for cpu in lshw_cpus_data:
-            assert "vendor" in cpu
-            assert type(cpu["vendor"]) is str
+            assert "manufacturer" in cpu
+            assert type(cpu["manufacturer"]) is str
 
     def test_read_cpus_name(self):
 
@@ -46,7 +46,7 @@ class LshwTest(TestCase):
 
         for cpu in lshw_cpus_data:
             assert "core_units" in cpu
-            assert type(cpu["core_units"]) is str
+            assert type(cpu["core_units"]) is int
 
     def test_read_cpus_units(self):
 
