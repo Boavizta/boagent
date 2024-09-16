@@ -570,31 +570,44 @@ class AllocateEmbeddedImpactForProcess(TestCase):
             self.assertEqual(ram_share, expected_ram_shares[index])
         assert type(process_ram_shares) is list
 
-    def test_get_process_storage_share_with_process_storage_size_in_megabytes(self):
+    def test_get_disk_usage_in_bytes(self):
+        disk_total_bytes = int(
+            self.get_metrics_verbose["raw_data"]["power_data"]["raw_data"][1]["host"][
+                "components"
+            ]["disks"][0]["disk_total_bytes"]
+        )
+        disk_available_bytes = int(
+            self.get_metrics_verbose["raw_data"]["power_data"]["raw_data"][1]["host"][
+                "components"
+            ]["disks"][0]["disk_available_bytes"]
+        )
+        expected_disk_usage = disk_total_bytes - disk_available_bytes
+        disk_usage = self.process.get_disk_usage_in_bytes()
+        assert type(disk_usage) is int
+        self.assertEqual(expected_disk_usage, disk_usage)
 
-        # Firefox snap directory occupies 383M according to `du -hs`
-        # Total disk storage in bytes, for reference = 255550554112
+    def test_get_process_storage_share_by_timestamp(self):
 
-        expected_storage_share = [0.15715270483193278]
-        process_storage_share = self.process.storage_share
-        assert type(process_storage_share) is list
-        self.assertEqual(process_storage_share, expected_storage_share)
+        expected_storage_shares = [0.0, 0.0, 0.0]
+        process_storage_shares = self.process.storage_shares
+        for index, storage_share in enumerate(process_storage_shares):
+            assert type(storage_share) is float
+            self.assertEqual(storage_share, expected_storage_shares[index])
+        assert type(process_storage_shares) is list
 
-    def test_get_process_storage_share_with_process_storage_size_in_gigabytes(self):
+    def test_get_embedded_impact_share_for_storage_by_timestamp(self):
 
-        with patch.object(self.process, "disk_usage", "1,2G"):
-            expected_storage_share = [0.5042016806722689]
-            process_storage_share = self.process.get_process_storage_share()
-            assert type(process_storage_share) is list
-            self.assertEqual(process_storage_share, expected_storage_share)
+        storage_embedded_impact_shares = (
+            self.process.get_component_embedded_impact_shares(
+                "SSD", self.process.storage_shares
+            )
+        )
 
-    def test_get_process_storage_share_with_process_storage_size_in_kilobytes(self):
-
-        with patch.object(self.process, "disk_usage", "7,3K"):
-            expected_storage_share = [2.9251355083048842e-06]
-            process_storage_share = self.process.get_process_storage_share()
-            assert type(process_storage_share) is list
-            self.assertEqual(process_storage_share, expected_storage_share)
+        for storage_embedded_impact_share in storage_embedded_impact_shares:
+            assert type(storage_embedded_impact_share) is tuple
+            for value in storage_embedded_impact_share:
+                assert type(storage_embedded_impact_share[1]) is float
+            assert type(storage_embedded_impact_shares)
 
     def test_get_embedded_impact_share_for_ram_by_timestamp(self):
 
