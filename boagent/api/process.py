@@ -9,6 +9,7 @@ class Process:
         self.validate_pid(pid)
         self._pid = pid
         self.process_info = self.get_process_info()
+        self.embedded_impact_values = self.get_embedded_impact_values()
 
     @property
     def processed_metrics(self):
@@ -221,3 +222,22 @@ class Process:
             f"pe_{queried_component}_min_impact": pe_min,
         }
         return component_embedded_impact_values
+
+    def get_embedded_impact_values(self):
+        process_embedded_impact_values = {}
+        components = ["cpu", "ram", "hdd", "ssd"]
+
+        for component in components:
+            try:
+                process_component_embedded_impact_values = (
+                    self.get_component_embedded_impact_values(component)
+                )
+                process_embedded_impact_values[
+                    f"process_{component}_embedded_impact_values"
+                ] = process_component_embedded_impact_values
+            except KeyError as absent_component:
+                print(
+                    f"Queried component is not present in Boagent metrics: {absent_component}"
+                )
+
+        return process_embedded_impact_values

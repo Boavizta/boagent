@@ -307,21 +307,7 @@ async def process_embedded_impacts(
     except InvalidPIDException as invalid_pid:
         return Response(status_code=400, content=invalid_pid.message)
     else:
-        process_cpu_embedded_impact_values = (
-            queried_process.get_component_embedded_impact_values("cpu")
-        )
-        process_ram_embedded_impact_values = (
-            queried_process.get_component_embedded_impact_values("ram")
-        )
-        process_ssd_embedded_impact_values = (
-            queried_process.get_component_embedded_impact_values("ssd")
-        )
-
-        process_embedded_impact_values = {
-            "process_cpu_embedded_impact_values": process_cpu_embedded_impact_values,
-            "process_ram_embedded_impact_values": process_ram_embedded_impact_values,
-            "process_ssd_embedded_impact_values": process_ssd_embedded_impact_values,
-        }
+        process_embedded_impact_values = queried_process.embedded_impact_values
         json_content = json.dumps(process_embedded_impact_values)
         return Response(status_code=200, content=json_content)
 
