@@ -172,6 +172,10 @@ class Process:
             component_impact_shares = self.get_component_embedded_impact_shares(
                 "SSD", self.storage_shares
             )
+        elif queried_component == "hdd":
+            component_impact_shares = self.get_component_embedded_impact_shares(
+                "HDD", self.storage_shares
+            )
         else:
             return "Queried component is not available for evaluation."
 
