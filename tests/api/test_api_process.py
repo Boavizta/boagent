@@ -13,20 +13,11 @@ mock_hardware_data = os.path.join(f"{current_dir}", "../mocks/hardware_data.json
 mock_boaviztapi_response_not_verbose = os.path.join(
     f"{current_dir}", "../mocks/boaviztapi_response_not_verbose.json"
 )
-mock_boaviztapi_response_verbose = os.path.join(
-    f"{current_dir}", "../mocks/boaviztapi_response_verbose.json"
-)
-mock_formatted_scaphandre = os.path.join(
-    f"{current_dir}", "../mocks/formatted_power_data_one_hour.json"
-)
-mock_formatted_scaphandre_with_processes = os.path.join(
-    f"{current_dir}", "../mocks/formatted_scaphandre.json"
-)
-mock_get_metrics_not_verbose = os.path.join(
-    f"{current_dir}", "../mocks/get_metrics_not_verbose.json"
-)
 mock_get_metrics_verbose = os.path.join(
     f"{current_dir}", "../mocks/get_metrics_verbose.json"
+)
+mock_get_metrics_verbose_no_hdd = os.path.join(
+    f"{current_dir}", "../mocks/get_metrics_verbose_no_hdd.json"
 )
 hardware_cli = os.path.join(f"{current_dir}", "../../boagent/hardware/hardware_cli.py")
 hardware_data = os.path.join(f"{current_dir}", "../../boagent/api/hardware_data.json")
@@ -155,11 +146,25 @@ class AllocateEmbeddedImpactForProcess(TestCase):
             self.assertEqual(storage_share, expected_storage_shares[index])
         assert type(process_storage_shares) is list
 
-    def test_get_embedded_impact_share_for_storage_by_timestamp(self):
+    def test_get_embedded_impact_share_for_ssd_by_timestamp(self):
 
         storage_embedded_impact_shares = (
             self.process.get_component_embedded_impact_shares(
                 "SSD", self.process.storage_shares
+            )
+        )
+
+        for storage_embedded_impact_share in storage_embedded_impact_shares:
+            assert type(storage_embedded_impact_share) is tuple
+            for value in storage_embedded_impact_share:
+                assert type(storage_embedded_impact_share[1]) is float
+            assert type(storage_embedded_impact_shares)
+
+    def test_get_embedded_impact_share_for_hdd_by_timestamp(self):
+
+        storage_embedded_impact_shares = (
+            self.process.get_component_embedded_impact_shares(
+                "HDD", self.process.storage_shares
             )
         )
 
@@ -234,13 +239,42 @@ class AllocateEmbeddedImpactForProcess(TestCase):
     def test_get_embedded_impact_values_for_ssd(self):
 
         impact_criterias = ["gwp", "adp", "pe"]
-        storage_embedded_impact_values = (
-            self.process.get_component_embedded_impact_values("ssd")
+        ssd_embedded_impact_values = self.process.get_component_embedded_impact_values(
+            "ssd"
         )
 
-        assert type(storage_embedded_impact_values) is dict
+        assert type(ssd_embedded_impact_values) is dict
         for criteria in impact_criterias:
-            assert f"{criteria}_ssd_average_impact" in storage_embedded_impact_values
+            assert f"{criteria}_ssd_average_impact" in ssd_embedded_impact_values
+
+    def test_get_embedded_impact_values_for_hdd(self):
+
+        impact_criterias = ["gwp", "adp", "pe"]
+        hdd_embedded_impact_values = self.process.get_component_embedded_impact_values(
+            "hdd"
+        )
+
+        assert type(hdd_embedded_impact_values) is dict
+        for criteria in impact_criterias:
+            assert f"{criteria}_hdd_average_impact" in hdd_embedded_impact_values
+
+    def test_get_all_components_embedded_impact_values(self):
+
+        process_embedded_impacts = self.process.embedded_impact_values
+        self.assertIn("process_cpu_embedded_impact_values", process_embedded_impacts)
+        self.assertIn("process_ram_embedded_impact_values", process_embedded_impacts)
+        self.assertIn("process_ssd_embedded_impact_values", process_embedded_impacts)
+        self.assertIn("process_hdd_embedded_impact_values", process_embedded_impacts)
+
+    def test_get_components_embedded_impact_values_with_hdd_absent_from_get_metrics(
+        self,
+    ):
+        self.process = Process(mock_get_metrics_verbose_no_hdd, self.pid)
+        process_embedded_impacts = self.process.embedded_impact_values
+        self.assertIn("process_cpu_embedded_impact_values", process_embedded_impacts)
+        self.assertIn("process_ram_embedded_impact_values", process_embedded_impacts)
+        self.assertIn("process_ssd_embedded_impact_values", process_embedded_impacts)
+        self.assertNotIn("process_hdd_embedded_impact_values", process_embedded_impacts)
 
 
 loader = TestLoader()
