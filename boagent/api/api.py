@@ -280,6 +280,7 @@ async def process_embedded_impacts(
     end_time: str = "0.0",
     location: str = "EEE",
     lifetime: float = DEFAULT_LIFETIME,
+    fetch_hardware: bool = False,
 ):
     """
     process_id: The process ID queried to be evaluated for embedded impacts for each available component.
@@ -291,7 +292,6 @@ async def process_embedded_impacts(
 
     verbose = True
     measure_power = True
-    fetch_hardware = True
 
     metrics_data = get_metrics(
         iso8601_or_timestamp_as_timestamp(start_time),
