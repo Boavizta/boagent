@@ -16,7 +16,6 @@ from boagent.api.api import (
 )
 from boagent.api.utils import format_prometheus_output
 
-
 current_dir = os.path.dirname(__file__)
 mock_power_data = os.path.join(f"{current_dir}", "../mocks/power_data.json")
 mock_hardware_data = os.path.join(f"{current_dir}", "../mocks/hardware_data.json")
@@ -28,6 +27,9 @@ mock_boaviztapi_response_verbose = os.path.join(
 )
 mock_formatted_scaphandre = os.path.join(
     f"{current_dir}", "../mocks/formatted_power_data_one_hour.json"
+)
+mock_formatted_scaphandre_with_processes = os.path.join(
+    f"{current_dir}", "../mocks/formatted_scaphandre.json"
 )
 mock_get_metrics_not_verbose = os.path.join(
     f"{current_dir}", "../mocks/get_metrics_not_verbose.json"
@@ -129,8 +131,8 @@ class ComputeAvgConsumptionTest(TestCase):
     def test_compute_average_consumption(self):
 
         with open(mock_power_data, "r") as power_data_file:
-            power_data = f"[{power_data_file.read()}]"
-        data = json.loads(power_data)
+            # power_data = f"[{power_data_file.read()}]"
+            data = json.load(power_data_file)
         avg_host = compute_average_consumption(data)
 
         assert type(avg_host) is float
@@ -187,12 +189,8 @@ class GetPowerDataTest(TestCase):
 
         self.formatted_scaphandre = f"{mock_formatted_scaphandre}"
 
-    @patch("boagent.api.api.format_scaphandre_json")
-    def test_get_power_data(self, mocked_format_scaphandre_json):
-
-        mocked_format_scaphandre_json.return_value = open(
-            mock_formatted_scaphandre, "r"
-        ).read()
+    @patch("boagent.api.api.POWER_DATA_FILE_PATH", mock_formatted_scaphandre)
+    def test_get_power_data(self):
 
         power_data = get_power_data(self.start_time, self.end_time)
 
@@ -202,14 +200,8 @@ class GetPowerDataTest(TestCase):
         assert type(power_data["avg_power"]) is float
         assert power_data["avg_power"] > 0
 
-    @patch("boagent.api.api.format_scaphandre_json")
-    def test_get_power_data_with_short_time_interval(
-        self, mocked_format_scaphandre_json
-    ):
-
-        mocked_format_scaphandre_json.return_value = open(
-            mock_formatted_scaphandre, "r"
-        ).read()
+    @patch("boagent.api.api.POWER_DATA_FILE_PATH", mock_formatted_scaphandre)
+    def test_get_power_data_with_short_time_interval(self):
 
         power_data = get_power_data(
             self.short_interval_start_time, self.short_interval_end_time

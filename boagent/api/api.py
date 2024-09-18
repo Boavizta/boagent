@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
 from boaviztapi_sdk.models.server import Server
+from boagent.api.exceptions import InvalidPIDException
 from boagent.hardware.lshw import Lshw
 from .utils import (
     iso8601_or_timestamp_as_timestamp,
@@ -24,6 +25,7 @@ from .utils import (
 )
 
 from .config import Settings
+from .process import Process
 
 from .database import (
     get_session,
@@ -221,7 +223,7 @@ async def query(
     verbose: Get detailled metrics with extra information.\n
     location: Country code to configure the local electricity grid to take into account.\n
     measure_power: Get electricity consumption metrics from Scaphandre or not.\n
-    lifetime: Full lifetime of the machine to consider.\n
+    lifetime: Full lifetime of the machine to evaluate.\n
     fetch_hardware: Regenerate hardware.json file with current machine hardware or not.\n
     """
     return get_metrics(
@@ -254,7 +256,7 @@ async def query_with_time_workload(
     verbose: Get detailled metrics with extra information.\n
     location: Country code to configure the local electricity grid to take into account.\n
     measure_power: Get electricity consumption metrics from Scaphandre or not.\n
-    lifetime: Full lifetime of the machine to consider.\n
+    lifetime: Full lifetime of the machine to evaluate.\n
     fetch_hardware: Regenerate hardware.json file with current machine hardware or not.\n
     time_workload: Workload percentage for CPU and RAM. Can be a float or a list of dictionaries with format
     {"time_percentage": float, "load_percentage": float}
@@ -269,6 +271,45 @@ async def query_with_time_workload(
         fetch_hardware,
         time_workload,
     )
+
+
+@app.get("/process_embedded_impacts")
+async def process_embedded_impacts(
+    process_id: int = 0,
+    start_time: str = "0.0",
+    end_time: str = "0.0",
+    location: str = "EEE",
+    lifetime: float = DEFAULT_LIFETIME,
+    fetch_hardware: bool = False,
+):
+    """
+    process_id: The process ID queried to be evaluated for embedded impacts for each available component.
+    start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
+    end_time: End time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
+    location: Country code to configure the local electricity grid to take into account.\n
+    lifetime: Full lifetime of the machine to evaluate.\n
+    """
+
+    verbose = True
+    measure_power = True
+
+    metrics_data = get_metrics(
+        iso8601_or_timestamp_as_timestamp(start_time),
+        iso8601_or_timestamp_as_timestamp(end_time),
+        verbose,
+        location,
+        measure_power,
+        lifetime,
+        fetch_hardware,
+    )
+    try:
+        queried_process = Process(metrics_data, process_id)
+    except InvalidPIDException as invalid_pid:
+        return Response(status_code=400, content=invalid_pid.message)
+    else:
+        process_embedded_impact_values = queried_process.embedded_impact_values
+        json_content = json.dumps(process_embedded_impact_values)
+        return Response(status_code=200, content=json_content)
 
 
 @app.get("/last_info")

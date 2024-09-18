@@ -155,10 +155,10 @@ class Lshw:
                 {
                     "units": +1,
                     "name": obj["product"],
-                    "vendor": obj["vendor"],
-                    "core_units": obj["configuration"][
-                        "cores"
-                    ],  # ONLY AVAILABLE AS ROOT
+                    "manufacturer": obj["vendor"],
+                    "core_units": int(
+                        obj["configuration"]["cores"]
+                    ),  # ONLY AVAILABLE AS ROOT
                     # "description": obj["description"],
                     # "location": obj["slot"],
                 }
