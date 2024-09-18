@@ -9,7 +9,6 @@ class Process:
         self.validate_pid(pid)
         self._pid = pid
         self.process_info = self.get_process_info()
-        self.embedded_impact_values = self.get_embedded_impact_values()
 
     @property
     def processed_metrics(self):
@@ -223,7 +222,8 @@ class Process:
         }
         return component_embedded_impact_values
 
-    def get_embedded_impact_values(self):
+    @property
+    def embedded_impact_values(self):
         process_embedded_impact_values = {}
         components = ["cpu", "ram", "hdd", "ssd"]
 
