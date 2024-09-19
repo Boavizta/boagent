@@ -140,11 +140,8 @@ class Lshw:
                             device["ModelNumber"]
                         ).lower(),
                         "type": "ssd",
+                        "capacity": device["PhysicalSize"] // 1073741824,
                     }
-                    if "UsedSize" in device:
-                        d["capacity"] = device["UsedSize"] // 1073741824
-                    if "UsedBytes" in device:
-                        d["capacity"] = device["UsedBytes"] // 1073741824
                     self.disks.append(d)
             except Exception:
                 pass
