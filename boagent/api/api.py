@@ -81,23 +81,6 @@ async def web():
     return res
 
 
-@app.get("/yearly_embedded")
-async def yearly_embedded():
-    hardware_data = get_hardware_data(False)
-    boaviztapi_data = query_machine_impact_data(
-        model=None,
-        configuration=generate_machine_configuration(hardware_data),
-        usage={},
-    )
-    if "manufacturer" in boaviztapi_data:
-        return boaviztapi_data["impacts"]["gwp"]["manufacturer"] / DEFAULT_LIFETIME
-    else:
-        return Response(
-            status_code=200,
-            content="SSD/HDD manufacturer not recognized by BoaviztAPI yet.",
-        )
-
-
 @app.get("/metrics", tags=["metrics"])
 async def metrics(
     start_time: str = "0.0",

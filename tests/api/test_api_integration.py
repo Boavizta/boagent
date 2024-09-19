@@ -238,7 +238,3 @@ class ApiEndpointsTest(TestCase):
             response.text
             == "Process_id 1234 has not been found in metrics data. Check the queried PID"
         )
-
-    def test_read_yearly_embedded(self):
-        response = client.get("/yearly_embedded")
-        assert response.status_code == 200
