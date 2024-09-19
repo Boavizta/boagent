@@ -5,10 +5,6 @@ import json
 import sys
 from boagent.hardware.lshw import Lshw
 
-# from disk import search_physical_drives
-# from cpu import get_cpus
-# from ram import get_ram_info
-
 lshw = Lshw()
 
 lshw_cpus = lshw.cpus
@@ -31,22 +27,6 @@ def main(output_file):
     return 0
 
 
-""" def disks():
-    disks = search_physical_drives()
-    for disk in disks:
-        disk.lookup()
-    return disks
-
-
-def format_disks(disks):
-    hardware_data = []
-    for disk in disks:
-        hardware_data.append(
-            {"capacity": disk.size, "manufacturer": disk.vendor, "type": disk.type}
-        )
-    return hardware_data """
-
-
 def get_disks():
     disks = lshw_disks
     return disks
@@ -61,18 +41,6 @@ def get_ram():
     rams = lshw_ram
     return rams
 
-
-""" def format_rams(rams):
-    hardware_data = []
-    for ram in rams:
-        options = {
-            "capacity": ram.size_gb,
-        }
-        if ram.manufacturer is not None and len(ram.manufacturer) > 0:
-            options["manufacturer"] = ram.manufacturer
-        hardware_data.append(options)
-    return hardware_data
- """
 
 if __name__ == "__main__":
     main()
