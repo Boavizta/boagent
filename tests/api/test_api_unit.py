@@ -72,11 +72,6 @@ class ReadHardwareDataTest(TestCase):
         data = get_hardware_data(fetch_hardware=True)
         assert type(data) is dict
 
-    # def test_read_query_machine_impact_data(self):
-    #    server_impact = query_machine_impact_data()
-    #    print(server_impact)
-    #    pass
-
     def tearDown(self) -> None:
         os.remove(hardware_data)
 
