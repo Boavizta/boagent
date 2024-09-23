@@ -1,11 +1,14 @@
+"""
+This file is modified code issued from https://github.com/Solvik/netbox-agent/blob/master/netbox_agent/lshw.py,
+copyright under Apache-2.0 licence.
+"""
+
 from shutil import which
 import subprocess
 import json
 import sys
 import re
 import os
-
-# Commented elements only available when runnning `lshw` as `sudo`.
 
 SYS_BLOCK_PATH = "/sys/block"
 
@@ -18,14 +21,12 @@ def is_tool(name):
 class Lshw:
     def __init__(self):
         if not is_tool("lshw"):
-            sys.stderr.write("lshw does not seem to be installed.")
-            sys.exit(1)
+            raise Exception("lshw does not seem to be installed.")
         try:
             data = subprocess.getoutput("lshw -quiet -json 2> /dev/null")
             json_data = json.loads(data)
         except json.JSONDecodeError:
-            sys.stderr.write("lshw does not seem do be executed as root.")
-            sys.exit(1)
+            raise Exception("lshw does not seem do be executed as root.")
         # Starting from version 02.18, `lshw -json` wraps its result in a list
         # rather than returning directly a dictionary
         if isinstance(json_data, list):
@@ -34,20 +35,15 @@ class Lshw:
             self.hw_info = json_data
         self.info = {}
         self.memories = []
-        # self.interfaces = []
         self.cpus = []
         self.power = []
         self.disks = []
         self.gpus = []
-        # self.vendor = self.hw_info["vendor"]
-        # self.product = self.hw_info["product"]
-        # self.chassis_serial = self.hw_info["serial"]
         self.motherboard_serial = self.hw_info["children"][0].get("serial", "No S/N")
         self.motherboard = self.hw_info["children"][0].get("product", "Motherboard")
 
         for k in self.hw_info["children"]:
             if k["class"] == "power":
-                # self.power[k["id"]] = k
                 self.power.append(k)
 
             if "children" in k:
@@ -124,8 +120,7 @@ class Lshw:
                     self.disks.append(d)
         if "nvme" in obj["configuration"]["driver"]:
             if not is_tool("nvme"):
-                sys.stderr.write("nvme-cli >= 1.0 does not seem to be installed")
-                sys.exit(1)
+                raise Exception("nvme-cli >= 1.0 does not seem to be installed")
             try:
                 nvme = json.loads(
                     subprocess.check_output(
@@ -153,17 +148,13 @@ class Lshw:
                     "units": +1,
                     "name": obj["product"],
                     "manufacturer": obj["vendor"],
-                    "core_units": int(
-                        obj["configuration"]["cores"]
-                    ),  # ONLY AVAILABLE AS ROOT
-                    # "description": obj["description"],
-                    # "location": obj["slot"],
+                    "core_units": int(obj["configuration"]["cores"]),
                 }
             )
 
     def find_memories(self, obj):
         if "children" not in obj:
-            # print("not a DIMM memory.")
+            print("not a DIMM memory.")
             return
 
         for dimm in obj["children"]:
@@ -202,8 +193,6 @@ class Lshw:
                 for b in bus["children"]:
                     if b["class"] == "storage":
                         self.find_storage(b)
-                    # if b["class"] == "network":
-                    #    self.find_network(b)
                     if b["class"] == "display":
                         self.find_gpus(b)
 
@@ -260,8 +249,3 @@ class Lshw:
             with open(rotational_fp, "r") as file:
                 rotational_int = int(file.read())
         return rotational_int
-
-
-"""
-if __name__ == "__main__":
-    pass """
