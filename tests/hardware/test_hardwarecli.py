@@ -1,6 +1,6 @@
 from unittest import TestCase
 from os.path import exists
-from boagent.hardware.hardware_cli import main, get_cpus, get_ram, get_disks
+from hardware_cli import main, get_cpus, get_ram, get_disks
 from click.testing import CliRunner
 
 
