@@ -138,14 +138,24 @@ class LshwTest(TestCase):
         assert disk_type == "unknown"
 
     @patch("boagent.hardware.lshw.is_tool")
+    def test_check_lshw_is_installed_to_parse_hardware_data_and_raises_error_if_not(
+        self, mocked_is_tool
+    ):
+        another_lshw = Lshw()
+        mocked_is_tool.return_value = False
+        with self.assertRaises(Exception) as context:
+            another_lshw.__init__()
+        self.assertTrue("lshw does not seem to be installed" in str(context.exception))
+
+    @patch("boagent.hardware.lshw.is_tool")
     def test_check_nvme_cli_is_installed_to_find_storage_and_raises_error_if_not(
         self, mocked_is_tool
     ):
+        mocked_is_tool.return_value = False
 
         with open(f"{mock_lshw_data}_disks.json", "r") as file, self.assertRaises(
             Exception
         ) as nvme_cli_exception:
-            mocked_is_tool.return_value = False
             data = load(file)
             hw.find_storage(data)
 

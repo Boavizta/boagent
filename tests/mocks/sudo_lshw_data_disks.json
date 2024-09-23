@@ -12,7 +12,7 @@
   "width": 32,
   "clock": 33000000,
   "configuration": {
-    "driver": "pcieport"
+    "driver": "nvme"
   },
   "capabilities": {
     "pci": true,
