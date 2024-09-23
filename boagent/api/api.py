@@ -184,7 +184,7 @@ async def process_embedded_impacts(
     fetch_hardware: bool = False,
 ):
     """
-    process_id: The process ID queried to be evaluated for embedded impacts for each available component.
+    process_id: The process ID queried to be evaluated for embedded impacts for each available component. \n
     start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
     end_time: End time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
     location: Country code to configure the local electricity grid to take into account.\n
