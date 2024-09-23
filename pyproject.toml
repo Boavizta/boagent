@@ -16,7 +16,6 @@ pandas = "^2.2.1"
 pydantic = "^2.6.4"
 pydantic-settings = "^2.2.1"
 requests = "^2.28.1"
-SQLAlchemy = "^1.4.42"
 uvicorn = "^0.19.0"
 
 [tool.poetry.group.dev.dependencies]
