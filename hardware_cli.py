@@ -3,6 +3,7 @@
 import click
 import json
 import sys
+
 from boagent.hardware.lshw import Lshw
 
 lshw = Lshw()
