@@ -31,6 +31,14 @@ def serialized_lshw_output():
             return serialized_lshw_output
 
 
+def serialized_nvme_output():
+    nvme_output = subprocess.check_output(
+        ["nvme", "-list", "-o", "json"], encoding="utf8"
+    )
+    serialized_nvme_output = json.loads(nvme_output)
+    return serialized_nvme_output
+
+
 class Lshw:
     def __init__(self):
         if not is_tool("lshw"):
@@ -125,11 +133,7 @@ class Lshw:
             if not is_tool("nvme"):
                 raise Exception("nvme-cli >= 1.0 does not seem to be installed")
             try:
-                nvme = json.loads(
-                    subprocess.check_output(
-                        ["nvme", "-list", "-o", "json"], encoding="utf8"
-                    )
-                )
+                nvme = serialized_nvme_output()
                 for device in nvme["Devices"]:
                     d = {
                         "units": +1,
