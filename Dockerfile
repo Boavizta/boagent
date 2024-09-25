@@ -10,7 +10,7 @@ RUN apt update && apt install lshw nvme-cli -y
 
 COPY pyproject.toml .
 
-RUN poetry install --only main
+RUN poetry install
 
 COPY . .
 
