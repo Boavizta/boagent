@@ -6,19 +6,27 @@ from os import path
 
 current_dir = path.dirname(__file__)
 mock_lshw_data = path.join(f"{current_dir}", "../mocks/sudo_lshw_data")
+mock_nvme_data = path.join(f"{current_dir}", "../mocks/nvme_data_sudo.json")
 with open(f"{mock_lshw_data}.json") as lshw_json:
-    data = load(lshw_json)
+    lshw_data = load(lshw_json)
+with open(mock_nvme_data) as nvme_json:
+    nvme_data = load(nvme_json)
 
 mocked_is_tool = Mock()
 mocked_is_tool.return_value = True
 mocked_serialized_lshw_output = Mock()
-mocked_serialized_lshw_output.return_value = data
+mocked_serialized_lshw_output.return_value = lshw_data
+mocked_serialized_nvme_output = Mock()
+mocked_serialized_nvme_output.return_value = nvme_data
 
 
 class LshwTest(TestCase):
     @patch("boagent.hardware.lshw.is_tool", mocked_is_tool)
     @patch(
         "boagent.hardware.lshw.serialized_lshw_output", mocked_serialized_lshw_output
+    )
+    @patch(
+        "boagent.hardware.lshw.serialized_nvme_output", mocked_serialized_nvme_output
     )
     def setUp(self):
         self.lshw = Lshw()
@@ -46,24 +54,28 @@ class LshwTest(TestCase):
         for cpu in self.cpu_data:
             assert "manufacturer" in cpu
             assert type(cpu["manufacturer"]) is str
+            assert cpu["manufacturer"] == "Advanced Micro Devices [AMD]"
 
     def test_read_cpus_name(self):
 
         for cpu in self.cpu_data:
             assert "name" in cpu
             assert type(cpu["name"]) is str
+            assert cpu["name"] == "AMD Ryzen 5 5600H with Radeon Graphics"
 
     def test_read_cpus_core_units(self):
 
         for cpu in self.cpu_data:
             assert "core_units" in cpu
             assert type(cpu["core_units"]) is int
+            assert cpu["core_units"] == 6
 
     def test_read_cpus_units(self):
 
         for cpu in self.cpu_data:
             assert "units" in cpu
             assert type(cpu["units"]) is int
+            assert cpu["units"] == 1
 
     def test_read_check_disk_vendor_with_correct_model(self):
 
@@ -104,18 +116,14 @@ class LshwTest(TestCase):
         for disk in self.storage_data:
             assert "type" in disk
             assert type(disk["type"]) is str
-            assert (
-                disk["type"] == "ssd"
-                or disk["type"] == "hdd"
-                or disk["type"] == "usb"
-                or disk["type"] == "unknown"
-            )
+            assert disk["type"] == "ssd"
 
     def test_read_disk_dev_name(self):
 
         for disk in self.storage_data:
             assert "logicalname" in disk
             assert type(disk["logicalname"]) is str
+            assert disk["logicalname"] == "/dev/nvme0n1"
 
     @patch("boagent.hardware.lshw.Lshw.get_rotational_int")
     def test_check_disk_type_is_ssd(self, mocked_get_rotational):
@@ -177,32 +185,39 @@ class LshwTest(TestCase):
         for disk in self.storage_data:
             assert "manufacturer" in disk
             assert type(disk["manufacturer"]) is str
+            assert disk["manufacturer"] == "toshiba"
 
     def test_read_disks_capacity(self):
 
         for disk in self.storage_data:
             assert "capacity" in disk
             assert type(disk["capacity"]) is int
+            assert disk["capacity"] == 238
 
     def test_read_disks_units(self):
 
         for disk in self.storage_data:
             assert "units" in disk
             assert type(disk["units"]) is int
+            assert disk["units"] == 1
 
     def test_read_ram_manufacturer(self):
 
         for ram in self.ram_data:
             assert "manufacturer" in ram
             assert type(ram["manufacturer"]) is str
+            assert ram["manufacturer"] == "Samsung"
 
     def test_read_ram_capacity(self):
 
-        for ram in self.ram_data[1:]:
+        for ram in self.ram_data:
             assert "capacity" in ram
             assert type(ram["capacity"]) is int
+            assert ram["capacity"] == 8
 
     def test_read_ram_units(self):
 
-        assert "units" in self.ram_data[0]
-        assert type(self.ram_data[0]["units"]) is int
+        for ram in self.ram_data:
+            assert "units" in ram
+            assert type(ram["units"]) is int
+            assert ram["units"] == 1
