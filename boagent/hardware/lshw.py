@@ -18,21 +18,24 @@ def is_tool(name):
     return which(name) is not None
 
 
+def serialized_lshw_output():
+    try:
+        lshw_output = subprocess.getoutput("lshw -quiet -json 2> /dev/null")
+        serialized_lshw_output = json.loads(lshw_output)
+    except json.JSONDecodeError:
+        raise Exception("lshw does not seem do be executed as root.")
+    else:
+        if isinstance(serialized_lshw_output, list):
+            return serialized_lshw_output[0]
+        else:
+            return serialized_lshw_output
+
+
 class Lshw:
     def __init__(self):
         if not is_tool("lshw"):
             raise Exception("lshw does not seem to be installed.")
-        try:
-            data = subprocess.getoutput("lshw -quiet -json 2> /dev/null")
-            json_data = json.loads(data)
-        except json.JSONDecodeError:
-            raise Exception("lshw does not seem do be executed as root.")
-        # Starting from version 02.18, `lshw -json` wraps its result in a list
-        # rather than returning directly a dictionary
-        if isinstance(json_data, list):
-            self.hw_info = json_data[0]
-        else:
-            self.hw_info = json_data
+        self.hw_info = serialized_lshw_output()
         self.info = {}
         self.memories = []
         self.cpus = []
@@ -154,7 +157,7 @@ class Lshw:
 
     def find_memories(self, obj):
         if "children" not in obj:
-            print("not a DIMM memory.")
+            # print("not a DIMM memory.")
             return
 
         for dimm in obj["children"]:
