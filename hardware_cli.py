@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
-import click
 import json
 import sys
 
 from boagent.hardware.lshw import Lshw
+from click import command, option, ClickException
 
 
-@click.command()
-@click.option("--output-file", help="File to output the hardwate data to")
+@command()
+@option("--output-file", help="File to output the hardwate data to")
 def main(output_file):
     try:
         lshw = Lshw()
@@ -18,7 +18,7 @@ def main(output_file):
         lshw_disks = lshw.disks
     except KeyError:
         error_message = "Hardware_cli was not executed with privileges, try `sudo ./hardware_cli.py`."
-        exception = click.ClickException(error_message)
+        exception = ClickException(error_message)
         exception.show()
     else:
         hardware_data = {}
