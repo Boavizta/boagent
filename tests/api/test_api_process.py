@@ -23,6 +23,7 @@ hardware_cli = os.path.join(f"{current_dir}", "../../boagent/hardware/hardware_c
 hardware_data = os.path.join(f"{current_dir}", "../../boagent/api/hardware_data.json")
 
 
+@patch("boagent.api.api.HARDWARE_FILE_PATH", mock_hardware_data)
 class AllocateEmbeddedImpactForProcess(TestCase):
     def setUp(self):
 
@@ -48,6 +49,8 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         self, mocked_query_machine_impact_data
     ):
 
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+
         total_embedded_impacts_host = get_metrics(
             self.start_time,
             self.end_time,
@@ -57,8 +60,6 @@ class AllocateEmbeddedImpactForProcess(TestCase):
             self.lifetime,
             self.fetch_hardware,
         )
-
-        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
 
         assert "embedded_emissions" in total_embedded_impacts_host
         assert "embedded_abiotic_resources_depletion" in total_embedded_impacts_host
