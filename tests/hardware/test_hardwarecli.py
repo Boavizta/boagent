@@ -5,46 +5,22 @@ from os.path import exists
 from unittest.mock import Mock, patch
 from hardware_cli import main
 from click.testing import CliRunner
+from tests.mocks.mocks import MockLshw
 
 current_dir = path.dirname(__file__)
-mock_lshw_data = path.join(f"{current_dir}", "../mocks/sudo_lshw_data")
-with open(f"{mock_lshw_data}.json") as lshw_json:
-    data = load(lshw_json)
 
-
-class MockLshw:
-    def __init__(self):
-        self.cpus = {
-            "cpus": [
-                {
-                    "units": 1,
-                    "name": "AMD Ryzen 5 5600H with Radeon Graphics",
-                    "manufacturer": "Advanced Micro Devices [AMD]",
-                    "core_units": 6,
-                }
-            ]
-        }
-        self.memories = {
-            "rams": [
-                {"units": 1, "manufacturer": "Samsung", "capacity": 8},
-                {"units": 1, "manufacturer": "Kingston", "capacity": 16},
-            ]
-        }
-        self.disks = {
-            "disks": [
-                {
-                    "units": 1,
-                    "logicalname": "/dev/nvme0n1",
-                    "manufacturer": "samsung",
-                    "type": "ssd",
-                    "capacity": 476,
-                }
-            ],
-        }
-
+# Need to use a mock of `lshw` run without `sudo` to reproduce the error case
+# where hardware_cli is run without `sudo`.
+mock_lshw_data = path.join(f"{current_dir}", "../mocks/lshw_data.json")
+with open(mock_lshw_data) as lshw_json:
+    lshw_data = load(lshw_json)
 
 mocked_lshw = Mock()
 mocked_lshw.return_value = MockLshw()
+mocked_is_tool = Mock()
+mocked_is_tool.return_value = True
+mocked_serialized_lshw_output = Mock()
+mocked_serialized_lshw_output.return_value = lshw_data
 
 
 class HardwarecliTest(TestCase):
@@ -72,7 +48,11 @@ class HardwarecliTest(TestCase):
         assert result.output.count("ram") >= 1
         assert result.output.count("cpu") >= 1
 
-    def test_hardware_cli_returns_error_is_not_executed_with_sudo(self):
+    @patch("boagent.hardware.lshw.is_tool", mocked_is_tool)
+    @patch(
+        "boagent.hardware.lshw.serialized_lshw_output", mocked_serialized_lshw_output
+    )
+    def test_hardware_cli_returns_error_if_not_executed_with_sudo(self):
         runner = CliRunner()
         result = runner.invoke(main)
         assert (

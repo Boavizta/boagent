@@ -2,7 +2,7 @@ import os
 import json
 
 from unittest import TestCase, TestSuite, TestLoader
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from boagent.api.api import (
     build_hardware_data,
@@ -15,6 +15,7 @@ from boagent.api.api import (
     get_metrics,
 )
 from boagent.api.utils import format_prometheus_output
+from tests.mocks.mocks import MockLshw
 
 current_dir = os.path.dirname(__file__)
 mock_power_data = os.path.join(f"{current_dir}", "../mocks/power_data.json")
@@ -40,8 +41,12 @@ mock_get_metrics_verbose = os.path.join(
 hardware_cli = os.path.join(f"{current_dir}", "../../boagent/hardware/hardware_cli.py")
 hardware_data = os.path.join(f"{current_dir}", "../../boagent/api/hardware_data.json")
 
+mocked_lshw = Mock()
+mocked_lshw.return_value = MockLshw()
+
 
 @patch("boagent.api.api.HARDWARE_FILE_PATH", hardware_data)
+@patch("boagent.api.api.Lshw", mocked_lshw)
 class ReadHardwareDataTest(TestCase):
     def test_build_hardware_data(self):
 
@@ -52,9 +57,9 @@ class ReadHardwareDataTest(TestCase):
 
         build_hardware_data()
         data = read_hardware_data()
-        assert type(data["cpus"]) is list
-        assert type(data["rams"]) is list
-        assert type(data["disks"]) is list
+        assert type(data["cpus"]) is dict
+        assert type(data["rams"]) is dict
+        assert type(data["disks"]) is dict
 
     @patch("boagent.api.api.build_hardware_data")
     def test_get_hardware_data_with_fetch_hardware_false(self, mocked_build_hardware):
