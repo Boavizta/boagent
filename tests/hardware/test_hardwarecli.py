@@ -1,17 +1,14 @@
 from json import load
 from unittest import TestCase
-from os import path
 from os.path import exists
 from unittest.mock import Mock, patch
 from hardware_cli import main
 from click.testing import CliRunner
-from tests.mocks.mocks import MockLshw
+from tests.mocks.mocks import MockLshw, mock_lshw_data
 
-current_dir = path.dirname(__file__)
 
 # Need to use a mock of `lshw` run without `sudo` to reproduce the error case
 # where hardware_cli is run without `sudo`.
-mock_lshw_data = path.join(f"{current_dir}", "../mocks/lshw_data.json")
 with open(mock_lshw_data) as lshw_json:
     lshw_data = load(lshw_json)
 

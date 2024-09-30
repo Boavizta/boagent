@@ -15,31 +15,17 @@ from boagent.api.api import (
     get_metrics,
 )
 from boagent.api.utils import format_prometheus_output
-from tests.mocks.mocks import MockLshw
-
-current_dir = os.path.dirname(__file__)
-mock_power_data = os.path.join(f"{current_dir}", "../mocks/power_data.json")
-mock_hardware_data = os.path.join(f"{current_dir}", "../mocks/hardware_data.json")
-mock_boaviztapi_response_not_verbose = os.path.join(
-    f"{current_dir}", "../mocks/boaviztapi_response_not_verbose.json"
+from tests.mocks.mocks import (
+    MockLshw,
+    hardware_data,
+    mock_power_data,
+    mock_hardware_data,
+    mock_boaviztapi_response_not_verbose,
+    mock_boaviztapi_response_verbose,
+    mock_formatted_scaphandre,
+    mock_get_metrics_verbose,
+    mock_get_metrics_not_verbose,
 )
-mock_boaviztapi_response_verbose = os.path.join(
-    f"{current_dir}", "../mocks/boaviztapi_response_verbose.json"
-)
-mock_formatted_scaphandre = os.path.join(
-    f"{current_dir}", "../mocks/formatted_power_data_one_hour.json"
-)
-mock_formatted_scaphandre_with_processes = os.path.join(
-    f"{current_dir}", "../mocks/formatted_scaphandre.json"
-)
-mock_get_metrics_not_verbose = os.path.join(
-    f"{current_dir}", "../mocks/get_metrics_not_verbose.json"
-)
-mock_get_metrics_verbose = os.path.join(
-    f"{current_dir}", "../mocks/get_metrics_verbose.json"
-)
-hardware_cli = os.path.join(f"{current_dir}", "../../boagent/hardware/hardware_cli.py")
-hardware_data = os.path.join(f"{current_dir}", "../../boagent/api/hardware_data.json")
 
 mocked_lshw = Mock()
 mocked_lshw.return_value = MockLshw()

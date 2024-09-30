@@ -2,12 +2,10 @@ from unittest import TestCase
 from boagent.hardware.lshw import Lshw
 from unittest.mock import Mock, patch
 from json import load
-from os import path
 
-current_dir = path.dirname(__file__)
-mock_lshw_data = path.join(f"{current_dir}", "../mocks/sudo_lshw_data")
-mock_nvme_data = path.join(f"{current_dir}", "../mocks/nvme_data_sudo.json")
-with open(f"{mock_lshw_data}.json") as lshw_json:
+from tests.mocks.mocks import mock_sudo_lshw_data, mock_lshw_data_disks, mock_nvme_data
+
+with open(mock_sudo_lshw_data) as lshw_json:
     lshw_data = load(lshw_json)
 with open(mock_nvme_data) as nvme_json:
     nvme_data = load(nvme_json)
@@ -171,7 +169,7 @@ class LshwTest(TestCase):
     ):
         mocked_is_tool.return_value = False
 
-        with open(f"{mock_lshw_data}_disks.json", "r") as file, self.assertRaises(
+        with open(mock_lshw_data_disks, "r") as file, self.assertRaises(
             Exception
         ) as nvme_cli_exception:
             data = load(file)

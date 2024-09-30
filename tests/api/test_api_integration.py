@@ -1,5 +1,4 @@
 import json
-import os
 
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
@@ -7,8 +6,13 @@ from unittest import TestCase
 from unittest.mock import patch
 from pytest import mark
 from boagent.api.config import Settings
+from tests.mocks.mocks import (
+    mock_boaviztapi_response_not_verbose,
+    mock_get_metrics_verbose,
+    mock_get_metrics_not_verbose,
+)
 
-# Mocks for testing environment
+# Mock settings for testing environment
 settings = Settings(
     hardware_file_path="./tests/mocks/hardware_data.json",
     db_path="./tests/mocks/boagent.db",
@@ -22,22 +26,7 @@ NOW_ISO8601_MINUS_ONE_MINUTE = datetime.fromisoformat(NOW_ISO8601) - timedelta(
     minutes=1
 )
 
-current_dir = os.path.dirname(__file__)
-mock_boaviztapi_response_not_verbose = os.path.join(
-    f"{current_dir}", "../mocks/boaviztapi_response_not_verbose.json"
-)
-mock_get_metrics_not_verbose = os.path.join(
-    f"{current_dir}", "../mocks/get_metrics_not_verbose.json"
-)
-mock_get_metrics_verbose = os.path.join(
-    f"{current_dir}", "../mocks/get_metrics_verbose.json"
-)
-
 client = TestClient(app)
-
-mock_get_metrics_verbose = os.path.join(
-    f"{current_dir}", "../mocks/get_metrics_verbose.json"
-)
 
 
 class ApiEndpointsTest(TestCase):

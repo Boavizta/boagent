@@ -1,4 +1,3 @@
-import os
 import json
 from unittest import TestCase, TestSuite, TestLoader
 from unittest.mock import patch
@@ -6,21 +5,12 @@ from boagent.api.api import (
     get_metrics,
 )
 from boagent.api.process import Process, InvalidPIDException
-
-current_dir = os.path.dirname(__file__)
-mock_power_data = os.path.join(f"{current_dir}", "../mocks/power_data.json")
-mock_hardware_data = os.path.join(f"{current_dir}", "../mocks/hardware_data.json")
-mock_boaviztapi_response_not_verbose = os.path.join(
-    f"{current_dir}", "../mocks/boaviztapi_response_not_verbose.json"
+from tests.mocks.mocks import (
+    mock_hardware_data,
+    mock_boaviztapi_response_not_verbose,
+    mock_get_metrics_verbose,
+    mock_get_metrics_verbose_no_hdd,
 )
-mock_get_metrics_verbose = os.path.join(
-    f"{current_dir}", "../mocks/get_metrics_verbose.json"
-)
-mock_get_metrics_verbose_no_hdd = os.path.join(
-    f"{current_dir}", "../mocks/get_metrics_verbose_no_hdd.json"
-)
-hardware_cli = os.path.join(f"{current_dir}", "../../boagent/hardware/hardware_cli.py")
-hardware_data = os.path.join(f"{current_dir}", "../../boagent/api/hardware_data.json")
 
 
 @patch("boagent.api.api.HARDWARE_FILE_PATH", mock_hardware_data)
