@@ -29,10 +29,13 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         with open(mock_boaviztapi_response_not_verbose, "r") as boaviztapi_data:
             self.boaviztapi_data = json.load(boaviztapi_data)
 
-        with open(mock_get_metrics_verbose) as get_metrics_verbose:
+        with open(mock_get_metrics_verbose, "r") as get_metrics_verbose:
             self.get_metrics_verbose = json.load(get_metrics_verbose)
 
-        self.process = Process(mock_get_metrics_verbose, self.pid)
+        with open(mock_get_metrics_verbose_no_hdd, "r") as get_metrics_verbose_no_hdd:
+            self.get_metrics_verbose_no_hdd = json.load(get_metrics_verbose_no_hdd)
+
+        self.process = Process(self.get_metrics_verbose, self.pid)
 
     @patch("boagent.api.api.query_machine_impact_data")
     def test_get_total_embedded_impacts_for_host(
@@ -87,7 +90,7 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         )
 
         with self.assertRaises(InvalidPIDException) as context_manager:
-            self.process = Process(mock_get_metrics_verbose, 1234)
+            self.process = Process(self.get_metrics_verbose, 1234)
 
         self.assertEqual(context_manager.exception.message, expected_error_message)
 
@@ -260,7 +263,7 @@ class AllocateEmbeddedImpactForProcess(TestCase):
     def test_get_components_embedded_impact_values_with_hdd_absent_from_get_metrics(
         self,
     ):
-        self.process = Process(mock_get_metrics_verbose_no_hdd, self.pid)
+        self.process = Process(self.get_metrics_verbose_no_hdd, self.pid)
         process_embedded_impacts = self.process.embedded_impact_values
         self.assertIn("process_cpu_embedded_impact_values", process_embedded_impacts)
         self.assertIn("process_ram_embedded_impact_values", process_embedded_impacts)

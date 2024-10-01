@@ -186,7 +186,7 @@ class ApiEndpointsTest(TestCase):
 
     @patch("boagent.api.api.get_metrics")
     def test_get_process_embedded_impacts_with_success(self, mocked_get_metrics):
-        mocked_get_metrics.return_value = mock_get_metrics_verbose
+        mocked_get_metrics.return_value = self.get_metrics_verbose
         params = {
             "process_id": 3099,
             "start_time": "1717500637.2979465",
@@ -209,7 +209,7 @@ class ApiEndpointsTest(TestCase):
         self, mocked_get_metrics
     ):
 
-        mocked_get_metrics.return_value = mock_get_metrics_verbose
+        mocked_get_metrics.return_value = self.get_metrics_verbose
         params = {
             "process_id": 1234,
             "start_time": "1717500637.2979465",

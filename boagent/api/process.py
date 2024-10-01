@@ -1,30 +1,19 @@
-from json import load
 from collections import defaultdict
 from .exceptions import InvalidPIDException
 
 
 class Process:
-    def __init__(self, metrics_file_path, pid):
-        self.metrics_file_path = metrics_file_path
+    def __init__(self, metrics_data, pid):
+        self.metrics_data = metrics_data
         self.validate_pid(pid)
         self._pid = pid
         self.process_info = self.get_process_info()
-
-    @property
-    def processed_metrics(self):
-        """The metrics in JSON format parsed from the metrics file path."""
-
-        with open(self.metrics_file_path, "r") as metrics_data_file:
-            processed_metrics = load(metrics_data_file)
-        return processed_metrics
 
     def validate_pid(self, value):
 
         timestamps = [
             timestamp
-            for timestamp in self.processed_metrics["raw_data"]["power_data"][
-                "raw_data"
-            ]
+            for timestamp in self.metrics_data["raw_data"]["power_data"]["raw_data"]
         ]
         consumers = [timestamp["consumers"] for timestamp in timestamps]
         pids = set([process["pid"] for consumer in consumers for process in consumer])
@@ -46,9 +35,7 @@ class Process:
 
         timestamps = [
             timestamp
-            for timestamp in self.processed_metrics["raw_data"]["power_data"][
-                "raw_data"
-            ]
+            for timestamp in self.metrics_data["raw_data"]["power_data"]["raw_data"]
         ]
         consumers = [timestamp["consumers"] for timestamp in timestamps]
         process_info = [
@@ -71,7 +58,7 @@ class Process:
 
     def get_total_ram_in_bytes(self):
 
-        ram_data = self.processed_metrics["raw_data"]["hardware_data"]["rams"]
+        ram_data = self.metrics_data["raw_data"]["hardware_data"]["rams"]
         total_ram_in_bytes = (
             sum(ram_unit["capacity"] for ram_unit in ram_data) * 1073741824
         )
@@ -81,12 +68,12 @@ class Process:
     def get_disk_usage_in_bytes(self):
 
         disk_total_bytes = int(
-            self.processed_metrics["raw_data"]["power_data"]["raw_data"][1]["host"][
+            self.metrics_data["raw_data"]["power_data"]["raw_data"][1]["host"][
                 "components"
             ]["disks"][0]["disk_total_bytes"]
         )
         disk_available_bytes = int(
-            self.processed_metrics["raw_data"]["power_data"]["raw_data"][1]["host"][
+            self.metrics_data["raw_data"]["power_data"]["raw_data"][1]["host"][
                 "components"
             ]["disks"][0]["disk_available_bytes"]
         )
@@ -135,7 +122,7 @@ class Process:
     def get_component_embedded_impact_shares(self, queried_component, component_shares):
 
         component = f"{queried_component}-1"
-        component_impacts_data = self.processed_metrics["raw_data"]["boaviztapi_data"][
+        component_impacts_data = self.metrics_data["raw_data"]["boaviztapi_data"][
             "verbose"
         ][component]["impacts"]
         component_embedded_impact_shares = list()
