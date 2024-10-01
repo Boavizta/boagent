@@ -211,7 +211,7 @@ class Process:
 
     @property
     def embedded_impact_values(self):
-        process_embedded_impact_values = {}
+        process_embedded_impact_values = {"pid": self._pid}
         components = ["cpu", "ram", "hdd", "ssd"]
 
         for component in components:

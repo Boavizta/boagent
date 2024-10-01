@@ -255,6 +255,7 @@ class AllocateEmbeddedImpactForProcess(TestCase):
     def test_get_all_components_embedded_impact_values(self):
 
         process_embedded_impacts = self.process.embedded_impact_values
+        self.assertIn("pid", process_embedded_impacts)
         self.assertIn("process_cpu_embedded_impact_values", process_embedded_impacts)
         self.assertIn("process_ram_embedded_impact_values", process_embedded_impacts)
         self.assertIn("process_ssd_embedded_impact_values", process_embedded_impacts)
@@ -265,6 +266,7 @@ class AllocateEmbeddedImpactForProcess(TestCase):
     ):
         self.process = Process(self.get_metrics_verbose_no_hdd, self.pid)
         process_embedded_impacts = self.process.embedded_impact_values
+        self.assertIn("pid", process_embedded_impacts)
         self.assertIn("process_cpu_embedded_impact_values", process_embedded_impacts)
         self.assertIn("process_ram_embedded_impact_values", process_embedded_impacts)
         self.assertIn("process_ssd_embedded_impact_values", process_embedded_impacts)

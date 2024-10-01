@@ -199,6 +199,8 @@ class ApiEndpointsTest(TestCase):
         }
         response = client.get("/process_embedded_impacts", params=params)
         assert response.status_code == 200
+        self.assertIn("pid", response.json())
+        self.assertEqual(response.json()["pid"], 3099)
         self.assertIn("process_cpu_embedded_impact_values", response.json())
         self.assertIn("process_ram_embedded_impact_values", response.json())
         self.assertIn("process_ssd_embedded_impact_values", response.json())
