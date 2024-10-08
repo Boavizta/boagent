@@ -255,11 +255,24 @@ class AllocateEmbeddedImpactForProcess(TestCase):
     def test_get_all_components_embedded_impact_values(self):
 
         process_embedded_impacts = self.process.embedded_impact_values
+        self.assertIn("process_embedded_impacts", process_embedded_impacts)
         self.assertIn("pid", process_embedded_impacts)
-        self.assertIn("process_cpu_embedded_impact_values", process_embedded_impacts)
-        self.assertIn("process_ram_embedded_impact_values", process_embedded_impacts)
-        self.assertIn("process_ssd_embedded_impact_values", process_embedded_impacts)
-        self.assertIn("process_hdd_embedded_impact_values", process_embedded_impacts)
+        self.assertIn(
+            "process_cpu_embedded_impact_values",
+            process_embedded_impacts["process_embedded_impacts"],
+        )
+        self.assertIn(
+            "process_ram_embedded_impact_values",
+            process_embedded_impacts["process_embedded_impacts"],
+        )
+        self.assertIn(
+            "process_ssd_embedded_impact_values",
+            process_embedded_impacts["process_embedded_impacts"],
+        )
+        self.assertIn(
+            "process_hdd_embedded_impact_values",
+            process_embedded_impacts["process_embedded_impacts"],
+        )
 
     def test_get_components_embedded_impact_values_with_hdd_absent_from_get_metrics(
         self,
@@ -267,10 +280,23 @@ class AllocateEmbeddedImpactForProcess(TestCase):
         self.process = Process(self.get_metrics_verbose_no_hdd, self.pid)
         process_embedded_impacts = self.process.embedded_impact_values
         self.assertIn("pid", process_embedded_impacts)
-        self.assertIn("process_cpu_embedded_impact_values", process_embedded_impacts)
-        self.assertIn("process_ram_embedded_impact_values", process_embedded_impacts)
-        self.assertIn("process_ssd_embedded_impact_values", process_embedded_impacts)
-        self.assertNotIn("process_hdd_embedded_impact_values", process_embedded_impacts)
+        self.assertIn("process_embedded_impacts", process_embedded_impacts)
+        self.assertIn(
+            "process_cpu_embedded_impact_values",
+            process_embedded_impacts["process_embedded_impacts"],
+        )
+        self.assertIn(
+            "process_ram_embedded_impact_values",
+            process_embedded_impacts["process_embedded_impacts"],
+        )
+        self.assertIn(
+            "process_ssd_embedded_impact_values",
+            process_embedded_impacts["process_embedded_impacts"],
+        )
+        self.assertNotIn(
+            "process_hdd_embedded_impact_values",
+            process_embedded_impacts["process_embedded_impacts"],
+        )
 
 
 loader = TestLoader()

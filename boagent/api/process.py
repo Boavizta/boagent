@@ -211,7 +211,10 @@ class Process:
 
     @property
     def embedded_impact_values(self):
-        process_embedded_impact_values = {"pid": self._pid}
+        process_embedded_impact_values = {
+            "pid": self._pid,
+            "process_embedded_impacts": {},
+        }
         components = ["cpu", "ram", "hdd", "ssd"]
 
         for component in components:
@@ -219,7 +222,7 @@ class Process:
                 process_component_embedded_impact_values = (
                     self.get_component_embedded_impact_values(component)
                 )
-                process_embedded_impact_values[
+                process_embedded_impact_values["process_embedded_impacts"][
                     f"process_{component}_embedded_impact_values"
                 ] = process_component_embedded_impact_values
             except KeyError as absent_component:
