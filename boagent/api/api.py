@@ -1,7 +1,7 @@
 import json
 import time
 from typing import Dict, Any, List, Union
-from fastapi import FastAPI, Response, Body
+from fastapi import FastAPI, Response, Body, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
@@ -206,7 +206,7 @@ async def process_embedded_impacts(
     try:
         queried_process = Process(metrics_data, process_id)
     except InvalidPIDException as invalid_pid:
-        return Response(status_code=400, content=invalid_pid.message)
+        raise HTTPException(status_code=400, detail=invalid_pid.message)
     else:
         process_embedded_impact_values = queried_process.embedded_impact_values
         json_content = json.dumps(process_embedded_impact_values)

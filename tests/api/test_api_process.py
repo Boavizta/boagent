@@ -86,7 +86,7 @@ class AllocateEmbeddedImpactForProcess(TestCase):
     def test_validate_pid_with_error_if_process_id_not_in_metrics(self):
 
         expected_error_message = (
-            "Process_id 1234 has not been found in metrics data. Check the queried PID"
+            "Process_id 1234 has not been found in metrics data. Check the queried PID."
         )
 
         with self.assertRaises(InvalidPIDException) as context_manager:

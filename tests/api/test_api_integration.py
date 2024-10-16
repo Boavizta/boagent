@@ -237,8 +237,8 @@ class ApiEndpointsTest(TestCase):
         }
 
         response = client.get("/process_embedded_impacts", params=params)
-        assert response.status_code == 400
-        assert (
-            response.text
-            == "Process_id 1234 has not been found in metrics data. Check the queried PID"
+        error_message = (
+            "Process_id 1234 has not been found in metrics data. Check the queried PID."
         )
+        self.assertEqual(response.status_code, 400)
+        self.assertIs(error_message in response.text, True)
