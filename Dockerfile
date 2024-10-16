@@ -1,25 +1,21 @@
 FROM python:3.10-slim
 
-LABEL org.opencontainers.image.authors="bpetit@hubblo.org"
-
-RUN apt update && apt install gcc g++ -y
-
-RUN apt-get install -y cron sqlite3
-
-RUN useradd -ms /bin/bash boagent
-
-#USER boagent
+LABEL org.opencontainers.image.authors="open-source@boavizta.org"
+LABEL org.opencontainers.image.description="Docker image for Boagent, a local API & environmental impact monitoring tool."
+LABEL org.opencontainers.image.licenses=Apache-2.0
 
 WORKDIR /home/boagent
 
-COPY requirements.txt requirements.txt
+RUN python3 -m pip install --upgrade poetry
 
-RUN pip3 install -r requirements.txt
+RUN apt update && apt install lshw nvme-cli -y
 
-ENV PATH $PATH:/home/boagent/.local/bin
+COPY pyproject.toml .
+
+RUN poetry install
 
 COPY . .
 
 EXPOSE 8000
 
-ENTRYPOINT [ "/bin/bash", "-c", "cd boagent/api && uvicorn api:app --host 0.0.0.0" ]
+ENTRYPOINT ["poetry", "run", "uvicorn", "--reload", "boagent.api.api:app", "--host", "0.0.0.0"]

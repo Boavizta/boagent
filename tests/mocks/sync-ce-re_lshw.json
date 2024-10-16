@@ -1,0 +1,1395 @@
+{
+  "id" : "jimbei",
+  "class" : "system",
+  "claimed" : true,
+  "handle" : "DMI:0001",
+  "description" : "Sealed-case PC",
+  "product" : "X8SIL (To Be Filled By O.E.M.)",
+  "vendor" : "Supermicro",
+  "version" : "0123456789",
+  "serial" : "0123456789",
+  "width" : 64,
+  "configuration" : {
+    "boot" : "normal",
+    "chassis" : "sealed",
+    "family" : "To Be Filled By O.E.M.",
+    "sku" : "To Be Filled By O.E.M.",
+    "uuid" : "49434d53-0200-900d-2500-0d902500d161"
+  },
+  "capabilities" : {
+    "smbios-2.6" : "SMBIOS version 2.6",
+    "dmi-2.6" : "DMI version 2.6",
+    "smp" : "Symmetric Multi-Processing",
+    "vsyscall32" : "32-bit processes"
+  },
+  "children" : [    {
+      "id" : "core",
+      "class" : "bus",
+      "claimed" : true,
+      "handle" : "DMI:0002",
+      "description" : "Motherboard",
+      "product" : "X8SIL",
+      "vendor" : "Supermicro",
+      "physid" : "0",
+      "version" : "0123456789",
+      "serial" : "0123456789",
+      "slot" : "To Be Filled By O.E.M.",
+      "children" : [        {
+          "id" : "firmware",
+          "class" : "memory",
+          "claimed" : true,
+          "description" : "BIOS",
+          "vendor" : "American Megatrends Inc.",
+          "physid" : "0",
+          "version" : "1.2a",
+          "date" : "06/27/2012",
+          "units" : "bytes",
+          "size" : 65536,
+          "capacity" : 4194304,
+          "capabilities" : {
+            "isa" : "ISA bus",
+            "pci" : "PCI bus",
+            "pnp" : "Plug-and-Play",
+            "upgrade" : "BIOS EEPROM can be upgraded",
+            "shadowing" : "BIOS shadowing",
+            "escd" : "ESCD",
+            "cdboot" : "Booting from CD-ROM/DVD",
+            "bootselect" : "Selectable boot path",
+            "socketedrom" : "BIOS ROM is socketed",
+            "edd" : "Enhanced Disk Drive extensions",
+            "int13floppy1200" : "5.25\" 1.2MB floppy",
+            "int13floppy720" : "3.5\" 720KB floppy",
+            "int13floppy2880" : "3.5\" 2.88MB floppy",
+            "int5printscreen" : "Print Screen key",
+            "int9keyboard" : "i8042 keyboard controller",
+            "int14serial" : "INT14 serial line control",
+            "int17printer" : "INT17 printer control",
+            "int10video" : "INT10 CGA/Mono video",
+            "acpi" : "ACPI",
+            "usb" : "USB legacy emulation",
+            "ls120boot" : "Booting from LS-120",
+            "zipboot" : "Booting from ATAPI ZIP",
+            "biosbootspecification" : "BIOS boot specification"
+          }
+        },
+        {
+          "id" : "cpu",
+          "class" : "processor",
+          "claimed" : true,
+          "handle" : "DMI:0004",
+          "description" : "CPU",
+          "product" : "Intel(R) Core(TM) i5 CPU         750  @ 2.67GHz",
+          "vendor" : "Intel Corp.",
+          "physid" : "4",
+          "businfo" : "cpu@0",
+          "version" : "6.30.5",
+          "serial" : "To Be Filled By O.E.M.",
+          "slot" : "CPU",
+          "units" : "Hz",
+          "size" : 1314560000,
+          "capacity" : 2668000000,
+          "width" : 64,
+          "clock" : 133000000,
+          "configuration" : {
+            "cores" : "4",
+            "enabledcores" : "4",
+            "microcode" : "10",
+            "threads" : "4"
+          },
+          "capabilities" : {
+            "lm" : "64bits extensions (x86-64)",
+            "fpu" : "mathematical co-processor",
+            "fpu_exception" : "FPU exceptions reporting",
+            "wp" : true,
+            "vme" : "virtual mode extensions",
+            "de" : "debugging extensions",
+            "pse" : "page size extensions",
+            "tsc" : "time stamp counter",
+            "msr" : "model-specific registers",
+            "pae" : "4GB+ memory addressing (Physical Address Extension)",
+            "mce" : "machine check exceptions",
+            "cx8" : "compare and exchange 8-byte",
+            "apic" : "on-chip advanced programmable interrupt controller (APIC)",
+            "sep" : "fast system calls",
+            "mtrr" : "memory type range registers",
+            "pge" : "page global enable",
+            "mca" : "machine check architecture",
+            "cmov" : "conditional move instruction",
+            "pat" : "page attribute table",
+            "pse36" : "36-bit page size extensions",
+            "clflush" : true,
+            "dts" : "debug trace and EMON store MSRs",
+            "acpi" : "thermal control (ACPI)",
+            "mmx" : "multimedia extensions (MMX)",
+            "fxsr" : "fast floating point save/restore",
+            "sse" : "streaming SIMD extensions (SSE)",
+            "sse2" : "streaming SIMD extensions (SSE2)",
+            "ht" : "HyperThreading",
+            "tm" : "thermal interrupt and status",
+            "pbe" : "pending break event",
+            "syscall" : "fast system calls",
+            "nx" : "no-execute bit (NX)",
+            "rdtscp" : true,
+            "x86-64" : "64bits extensions (x86-64)",
+            "constant_tsc" : true,
+            "arch_perfmon" : true,
+            "pebs" : true,
+            "bts" : true,
+            "rep_good" : true,
+            "nopl" : true,
+            "xtopology" : true,
+            "nonstop_tsc" : true,
+            "cpuid" : true,
+            "aperfmperf" : true,
+            "pni" : true,
+            "dtes64" : true,
+            "monitor" : true,
+            "ds_cpl" : true,
+            "vmx" : true,
+            "smx" : true,
+            "est" : true,
+            "tm2" : true,
+            "ssse3" : true,
+            "cx16" : true,
+            "xtpr" : true,
+            "pdcm" : true,
+            "sse4_1" : true,
+            "sse4_2" : true,
+            "popcnt" : true,
+            "lahf_lm" : true,
+            "pti" : true,
+            "ssbd" : true,
+            "ibrs" : true,
+            "ibpb" : true,
+            "stibp" : true,
+            "tpr_shadow" : true,
+            "vnmi" : true,
+            "flexpriority" : true,
+            "ept" : true,
+            "vpid" : true,
+            "dtherm" : true,
+            "ida" : true,
+            "flush_l1d" : true,
+            "cpufreq" : "CPU Frequency scaling"
+          },
+          "children" : [            {
+              "id" : "cache:0",
+              "class" : "memory",
+              "claimed" : true,
+              "handle" : "DMI:0005",
+              "description" : "L1 cache",
+              "physid" : "5",
+              "slot" : "L1-Cache",
+              "units" : "bytes",
+              "size" : 262144,
+              "capacity" : 262144,
+              "configuration" : {
+                "level" : "1"
+              },
+              "capabilities" : {
+                "internal" : "Internal",
+                "write-through" : "Write-trough",
+                "instruction" : "Instruction cache"
+              }
+            },
+            {
+              "id" : "cache:1",
+              "class" : "memory",
+              "claimed" : true,
+              "handle" : "DMI:0006",
+              "description" : "L2 cache",
+              "physid" : "6",
+              "slot" : "L2-Cache",
+              "units" : "bytes",
+              "size" : 1048576,
+              "capacity" : 1048576,
+              "configuration" : {
+                "level" : "2"
+              },
+              "capabilities" : {
+                "internal" : "Internal",
+                "write-through" : "Write-trough",
+                "unified" : "Unified cache"
+              }
+            },
+            {
+              "id" : "cache:2",
+              "class" : "memory",
+              "claimed" : true,
+              "handle" : "DMI:0007",
+              "description" : "L3 cache",
+              "physid" : "7",
+              "slot" : "L3-Cache",
+              "units" : "bytes",
+              "size" : 8388608,
+              "capacity" : 8388608,
+              "configuration" : {
+                "level" : "3"
+              },
+              "capabilities" : {
+                "internal" : "Internal",
+                "write-back" : "Write-back",
+                "unified" : "Unified cache"
+              }
+            }]
+        },
+        {
+          "id" : "memory",
+          "class" : "memory",
+          "claimed" : true,
+          "handle" : "DMI:002C",
+          "description" : "System Memory",
+          "physid" : "2c",
+          "slot" : "System board or motherboard",
+          "units" : "bytes",
+          "size" : 17179869184,
+          "children" : [            {
+              "id" : "bank:0",
+              "class" : "memory",
+              "claimed" : true,
+              "handle" : "DMI:002E",
+              "description" : "DIMM DDR3 Synchronous 1333 MHz (0.8 ns)",
+              "product" : "NT4GC64B8HG0NF-CG",
+              "vendor" : "Nanya",
+              "physid" : "0",
+              "serial" : "1194C778",
+              "slot" : "DIMM1A",
+              "units" : "bytes",
+              "size" : 4294967296,
+              "width" : 64,
+              "clock" : 1333000000
+            },
+            {
+              "id" : "bank:1",
+              "class" : "memory",
+              "claimed" : true,
+              "handle" : "DMI:0030",
+              "description" : "DIMM DDR3 Synchronous 1333 MHz (0.8 ns)",
+              "product" : "99U5403-034.A00G",
+              "vendor" : "Kingston",
+              "physid" : "1",
+              "serial" : "369C3810",
+              "slot" : "DIMM1B",
+              "units" : "bytes",
+              "size" : 4294967296,
+              "width" : 64,
+              "clock" : 1333000000
+            },
+            {
+              "id" : "bank:2",
+              "class" : "memory",
+              "claimed" : true,
+              "handle" : "DMI:0032",
+              "description" : "DIMM DDR3 Synchronous 1333 MHz (0.8 ns)",
+              "product" : "NT4GC64B8HG0NF-CG",
+              "vendor" : "Nanya",
+              "physid" : "2",
+              "serial" : "11886939",
+              "slot" : "DIMM2A",
+              "units" : "bytes",
+              "size" : 4294967296,
+              "width" : 64,
+              "clock" : 1333000000
+            },
+            {
+              "id" : "bank:3",
+              "class" : "memory",
+              "claimed" : true,
+              "handle" : "DMI:0034",
+              "description" : "DIMM DDR3 Synchronous 1333 MHz (0.8 ns)",
+              "product" : "NT4GC64B8HG0NF-CG",
+              "vendor" : "Nanya",
+              "physid" : "3",
+              "serial" : "14945741",
+              "slot" : "DIMM2B",
+              "units" : "bytes",
+              "size" : 4294967296,
+              "width" : 64,
+              "clock" : 1333000000
+            }]
+        },
+        {
+          "id" : "pci:0",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:00",
+          "description" : "Host bridge",
+          "product" : "Core Processor DMI",
+          "vendor" : "Intel Corporation",
+          "physid" : "100",
+          "businfo" : "pci@0000:00:00.0",
+          "version" : "11",
+          "width" : 32,
+          "clock" : 33000000,
+          "children" : [            {
+              "id" : "pci:0",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCIBUS:0000:01",
+              "description" : "PCI bridge",
+              "product" : "Core Processor PCI Express Root Port 1",
+              "vendor" : "Intel Corporation",
+              "physid" : "3",
+              "businfo" : "pci@0000:00:03.0",
+              "version" : "11",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "pcieport"
+              },
+              "capabilities" : {
+                "pci" : true,
+                "msi" : "Message Signalled Interrupts",
+                "pciexpress" : "PCI Express",
+                "pm" : "Power Management",
+                "normal_decode" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "pci:1",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCIBUS:0000:02",
+              "description" : "PCI bridge",
+              "product" : "Core Processor PCI Express Root Port 3",
+              "vendor" : "Intel Corporation",
+              "physid" : "5",
+              "businfo" : "pci@0000:00:05.0",
+              "version" : "11",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "pcieport"
+              },
+              "capabilities" : {
+                "pci" : true,
+                "msi" : "Message Signalled Interrupts",
+                "pciexpress" : "PCI Express",
+                "pm" : "Power Management",
+                "normal_decode" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "generic:0",
+              "class" : "generic",
+              "handle" : "PCI:0000:00:08.0",
+              "description" : "System peripheral",
+              "product" : "Core Processor System Management Registers",
+              "vendor" : "Intel Corporation",
+              "physid" : "8",
+              "businfo" : "pci@0000:00:08.0",
+              "version" : "11",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "pciexpress" : "PCI Express",
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "generic:1",
+              "class" : "generic",
+              "handle" : "PCI:0000:00:08.1",
+              "description" : "System peripheral",
+              "product" : "Core Processor Semaphore and Scratchpad Registers",
+              "vendor" : "Intel Corporation",
+              "physid" : "8.1",
+              "businfo" : "pci@0000:00:08.1",
+              "version" : "11",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "pciexpress" : "PCI Express",
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "generic:2",
+              "class" : "generic",
+              "handle" : "PCI:0000:00:08.2",
+              "description" : "System peripheral",
+              "product" : "Core Processor System Control and Status Registers",
+              "vendor" : "Intel Corporation",
+              "physid" : "8.2",
+              "businfo" : "pci@0000:00:08.2",
+              "version" : "11",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "pciexpress" : "PCI Express",
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "generic:3",
+              "class" : "generic",
+              "handle" : "PCI:0000:00:08.3",
+              "description" : "System peripheral",
+              "product" : "Core Processor Miscellaneous Registers",
+              "vendor" : "Intel Corporation",
+              "physid" : "8.3",
+              "businfo" : "pci@0000:00:08.3",
+              "version" : "11",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "latency" : "0"
+              }
+            },
+            {
+              "id" : "generic:4",
+              "class" : "generic",
+              "handle" : "PCI:0000:00:10.0",
+              "description" : "System peripheral",
+              "product" : "Core Processor QPI Link",
+              "vendor" : "Intel Corporation",
+              "physid" : "10",
+              "businfo" : "pci@0000:00:10.0",
+              "version" : "11",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "latency" : "0"
+              }
+            },
+            {
+              "id" : "generic:5",
+              "class" : "generic",
+              "handle" : "PCI:0000:00:10.1",
+              "description" : "System peripheral",
+              "product" : "Core Processor QPI Routing and Protocol Registers",
+              "vendor" : "Intel Corporation",
+              "physid" : "10.1",
+              "businfo" : "pci@0000:00:10.1",
+              "version" : "11",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "latency" : "0"
+              }
+            },
+            {
+              "id" : "pci:2",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCIBUS:0000:03",
+              "description" : "PCI bridge",
+              "product" : "5 Series/3400 Series Chipset PCI Express Root Port 1",
+              "vendor" : "Intel Corporation",
+              "physid" : "1c",
+              "businfo" : "pci@0000:00:1c.0",
+              "version" : "05",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "pcieport"
+              },
+              "capabilities" : {
+                "pci" : true,
+                "pciexpress" : "PCI Express",
+                "msi" : "Message Signalled Interrupts",
+                "pm" : "Power Management",
+                "normal_decode" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              }
+            },
+            {
+              "id" : "pci:3",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCIBUS:0000:04",
+              "description" : "PCI bridge",
+              "product" : "5 Series/3400 Series Chipset PCI Express Root Port 5",
+              "vendor" : "Intel Corporation",
+              "physid" : "1c.4",
+              "businfo" : "pci@0000:00:1c.4",
+              "version" : "05",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "pcieport"
+              },
+              "capabilities" : {
+                "pci" : true,
+                "pciexpress" : "PCI Express",
+                "msi" : "Message Signalled Interrupts",
+                "pm" : "Power Management",
+                "normal_decode" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              },
+              "children" : [                {
+                  "id" : "network",
+                  "class" : "network",
+                  "claimed" : true,
+                  "handle" : "PCI:0000:04:00.0",
+                  "description" : "Ethernet interface",
+                  "product" : "82574L Gigabit Network Connection",
+                  "vendor" : "Intel Corporation",
+                  "physid" : "0",
+                  "businfo" : "pci@0000:04:00.0",
+                  "logicalname" : "enp4s0",
+                  "version" : "00",
+                  "serial" : "00:25:90:0d:61:d0",
+                  "units" : "bit/s",
+                  "size" : 100000000,
+                  "capacity" : 1000000000,
+                  "width" : 32,
+                  "clock" : 33000000,
+                  "configuration" : {
+                    "autonegotiation" : "on",
+                    "broadcast" : "yes",
+                    "driver" : "e1000e",
+                    "driverversion" : "5.15.0-91-generic",
+                    "duplex" : "full",
+                    "firmware" : "1.9-0",
+                    "ip" : "91.121.209.54",
+                    "latency" : "0",
+                    "link" : "yes",
+                    "multicast" : "yes",
+                    "port" : "twisted pair",
+                    "speed" : "100Mbit/s"
+                  },
+                  "capabilities" : {
+                    "pm" : "Power Management",
+                    "msi" : "Message Signalled Interrupts",
+                    "pciexpress" : "PCI Express",
+                    "msix" : "MSI-X",
+                    "bus_master" : "bus mastering",
+                    "cap_list" : "PCI capabilities listing",
+                    "ethernet" : true,
+                    "physical" : "Physical interface",
+                    "tp" : "twisted pair",
+                    "10bt" : "10Mbit/s",
+                    "10bt-fd" : "10Mbit/s (full duplex)",
+                    "100bt" : "100Mbit/s",
+                    "100bt-fd" : "100Mbit/s (full duplex)",
+                    "1000bt-fd" : "1Gbit/s (full duplex)",
+                    "autonegotiation" : "Auto-negotiation"
+                  }
+                }]
+            },
+            {
+              "id" : "pci:4",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCIBUS:0000:05",
+              "description" : "PCI bridge",
+              "product" : "5 Series/3400 Series Chipset PCI Express Root Port 6",
+              "vendor" : "Intel Corporation",
+              "physid" : "1c.5",
+              "businfo" : "pci@0000:00:1c.5",
+              "version" : "05",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "pcieport"
+              },
+              "capabilities" : {
+                "pci" : true,
+                "pciexpress" : "PCI Express",
+                "msi" : "Message Signalled Interrupts",
+                "pm" : "Power Management",
+                "normal_decode" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              },
+              "children" : [                {
+                  "id" : "network",
+                  "class" : "network",
+                  "disabled" : true,
+                  "claimed" : true,
+                  "handle" : "PCI:0000:05:00.0",
+                  "description" : "Ethernet interface",
+                  "product" : "82574L Gigabit Network Connection",
+                  "vendor" : "Intel Corporation",
+                  "physid" : "0",
+                  "businfo" : "pci@0000:05:00.0",
+                  "logicalname" : "enp5s0",
+                  "version" : "00",
+                  "serial" : "00:25:90:0d:61:d1",
+                  "units" : "bit/s",
+                  "capacity" : 1000000000,
+                  "width" : 32,
+                  "clock" : 33000000,
+                  "configuration" : {
+                    "autonegotiation" : "on",
+                    "broadcast" : "yes",
+                    "driver" : "e1000e",
+                    "driverversion" : "5.15.0-91-generic",
+                    "firmware" : "1.9-0",
+                    "latency" : "0",
+                    "link" : "no",
+                    "multicast" : "yes",
+                    "port" : "twisted pair"
+                  },
+                  "capabilities" : {
+                    "pm" : "Power Management",
+                    "msi" : "Message Signalled Interrupts",
+                    "pciexpress" : "PCI Express",
+                    "msix" : "MSI-X",
+                    "bus_master" : "bus mastering",
+                    "cap_list" : "PCI capabilities listing",
+                    "ethernet" : true,
+                    "physical" : "Physical interface",
+                    "tp" : "twisted pair",
+                    "10bt" : "10Mbit/s",
+                    "10bt-fd" : "10Mbit/s (full duplex)",
+                    "100bt" : "100Mbit/s",
+                    "100bt-fd" : "100Mbit/s (full duplex)",
+                    "1000bt-fd" : "1Gbit/s (full duplex)",
+                    "autonegotiation" : "Auto-negotiation"
+                  }
+                }]
+            },
+            {
+              "id" : "usb",
+              "class" : "bus",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:1d.0",
+              "description" : "USB controller",
+              "product" : "5 Series/3400 Series Chipset USB2 Enhanced Host Controller",
+              "vendor" : "Intel Corporation",
+              "physid" : "1d",
+              "businfo" : "pci@0000:00:1d.0",
+              "version" : "05",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "ehci-pci",
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "pm" : "Power Management",
+                "debug" : "Debug port",
+                "ehci" : "Enhanced Host Controller Interface (USB2)",
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              },
+              "children" : [                {
+                  "id" : "usbhost",
+                  "class" : "bus",
+                  "claimed" : true,
+                  "handle" : "USB:1:1",
+                  "product" : "EHCI Host Controller",
+                  "vendor" : "Linux 5.15.0-91-generic ehci_hcd",
+                  "physid" : "1",
+                  "businfo" : "usb@1",
+                  "logicalname" : "usb1",
+                  "version" : "5.15",
+                  "configuration" : {
+                    "driver" : "hub",
+                    "slots" : "2",
+                    "speed" : "480Mbit/s"
+                  },
+                  "capabilities" : {
+                    "usb-2.00" : "USB 2.0"
+                  },
+                  "children" : [                    {
+                      "id" : "usb",
+                      "class" : "bus",
+                      "claimed" : true,
+                      "handle" : "USB:1:2",
+                      "description" : "USB hub",
+                      "product" : "Integrated Rate Matching Hub",
+                      "vendor" : "Intel Corp.",
+                      "physid" : "1",
+                      "businfo" : "usb@1:1",
+                      "version" : "0.00",
+                      "configuration" : {
+                        "driver" : "hub",
+                        "slots" : "8",
+                        "speed" : "480Mbit/s"
+                      },
+                      "capabilities" : {
+                        "usb-2.00" : "USB 2.0"
+                      }
+                    }]
+                }]
+            },
+            {
+              "id" : "pci:5",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCIBUS:0000:06",
+              "description" : "PCI bridge",
+              "product" : "82801 PCI Bridge",
+              "vendor" : "Intel Corporation",
+              "physid" : "1e",
+              "businfo" : "pci@0000:00:1e.0",
+              "version" : "a5",
+              "width" : 32,
+              "clock" : 33000000,
+              "capabilities" : {
+                "pci" : true,
+                "subtractive_decode" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              },
+              "children" : [                {
+                  "id" : "display",
+                  "class" : "display",
+                  "claimed" : true,
+                  "handle" : "PCI:0000:06:03.0",
+                  "description" : "VGA compatible controller",
+                  "product" : "MGA G200eW WPCM450",
+                  "vendor" : "Matrox Electronics Systems Ltd.",
+                  "physid" : "3",
+                  "businfo" : "pci@0000:06:03.0",
+                  "logicalname" : "/dev/fb0",
+                  "version" : "0a",
+                  "width" : 32,
+                  "clock" : 33000000,
+                  "configuration" : {
+                    "depth" : "32",
+                    "driver" : "mgag200",
+                    "latency" : "64",
+                    "maxlatency" : "32",
+                    "mingnt" : "16",
+                    "resolution" : "1024,768"
+                  },
+                  "capabilities" : {
+                    "pm" : "Power Management",
+                    "vga_controller" : true,
+                    "bus_master" : "bus mastering",
+                    "cap_list" : "PCI capabilities listing",
+                    "rom" : "extension ROM",
+                    "fb" : "framebuffer"
+                  }
+                }]
+            },
+            {
+              "id" : "isa",
+              "class" : "bridge",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:1f.0",
+              "description" : "ISA bridge",
+              "product" : "3400 Series Chipset LPC Interface Controller",
+              "vendor" : "Intel Corporation",
+              "physid" : "1f",
+              "businfo" : "pci@0000:00:1f.0",
+              "version" : "05",
+              "width" : 32,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "lpc_ich",
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "isa" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing"
+              },
+              "children" : [                {
+                  "id" : "pnp00:00",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c01",
+                  "physid" : "0",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:01",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0b00",
+                  "physid" : "1",
+                  "configuration" : {
+                    "driver" : "rtc_cmos"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:02",
+                  "class" : "communication",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0501",
+                  "physid" : "2",
+                  "configuration" : {
+                    "driver" : "serial"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:03",
+                  "class" : "communication",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0501",
+                  "physid" : "3",
+                  "configuration" : {
+                    "driver" : "serial"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:04",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "4",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:05",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "5",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:06",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "6",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:07",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "7",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:08",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c02",
+                  "physid" : "8",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                },
+                {
+                  "id" : "pnp00:09",
+                  "class" : "system",
+                  "claimed" : true,
+                  "product" : "PnP device PNP0c01",
+                  "physid" : "9",
+                  "configuration" : {
+                    "driver" : "system"
+                  },
+                  "capabilities" : {
+                    "pnp" : true
+                  }
+                }]
+            },
+            {
+              "id" : "sata",
+              "class" : "storage",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:1f.2",
+              "description" : "SATA controller",
+              "product" : "5 Series/3400 Series Chipset 4 port SATA AHCI Controller",
+              "vendor" : "Intel Corporation",
+              "physid" : "1f.2",
+              "businfo" : "pci@0000:00:1f.2",
+              "logicalname" : "scsi0",
+              "version" : "05",
+              "width" : 32,
+              "clock" : 66000000,
+              "configuration" : {
+                "driver" : "ahci",
+                "latency" : "0"
+              },
+              "capabilities" : {
+                "sata" : true,
+                "msi" : "Message Signalled Interrupts",
+                "pm" : "Power Management",
+                "ahci_1.0" : true,
+                "bus_master" : "bus mastering",
+                "cap_list" : "PCI capabilities listing",
+                "emulated" : "Emulated device"
+              },
+              "children" : [                {
+                  "id" : "disk",
+                  "class" : "disk",
+                  "claimed" : true,
+                  "handle" : "GUID:e28a896c-74dc-4063-a4d1-91681dcecf2c",
+                  "description" : "ATA Disk",
+                  "product" : "HGST HUS724020AL",
+                  "physid" : "0.0.0",
+                  "businfo" : "scsi@0:0.0.0",
+                  "logicalname" : "/dev/sda",
+                  "dev" : "8:0",
+                  "version" : "ABY0",
+                  "serial" : "PN1134P6K12EDW",
+                  "units" : "bytes",
+                  "size" : 2000398934016,
+                  "configuration" : {
+                    "ansiversion" : "5",
+                    "guid" : "e28a896c-74dc-4063-a4d1-91681dcecf2c",
+                    "logicalsectorsize" : "512",
+                    "sectorsize" : "512"
+                  },
+                  "capabilities" : {
+                    "gpt-1.00" : "GUID Partition Table version 1.00",
+                    "partitioned" : "Partitioned disk",
+                    "partitioned:gpt" : "GUID partition table"
+                  },
+                  "children" : [                    {
+                      "id" : "volume:0",
+                      "class" : "volume",
+                      "claimed" : true,
+                      "handle" : "GUID:42ff3370-fd34-4b61-b1c9-52da58c0338d",
+                      "description" : "BIOS Boot partition",
+                      "vendor" : "EFI",
+                      "physid" : "1",
+                      "businfo" : "scsi@0:0.0.0,1",
+                      "logicalname" : "/dev/sda1",
+                      "dev" : "8:1",
+                      "serial" : "42ff3370-fd34-4b61-b1c9-52da58c0338d",
+                      "capacity" : 1028096,
+                      "configuration" : {
+                        "name" : "bios_grub-sda"
+                      },
+                      "capabilities" : {
+                        "nofs" : "No filesystem"
+                      }
+                    },
+                    {
+                      "id" : "volume:1",
+                      "class" : "volume",
+                      "claimed" : true,
+                      "handle" : "GUID:d9918f23-f51e-4374-8772-3a30bfcc9948",
+                      "description" : "EXT4 volume",
+                      "vendor" : "Linux",
+                      "physid" : "2",
+                      "businfo" : "scsi@0:0.0.0,2",
+                      "logicalname" : ["/dev/sda2", "/boot"],
+                      "dev" : "8:2",
+                      "version" : "1.0",
+                      "serial" : "aa195782-db85-436f-b272-1d56e72ea0fc",
+                      "size" : 535822336,
+                      "configuration" : {
+                        "created" : "2019-01-24 23:01:40",
+                        "filesystem" : "ext4",
+                        "label" : "/boot",
+                        "lastmountpoint" : "/boot",
+                        "modified" : "2024-01-04 16:31:11",
+                        "mount.fstype" : "ext4",
+                        "mount.options" : "rw,relatime,errors=remount-ro",
+                        "mounted" : "2024-01-04 16:31:11",
+                        "name" : "primary",
+                        "state" : "mounted"
+                      },
+                      "capabilities" : {
+                        "journaled" : true,
+                        "extended_attributes" : "Extended Attributes",
+                        "huge_files" : "16TB+ files",
+                        "dir_nlink" : "directories with 65000+ subdirs",
+                        "recover" : "needs recovery",
+                        "extents" : "extent-based allocation",
+                        "ext4" : true,
+                        "ext2" : "EXT2/EXT3",
+                        "initialized" : "initialized volume"
+                      }
+                    },
+                    {
+                      "id" : "volume:2",
+                      "class" : "volume",
+                      "claimed" : true,
+                      "handle" : "GUID:140f06cf-0335-44e9-b3fd-b8190224265d",
+                      "description" : "Linux swap volume",
+                      "vendor" : "Linux",
+                      "physid" : "3",
+                      "businfo" : "scsi@0:0.0.0,3",
+                      "logicalname" : "/dev/sda3",
+                      "dev" : "8:3",
+                      "version" : "1",
+                      "serial" : "309f7768-e3ef-44f6-8bb5-d0049b6c9a07",
+                      "size" : 535691520,
+                      "capacity" : 535821824,
+                      "configuration" : {
+                        "filesystem" : "swap",
+                        "label" : "swap-sda3",
+                        "name" : "primary",
+                        "pagesize" : "4095"
+                      },
+                      "capabilities" : {
+                        "nofs" : "No filesystem",
+                        "swap" : "Linux swap",
+                        "initialized" : "initialized volume"
+                      }
+                    },
+                    {
+                      "id" : "volume:3",
+                      "class" : "volume",
+                      "claimed" : true,
+                      "handle" : "GUID:18023466-1b7d-439b-bdd9-3e06a8fb4f63",
+                      "description" : "EXT4 volume",
+                      "vendor" : "Linux",
+                      "physid" : "4",
+                      "businfo" : "scsi@0:0.0.0,4",
+                      "logicalname" : ["/dev/sda4", "/"],
+                      "dev" : "8:4",
+                      "version" : "1.0",
+                      "serial" : "bd7bcedf-e69b-4fcb-8679-824ce4333dba",
+                      "size" : 1272657739776,
+                      "configuration" : {
+                        "created" : "2019-01-24 23:01:33",
+                        "filesystem" : "ext4",
+                        "label" : "/",
+                        "lastmountpoint" : "/",
+                        "modified" : "2024-01-04 16:30:47",
+                        "mount.fstype" : "ext4",
+                        "mount.options" : "rw,relatime,errors=remount-ro",
+                        "mounted" : "2024-01-04 16:30:58",
+                        "name" : "primary",
+                        "state" : "mounted"
+                      },
+                      "capabilities" : {
+                        "journaled" : true,
+                        "extended_attributes" : "Extended Attributes",
+                        "large_files" : "4GB+ files",
+                        "huge_files" : "16TB+ files",
+                        "dir_nlink" : "directories with 65000+ subdirs",
+                        "recover" : "needs recovery",
+                        "extents" : "extent-based allocation",
+                        "ext4" : true,
+                        "ext2" : "EXT2/EXT3",
+                        "initialized" : "initialized volume"
+                      }
+                    },
+                    {
+                      "id" : "volume:4",
+                      "class" : "volume",
+                      "claimed" : true,
+                      "handle" : "GUID:98851bad-b3c8-4271-a39f-4668b8e109e8",
+                      "description" : "LVM Physical Volume",
+                      "vendor" : "Linux",
+                      "physid" : "5",
+                      "businfo" : "scsi@0:0.0.0,5",
+                      "logicalname" : "/dev/sda5",
+                      "dev" : "8:5",
+                      "serial" : "lXXkmE-4tYr-DLgZ-L7fp-iCOG-F8fO-kxWRZa",
+                      "size" : 726661070848,
+                      "configuration" : {
+                        "name" : "logical"
+                      },
+                      "capabilities" : {
+                        "multi" : "Multi-volumes",
+                        "lvm2" : true
+                      }
+                    }]
+                }]
+            },
+            {
+              "id" : "serial",
+              "class" : "bus",
+              "claimed" : true,
+              "handle" : "PCI:0000:00:1f.3",
+              "description" : "SMBus",
+              "product" : "5 Series/3400 Series Chipset SMBus Controller",
+              "vendor" : "Intel Corporation",
+              "physid" : "1f.3",
+              "businfo" : "pci@0000:00:1f.3",
+              "version" : "05",
+              "width" : 64,
+              "clock" : 33000000,
+              "configuration" : {
+                "driver" : "i801_smbus",
+                "latency" : "0"
+              }
+            }]
+        },
+        {
+          "id" : "pci:1",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor QuickPath Architecture Generic Non-Core Registers",
+          "vendor" : "Intel Corporation",
+          "physid" : "101",
+          "businfo" : "pci@0000:ff:00.0",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:2",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor QuickPath Architecture System Address Decoder",
+          "vendor" : "Intel Corporation",
+          "physid" : "102",
+          "businfo" : "pci@0000:ff:00.1",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:3",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor QPI Link 0",
+          "vendor" : "Intel Corporation",
+          "physid" : "103",
+          "businfo" : "pci@0000:ff:02.0",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000,
+          "configuration" : {
+            "driver" : "i7core_edac"
+          }
+        },
+        {
+          "id" : "pci:4",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor QPI Physical 0",
+          "vendor" : "Intel Corporation",
+          "physid" : "104",
+          "businfo" : "pci@0000:ff:02.1",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:5",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor Integrated Memory Controller",
+          "vendor" : "Intel Corporation",
+          "physid" : "105",
+          "businfo" : "pci@0000:ff:03.0",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:6",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor Integrated Memory Controller Target Address Decoder",
+          "vendor" : "Intel Corporation",
+          "physid" : "106",
+          "businfo" : "pci@0000:ff:03.1",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:7",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor Integrated Memory Controller Test Registers",
+          "vendor" : "Intel Corporation",
+          "physid" : "107",
+          "businfo" : "pci@0000:ff:03.4",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:8",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor Integrated Memory Controller Channel 0 Control Registers",
+          "vendor" : "Intel Corporation",
+          "physid" : "108",
+          "businfo" : "pci@0000:ff:04.0",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:9",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor Integrated Memory Controller Channel 0 Address Registers",
+          "vendor" : "Intel Corporation",
+          "physid" : "109",
+          "businfo" : "pci@0000:ff:04.1",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:10",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor Integrated Memory Controller Channel 0 Rank Registers",
+          "vendor" : "Intel Corporation",
+          "physid" : "10a",
+          "businfo" : "pci@0000:ff:04.2",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:11",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor Integrated Memory Controller Channel 0 Thermal Control Registers",
+          "vendor" : "Intel Corporation",
+          "physid" : "10b",
+          "businfo" : "pci@0000:ff:04.3",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:12",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor Integrated Memory Controller Channel 1 Control Registers",
+          "vendor" : "Intel Corporation",
+          "physid" : "10c",
+          "businfo" : "pci@0000:ff:05.0",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:13",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor Integrated Memory Controller Channel 1 Address Registers",
+          "vendor" : "Intel Corporation",
+          "physid" : "10d",
+          "businfo" : "pci@0000:ff:05.1",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:14",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor Integrated Memory Controller Channel 1 Rank Registers",
+          "vendor" : "Intel Corporation",
+          "physid" : "10e",
+          "businfo" : "pci@0000:ff:05.2",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        },
+        {
+          "id" : "pci:15",
+          "class" : "bridge",
+          "claimed" : true,
+          "handle" : "PCIBUS:0000:ff",
+          "description" : "Host bridge",
+          "product" : "Core Processor Integrated Memory Controller Channel 1 Thermal Control Registers",
+          "vendor" : "Intel Corporation",
+          "physid" : "10f",
+          "businfo" : "pci@0000:ff:05.3",
+          "version" : "04",
+          "width" : 32,
+          "clock" : 33000000
+        }]
+    },
+    {
+      "id" : "power",
+      "class" : "power",
+      "description" : "To Be Filled By O.E.M.",
+      "product" : "To Be Filled By O.E.M.",
+      "vendor" : "To Be Filled By O.E.M.",
+      "physid" : "1",
+      "version" : "To Be Filled By O.E.M.",
+      "serial" : "To Be Filled By O.E.M.",
+      "units" : "mWh",
+      "capacity" : 32768
+    },
+    {
+      "id" : "input:0",
+      "class" : "input",
+      "claimed" : true,
+      "product" : "Power Button",
+      "physid" : "2",
+      "logicalname" : ["input0", "/dev/input/event0"],
+      "capabilities" : {
+        "platform" : true
+      }
+    },
+    {
+      "id" : "input:1",
+      "class" : "input",
+      "claimed" : true,
+      "product" : "Power Button",
+      "physid" : "3",
+      "logicalname" : ["input1", "/dev/input/event1"],
+      "capabilities" : {
+        "platform" : true
+      }
+    }]
+}

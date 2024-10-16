@@ -1,0 +1,17 @@
+{
+  "Devices" : [
+    {
+      "NameSpace" : 1,
+      "DevicePath" : "/dev/nvme0n1",
+      "Firmware" : "        ",
+      "Index" : 0,
+      "ModelNumber" : "                                        ",
+      "ProductName" : "Non-Volatile memory controller: Toshiba Corporation XG6 NVMe SSD Controller Satellite Pro",
+      "SerialNumber" : "                    ",
+      "UsedBytes" : 0,
+      "MaximumLBA" : 0,
+      "PhysicalSize" : 0,
+      "SectorSize" : 1
+    }
+  ]
+}
