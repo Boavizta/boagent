@@ -24,8 +24,11 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: Install poetry
+        run: python -m pip install --upgrade poetry wheel
+
       - name: Build  docker image
-        run: docker build . --tag ghcr.io/boavizta/boagent:$(python3 setup.py --version)
+        run: docker build . --tag ghcr.io/boavizta/boagent:$(poetry version -s)
 
       - name: Push docker image
-        run: docker push ghcr.io/boavizta/boagent:$(python3 setup.py --version)
+        run: docker push ghcr.io/boavizta/boagent:$(poetry version -s)
