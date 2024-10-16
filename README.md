@@ -42,7 +42,7 @@ poetry run uvicorn --reload boagent.api.api:app
 
 ### Run in a docker container
 
-You could pull the [image](https://github.com/Boavizta/boagent/pkgs/container/boagent) with `docker pull ghcr.io/boavizta/boagent:latest`.
+You could pull the [image](https://github.com/Boavizta/boagent/pkgs/container/boagent) with `docker pull ghcr.io/boavizta/boagent:0.1.0`.
 
 ### Run in docker-compose (with all the requirements)
 
@@ -65,7 +65,7 @@ At the moment, it will output the formatted data for CPU, RAM and storage device
 ## Linux
 
 Boagent parses output from `lshw` (a tool listing hardware components and characteristics) and `nvme-cli` (a tool listing information on SSD storage
-devices available through NVME interfaces). To get all actually parsed information (and for future developments), Boagent needs those two programs and toexecute them with root privileges.
+devices available through NVME interfaces). To get all actually parsed information (and for future developments), Boagent needs those two programs and to execute them with root privileges.
 
 ### BoaviztAPI
 
@@ -115,6 +115,8 @@ hardware components on a running computer. The code for this `Lshw` class is an 
 will run as privileged and will be able to receive the needed hardware data. At the moment, only data for the CPU, RAM and storage (either HDD or SSD) are parsed and sent to BoaviztAPI
 in order to calculate impacts.
 
+Another endpoint, `process_embedded_impacts`, allows to calculate the embedded impacts of a process running on the host, in relation to the host components (CPU, RAM and storage). It will give, for all the components, the average, maximum and minimum values between two timestamps for three environmental impact factors : Global Warming Potential (in KgCO2e), Abiotic Depletion Potential (in KgSbeq) and Primary Energy (in microjoules). To get these informations, a Linux Process ID has to be provided.
+
 ## Deeper explanations
 
 ### Environmental metrics
@@ -125,7 +127,7 @@ This way, it is intended to evaluate the impacts on all life cycle phases (extra
 
 Here are the impacts considered so far :
 
-- Green House Gaz emissions / Global Warming Potential (see GHG protocol as a reference)
+- Green House Gas emissions / Global Warming Potential (see GHG protocol as a reference)
     - resources extraction (LCA) / scope 3 (GHG protocol) ✔️
     - use (LCA) / scope 2 (GHG protocol) ✔️
     - manufacturing (LCA) / scope 3 (GHG protocol) ✔️
