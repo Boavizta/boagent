@@ -1,6 +1,8 @@
 FROM python:3.10-slim
 
-LABEL org.opencontainers.image.authors="bpetit@hubblo.org"
+LABEL org.opencontainers.image.authors="open-source@boavizta.org"
+LABEL org.opencontainers.image.description="Docker image for Boagent, a local API & environmental impact monitoring tool."
+LABEL org.opencontainers.image.licenses=Apache-2.0
 
 WORKDIR /home/boagent
 
