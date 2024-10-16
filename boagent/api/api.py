@@ -174,7 +174,7 @@ async def query_with_time_workload(
     )
 
 
-@app.get("/process_embedded_impacts")
+@app.get("/process_embedded_impacts", tags=["process"])
 async def process_embedded_impacts(
     process_id: int = 0,
     start_time: str = "0.0",
