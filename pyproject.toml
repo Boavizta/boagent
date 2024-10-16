@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "boagent"
-version = "0.9.0"
+version = "0.1.0"
 description = "Local API to collect and compute data on used device and running applications to give insight on their environmental impacts."
 authors = ["Boavizta <open-source@boavizta.org>"]
 license = "Apache-2.0"
