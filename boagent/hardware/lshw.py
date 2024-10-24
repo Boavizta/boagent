@@ -129,24 +129,25 @@ class Lshw:
                         "type": self.get_disk_type(device["logicalname"]),
                     }
                     self.disks.append(d)
-        if "nvme" in obj["configuration"]["driver"]:
-            if not is_tool("nvme"):
-                raise Exception("nvme-cli >= 1.0 does not seem to be installed")
-            try:
-                nvme = serialized_nvme_output()
-                for device in nvme["Devices"]:
-                    d = {
-                        "units": +1,
-                        "logicalname": device["DevicePath"],
-                        "manufacturer": self.check_disk_vendor(
-                            device["ModelNumber"]
-                        ).lower(),
-                        "type": "ssd",
-                        "capacity": device["PhysicalSize"] // 1073741824,
-                    }
-                    self.disks.append(d)
-            except Exception:
-                pass
+        if "configuration" in obj:
+            if "nvme" in obj["configuration"]["driver"]:
+                if not is_tool("nvme"):
+                    raise Exception("nvme-cli >= 1.0 does not seem to be installed")
+                try:
+                    nvme = serialized_nvme_output()
+                    for device in nvme["Devices"]:
+                        d = {
+                            "units": +1,
+                            "logicalname": device["DevicePath"],
+                            "manufacturer": self.check_disk_vendor(
+                                device["ModelNumber"]
+                            ).lower(),
+                            "type": "ssd",
+                            "capacity": device["PhysicalSize"] // 1073741824,
+                        }
+                        self.disks.append(d)
+                except Exception:
+                    pass
 
     def find_cpus(self, obj):
         if "product" in obj:

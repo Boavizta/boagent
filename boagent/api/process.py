@@ -67,16 +67,27 @@ class Process:
 
     def get_disk_usage_in_bytes(self):
 
-        disk_total_bytes = int(
-            self.metrics_data["raw_data"]["power_data"]["raw_data"][1]["host"][
-                "components"
-            ]["disks"][0]["disk_total_bytes"]
-        )
-        disk_available_bytes = int(
-            self.metrics_data["raw_data"]["power_data"]["raw_data"][1]["host"][
-                "components"
-            ]["disks"][0]["disk_available_bytes"]
-        )
+        # Data from Scaphandre can be empty on first returned element in the array
+        try:
+            key_for_disk_total_bytes = self.metrics_data["raw_data"]["power_data"][
+                "raw_data"
+            ][0]["host"]["components"]["disks"][0]["disk_total_bytes"]
+        except IndexError:
+            key_for_disk_total_bytes = self.metrics_data["raw_data"]["power_data"][
+                "raw_data"
+            ][1]["host"]["components"]["disks"][0]["disk_total_bytes"]
+
+        try:
+            key_for_disk_available_bytes = self.metrics_data["raw_data"]["power_data"][
+                "raw_data"
+            ][0]["host"]["components"]["disks"][0]["disk_available_bytes"]
+        except IndexError:
+            key_for_disk_available_bytes = self.metrics_data["raw_data"]["power_data"][
+                "raw_data"
+            ][1]["host"]["components"]["disks"][0]["disk_available_bytes"]
+
+        disk_total_bytes = int(key_for_disk_total_bytes)
+        disk_available_bytes = int(key_for_disk_available_bytes)
         disk_usage_in_bytes = disk_total_bytes - disk_available_bytes
         return disk_usage_in_bytes
 
