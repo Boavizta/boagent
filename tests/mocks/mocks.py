@@ -63,3 +63,17 @@ class MockLshw:
                 }
             ],
         }
+
+
+class MockWin32:
+    def __init__(self):
+        self.cpus = {
+            "cpus": [
+                {
+                    "units": 1,
+                    "name": "AMD Ryzen 5 5600H with Radeon Graphics",
+                    "manufacturer": "Advanced Micro Devices [AMD]",
+                    "core_units": 6,
+                }
+            ]
+        }
