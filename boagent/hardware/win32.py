@@ -31,6 +31,7 @@ class Hardware:
     def __init__(self) -> None:
         self.cpus = []
         self.memories = []
+        self.disks = []
 
     def find_cpus(self) -> dict:
         cpus = {"cpus": []}
@@ -66,3 +67,14 @@ class Hardware:
             memories["rams"].append(ram)
 
         return memories
+
+    def find_storage(self) -> dict:
+        disks = {"disks": []}
+        storage = get_win32_instances(Win32_WMI_Class.DRIVE)
+        total_units = len(storage)
+        for disk in storage:
+            disk_manufacturer = get_property(disk, "Manufacturer")
+            disk = {"units": total_units, "manufacturer": disk_manufacturer}
+            disks["disks"].append(disk)
+
+        return disks
