@@ -11,9 +11,19 @@ Win32_WMI_Class = Enum(
     ],
 )
 
+Win32_WMI_Class_Property = Enum(
+    "Win32_WMI_Class_Property",
+    [
+        ("NAME", "Name"),
+        ("MANUFACTURER", "Manufacturer"),
+        ("CORE_NUMBER", "NumberOfCores"),
+        ("CAPACITY", "Capacity"),
+    ],
+)
 
-def get_property(com_object, field: str) -> str | int:
-    property = com_object.Properties_(field).Value
+
+def get_property(com_object, field: Win32_WMI_Class_Property) -> str | int:
+    property = com_object.Properties_(field.value).Value
     return property
 
 
@@ -38,9 +48,13 @@ class Hardware:
         processors = get_win32_instances(Win32_WMI_Class.PROCESSOR)
         total_units = len(processors)
         for processor in processors:
-            cpu_name = get_property(processor, "Name")
-            cpu_manufacturer = get_property(processor, "Manufacturer")
-            cpu_core_units = get_property(processor, "NumberOfCores")
+            cpu_name = get_property(processor, Win32_WMI_Class_Property.NAME)
+            cpu_manufacturer = get_property(
+                processor, Win32_WMI_Class_Property.MANUFACTURER
+            )
+            cpu_core_units = get_property(
+                processor, Win32_WMI_Class_Property.CORE_NUMBER
+            )
             cpu = {
                 "units": total_units,
                 "name": cpu_name,
@@ -56,8 +70,8 @@ class Hardware:
         rams = get_win32_instances(Win32_WMI_Class.MEMORY)
         total_units = len(rams)
         for ram in rams:
-            ram_manufacturer = get_property(ram, "Manufacturer")
-            ram_capacity = get_property(ram, "Capacity")
+            ram_manufacturer = get_property(ram, Win32_WMI_Class_Property.MANUFACTURER)
+            ram_capacity = get_property(ram, Win32_WMI_Class_Property.CAPACITY)
             capacity_converted_to_gigabytes = convert_to_gigabytes(ram_capacity)
             ram = {
                 "units": total_units,
