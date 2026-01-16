@@ -15,6 +15,7 @@ mock_win32_processor_core_units = 6
 mock_win32_memory_manufacturer = "Samsung"
 mock_win32_memory_capacity = 8589934592
 mock_win32_disk_manufacturer = "samsung"
+mock_win32_disk_size = 999653638144
 
 
 class HardwareTest(TestCase):
@@ -121,7 +122,8 @@ class HardwareTest(TestCase):
     @patch("boagent.hardware.win32.get_property")
     def test_find_storage_capacity(self, mocked_get_property, mocked_win32_instances):
         mocked_win32_instances.return_value = [1]
-        mocked_get_property.return_value = mock_win32_disk_manufacturer
+        mocked_get_property.return_value = mock_win32_disk_size
         storage = self.hardware.find_storage()
-        storage_manufacturer = storage["disks"][0]["manufacturer"]
-        assert storage_manufacturer == mock_win32_disk_manufacturer
+        storage_capacity = storage["disks"][0]["capacity"]
+        expected_capacity = 931
+        assert storage_capacity == expected_capacity

@@ -1,6 +1,7 @@
 import win32com.client
 from enum import Enum
 
+NUMBER_OF_BYTES_IN_A_GIGABYTE = 1073741824
 Win32_WMI_Class = Enum(
     "Win32_WMI_Class",
     [
@@ -87,8 +88,16 @@ class Hardware:
         storage = get_win32_instances(Win32_WMI_Class.DRIVE)
         total_units = len(storage)
         for disk in storage:
-            disk_manufacturer = get_property(disk, "Manufacturer")
-            disk = {"units": total_units, "manufacturer": disk_manufacturer}
+            disk_manufacturer = get_property(
+                disk, Win32_WMI_Class_Property.MANUFACTURER
+            )
+            disk_capacity = get_property(disk, Win32_WMI_Class_Property.CAPACITY)
+            converted_to_gigabytes = disk_capacity // NUMBER_OF_BYTES_IN_A_GIGABYTE
+            disk = {
+                "units": total_units,
+                "manufacturer": disk_manufacturer,
+                "capacity": converted_to_gigabytes,
+            }
             disks["disks"].append(disk)
 
         return disks
