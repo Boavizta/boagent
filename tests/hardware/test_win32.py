@@ -7,7 +7,7 @@ if os.name == "posix":
     sys.modules["win32com"] = Mock()
     sys.modules["win32com.client"] = Mock()
 
-from boagent.hardware.win32 import Hardware
+from boagent.hardware.win32 import convert_media_type, Hardware
 
 mock_win32_processor_name = "AMD Ryzen 5 5600H with Radeon Graphics"
 mock_win32_processor_manufacturer = "Advanced Micro Devices [AMD]"
@@ -16,6 +16,8 @@ mock_win32_memory_manufacturer = "Samsung"
 mock_win32_memory_capacity = 8589934592
 mock_win32_disk_manufacturer = "samsung"
 mock_win32_disk_size = 999653638144
+mock_win32_disk_type = 4
+mock_win32_disk_logical_name = "C:"
 
 
 class HardwareTest(TestCase):
@@ -61,13 +63,18 @@ class HardwareTest(TestCase):
         assert cpu_units == expected_units
 
     @patch("boagent.hardware.win32.get_win32_instances")
-    @patch("boagent.hardware.win32.get_property")
+    @patch(
+        "boagent.hardware.win32.get_property",
+    )
     @patch("boagent.hardware.win32.convert_to_gigabytes")
     def test_find_memory_manufacturer(
         self, mocked_conversion, mocked_get_property, mocked_win32_instances
     ):
         mocked_win32_instances.return_value = [1]
-        mocked_get_property.return_value = mock_win32_memory_manufacturer
+        mocked_get_property.side_effect = [
+            mock_win32_memory_manufacturer,
+            mock_win32_memory_capacity,
+        ]
         mocked_conversion.return_value = 8
         memories = self.hardware.find_memories()
         memory_manufacturer = memories["rams"][0]["manufacturer"]
@@ -113,7 +120,12 @@ class HardwareTest(TestCase):
         self, mocked_get_property, mocked_win32_instances
     ):
         mocked_win32_instances.return_value = [1]
-        mocked_get_property.return_value = mock_win32_disk_manufacturer
+        mocked_get_property.side_effect = [
+            mock_win32_disk_manufacturer,
+            mock_win32_disk_size,
+            mock_win32_disk_type,
+            mock_win32_disk_logical_name,
+        ]
         storage = self.hardware.find_storage()
         storage_manufacturer = storage["disks"][0]["manufacturer"]
         assert storage_manufacturer == mock_win32_disk_manufacturer
@@ -127,3 +139,49 @@ class HardwareTest(TestCase):
         storage_capacity = storage["disks"][0]["capacity"]
         expected_capacity = 931
         assert storage_capacity == expected_capacity
+
+    @patch("boagent.hardware.win32.get_win32_instances")
+    @patch("boagent.hardware.win32.get_property")
+    @patch("boagent.hardware.win32.convert_to_gigabytes")
+    def test_find_storage_type_ssd(
+        self, mocked_conversion, mocked_get_property, mocked_win32_instances
+    ):
+        mocked_win32_instances.return_value = [1]
+        mocked_get_property.return_value = mock_win32_disk_type
+        mocked_conversion.return_value = 931
+        storage = self.hardware.find_storage()
+        storage_type = storage["disks"][0]["type"]
+        expected_type = "ssd"
+        assert storage_type == expected_type
+
+    def test_media_type_conversion(self):
+        ssd_type = 4
+        result = convert_media_type(ssd_type)
+        assert result == "ssd"
+
+        hdd_type = 3
+        result = convert_media_type(hdd_type)
+        assert result == "hdd"
+
+        unspecified = 0
+        result = convert_media_type(unspecified)
+        assert result == "unspecified"
+
+    @patch("boagent.hardware.win32.get_win32_instances")
+    @patch("boagent.hardware.win32.get_property")
+    @patch("boagent.hardware.win32.convert_to_gigabytes")
+    def test_find_storage_logical_name(
+        self, mocked_conversion, mocked_get_property, mocked_win32_instances
+    ):
+        mocked_win32_instances.return_value = [1]
+        mocked_get_property.side_effect = [
+            mock_win32_disk_manufacturer,
+            mock_win32_disk_size,
+            mock_win32_disk_type,
+            mock_win32_disk_logical_name,
+        ]
+        mocked_conversion.return_value = 931
+        storage = self.hardware.find_storage()
+        storage_logical_name = storage["disks"][0]["logicalname"]
+        expected_logical_name = "C:"
+        assert storage_logical_name == expected_logical_name

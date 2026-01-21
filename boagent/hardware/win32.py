@@ -2,13 +2,15 @@ import win32com.client
 from enum import Enum
 
 NUMBER_OF_BYTES_IN_A_GIGABYTE = 1073741824
+STORAGE_NAMESPACE = r"winmgmts:\\.\root\Microsoft\Windows\Storage"
 Win32_WMI_Class = Enum(
     "Win32_WMI_Class",
     [
         ("PROCESSOR", "Win32_Processor"),
         ("MEMORY", "Win32_PhysicalMemory"),
         ("DRIVE", "Win32_DiskDrive"),
-        ("LOGICAL_DRIVE", "Win32_LogicalDrive"),
+        ("LOGICAL_DISK", "Win32_LogicalDisk"),
+        ("PHYSICAL_DISK", "MSFT_PhysicalDisk"),
     ],
 )
 
@@ -19,8 +21,23 @@ Win32_WMI_Class_Property = Enum(
         ("MANUFACTURER", "Manufacturer"),
         ("CORE_NUMBER", "NumberOfCores"),
         ("CAPACITY", "Capacity"),
+        ("DISK_TYPE", "MediaType"),
+        ("LOGICAL_NAME", "DeviceID"),
     ],
 )
+
+"""
+MediaType property documented here: https://learn.microsoft.com/en-us/windows-hardware/drivers/storage/msft-physicaldisk
+"""
+
+
+def convert_media_type(mtype: int) -> str:
+    if mtype == 4:
+        return "ssd"
+    elif mtype == 3:
+        return "hdd"
+    else:
+        return "unspecified"
 
 
 def get_property(com_object, field: Win32_WMI_Class_Property) -> str | int:
@@ -29,8 +46,14 @@ def get_property(com_object, field: Win32_WMI_Class_Property) -> str | int:
 
 
 def get_win32_instances(class_name: Win32_WMI_Class):
-    instances = win32com.client.GetObject("winmgmts:").InstancesOf(class_name)
-    return instances
+    if class_name == Win32_WMI_Class.PHYSICAL_DISK:
+        instances = win32com.client.GetObject(STORAGE_NAMESPACE).InstancesOf(
+            class_name.value
+        )
+        return instances
+    else:
+        instances = win32com.client.GetObject("winmgmts:").InstancesOf(class_name.value)
+        return instances
 
 
 def convert_to_gigabytes(capacity: int):
@@ -72,7 +95,7 @@ class Hardware:
         total_units = len(rams)
         for ram in rams:
             ram_manufacturer = get_property(ram, Win32_WMI_Class_Property.MANUFACTURER)
-            ram_capacity = get_property(ram, Win32_WMI_Class_Property.CAPACITY)
+            ram_capacity = int(get_property(ram, Win32_WMI_Class_Property.CAPACITY))
             capacity_converted_to_gigabytes = convert_to_gigabytes(ram_capacity)
             ram = {
                 "units": total_units,
@@ -83,20 +106,38 @@ class Hardware:
 
         return memories
 
+    """
+    The MSFT_PhysicalDisk drive allow to find easily if a disk is a hard drive or a solid-state drive. However, it does not document
+    the manufacturer as a property. The model can be found with the FriendlyName property, but its format will probably not be consistent depending
+    on drive models.
+    The Win32_DiskDrive document the manufacturer as a property, but it does not reliably find a brand name. Querying BoaviztAPI with a model, which
+    will probably respond with an archetype depending on the disk type and its size, might be necessary.
+    """
+
     def find_storage(self) -> dict:
         disks = {"disks": []}
-        storage = get_win32_instances(Win32_WMI_Class.DRIVE)
-        total_units = len(storage)
-        for disk in storage:
+        pdisks = get_win32_instances(Win32_WMI_Class.PHYSICAL_DISK)
+        ddrives = get_win32_instances(Win32_WMI_Class.DRIVE)
+        ldisks = get_win32_instances(Win32_WMI_Class.LOGICAL_DISK)
+        total_units = len(pdisks)
+        for index, disk in enumerate(pdisks):
             disk_manufacturer = get_property(
-                disk, Win32_WMI_Class_Property.MANUFACTURER
+                ddrives[index], Win32_WMI_Class_Property.MANUFACTURER
             )
-            disk_capacity = get_property(disk, Win32_WMI_Class_Property.CAPACITY)
-            converted_to_gigabytes = disk_capacity // NUMBER_OF_BYTES_IN_A_GIGABYTE
+            disk_capacity = int(get_property(disk, Win32_WMI_Class_Property.CAPACITY))
+            disk_type = convert_media_type(
+                int(get_property(disk, Win32_WMI_Class_Property.DISK_TYPE))
+            )
+            converted_to_gigabytes = convert_to_gigabytes(disk_capacity)
+            disk_logical_name = get_property(
+                ldisks[index], Win32_WMI_Class_Property.LOGICAL_NAME
+            )
             disk = {
                 "units": total_units,
                 "manufacturer": disk_manufacturer,
                 "capacity": converted_to_gigabytes,
+                "type": disk_type,
+                "logicalname": disk_logical_name,
             }
             disks["disks"].append(disk)
 
