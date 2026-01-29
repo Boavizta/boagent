@@ -1,5 +1,11 @@
 import json
+import os
+import sys
+from unittest.mock import Mock
 
+if os.name == "posix":
+    sys.modules["win32com"] = Mock()
+    sys.modules["win32com.client"] = Mock()
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from unittest import TestCase

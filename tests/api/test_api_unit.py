@@ -1,8 +1,13 @@
 import os
+import sys
 import json
 
 from unittest import TestCase, TestSuite, TestLoader
 from unittest.mock import Mock, patch
+
+if os.name == "posix":
+    sys.modules["win32com"] = Mock()
+    sys.modules["win32com.client"] = Mock()
 
 from boagent.api.api import (
     build_hardware_data,
@@ -17,6 +22,7 @@ from boagent.api.api import (
 from boagent.api.utils import format_prometheus_output
 from tests.mocks.mocks import (
     MockLshw,
+    MockWin32,
     hardware_data,
     mock_power_data,
     mock_hardware_data,
@@ -30,11 +36,22 @@ from tests.mocks.mocks import (
 mocked_lshw = Mock()
 mocked_lshw.return_value = MockLshw()
 
+mocked_win32 = Mock()
+mocked_win32.return_value = MockWin32()
+
 
 @patch("boagent.api.api.HARDWARE_FILE_PATH", hardware_data)
 @patch("boagent.api.api.Lshw", mocked_lshw)
+@patch("boagent.api.api.Hardware", mocked_win32)
 class ReadHardwareDataTest(TestCase):
-    def test_build_hardware_data(self):
+    @patch("boagent.api.api.name", "posix")
+    def test_build_hardware_data_linux(self):
+
+        build_hardware_data()
+        assert os.path.exists(hardware_data) is True
+
+    @patch("boagent.api.api.name", "nt")
+    def test_build_hardware_data_windows(self):
 
         build_hardware_data()
         assert os.path.exists(hardware_data) is True

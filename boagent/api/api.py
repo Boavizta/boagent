@@ -1,12 +1,14 @@
 import json
 import time
 from typing import Dict, Any, List, Union
+from os import name
 from fastapi import FastAPI, Response, Body, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
 from boaviztapi_sdk.models.server import Server
 from boagent.api.exceptions import InvalidPIDException
+from boagent.hardware.win32 import Hardware
 from boagent.hardware.lshw import Lshw
 from .utils import (
     iso8601_or_timestamp_as_timestamp,
@@ -435,13 +437,22 @@ def read_hardware_data() -> Dict:
 
 
 def build_hardware_data():
-    lshw = Lshw()
-    with open(HARDWARE_FILE_PATH, "w") as hardware_file:
-        hardware_data = {}
-        hardware_data["disks"] = lshw.disks
-        hardware_data["cpus"] = lshw.cpus
-        hardware_data["rams"] = lshw.memories
-        json.dump(hardware_data, hardware_file)
+    if name == "posix":
+        lshw = Lshw()
+        with open(HARDWARE_FILE_PATH, "w") as hardware_file:
+            hardware_data = {}
+            hardware_data["disks"] = lshw.disks
+            hardware_data["cpus"] = lshw.cpus
+            hardware_data["rams"] = lshw.memories
+            json.dump(hardware_data, hardware_file)
+    elif name == "nt":
+        hardware = Hardware()
+        with open(HARDWARE_FILE_PATH, "w") as hardware_file:
+            hardware_data = {}
+            hardware_data["disks"] = hardware.disks
+            hardware_data["cpus"] = hardware.cpus
+            hardware_data["rams"] = hardware.memories
+            json.dump(hardware_data, hardware_file)
 
 
 def query_machine_impact_data(
