@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from unittest import TestCase
 from unittest.mock import patch
-from pytest import mark
 from boagent.api.config import Settings
 from tests.mocks.mocks import (
     mock_boaviztapi_response_not_verbose,
@@ -91,7 +90,6 @@ class ApiEndpointsTest(TestCase):
         response = client.get("/metrics", params=params)
         assert response.status_code == 200
 
-    @mark.query
     @patch("boagent.api.api.get_metrics")
     def test_read_query_without_measure_power_and_fetch_hardware_with_success(
         self, mocked_get_metrics
@@ -112,7 +110,6 @@ class ApiEndpointsTest(TestCase):
         response = client.get("/query", params=params)
         assert response.status_code == 200
 
-    @mark.query
     @patch("boagent.api.api.get_metrics")
     def test_read_query_with_measure_power_with_success(self, mocked_get_metrics):
 
@@ -131,7 +128,6 @@ class ApiEndpointsTest(TestCase):
         response = client.get("/query", params=params)
         assert response.status_code == 200
 
-    @mark.query
     @patch("boagent.api.api.get_metrics")
     def test_read_query_with_fetch_hardware_with_success(self, mocked_get_metrics):
 
@@ -150,7 +146,6 @@ class ApiEndpointsTest(TestCase):
         response = client.get("query", params=params)
         assert response.status_code == 200
 
-    @mark.query
     @patch("boagent.api.api.get_metrics")
     def test_read_query_with_measure_power_and_fetch_hardware(self, mocked_get_metrics):
 
@@ -169,7 +164,6 @@ class ApiEndpointsTest(TestCase):
         response = client.get("/query", params=params)
         assert response.status_code == 200
 
-    @mark.query
     @patch("boagent.api.api.get_metrics")
     def test_read_query_with_measure_power_and_fetch_hardware_verbose(
         self, mocked_get_metrics
