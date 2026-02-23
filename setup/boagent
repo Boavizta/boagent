@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd /usr/lib/python3/dist-packages/boagent
+python3 -m venv venv
+python3 -m pip install boaviztapi-sdk
+python3 -m uvicorn boagent.api.api:app --host 127.0.0.1

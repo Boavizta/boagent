@@ -9,7 +9,7 @@ description = "Local API to collect and compute data on used device and running 
 authors = ["Boavizta <open-source@boavizta.org>"]
 license = "Apache-2.0"
 readme = "README.md"
-package-mode = false
+package-mode = true
 
 [tool.poetry.dependencies]
 python = "^3.10"
