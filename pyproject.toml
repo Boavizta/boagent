@@ -2,23 +2,25 @@
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry]
+[project]
 name = "boagent"
 version = "0.1.1"
 description = "Local API to collect and compute data on used device and running applications to give insight on their environmental impacts."
-authors = ["Boavizta <open-source@boavizta.org>"]
+authors = [{name= "Boavizta", email = "open-source@boavizta.org"},]
 license = "Apache-2.0"
+requires-python = ">=3.10"
 readme = "README.md"
-package-mode = true
+dependencies = [
+"boaviztapi-sdk (>=2.0.2)",
+"fastapi (>=0.110.0)",
+"pydantic (>=2.6.4)",
+"pydantic-settings (>=2.2.1)",
+"click (>=8.1.7)",
+"python-dateutil (>=2.9.0.post0)",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-boaviztapi-sdk = "^1.2.4"
-fastapi = "^0.110.0"
-pydantic = "^2.6.4"
-pydantic-settings = "^2.2.1"
-click = "^8.1.7"
-python-dateutil = "^2.9.0.post0"
+[tool.poetry]
+package-mode = true
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
