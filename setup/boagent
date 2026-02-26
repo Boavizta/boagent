@@ -1,8 +1,16 @@
 #!/bin/bash
 
-cd /usr/lib/python3/dist-packages/boagent
+cd /usr/lib/python3/dist-packages/boagent || exit
 python3 -m venv --system-site-packages venv
 source venv/bin/activate
-python3 -m pip install boaviztapi-sdk
-cd ..
+
+if python3 -m show boaviztapi_sdk
+then
+	echo "boaviztapi_sdk is already present"
+else
+	echo "boaviztapi_sdk is not present"
+	python3 -m pip install boaviztapi_sdk
+fi
+
+cd /usr/lib/python3/dist-packages || exit
 python3 -m uvicorn boagent.api.api:app --host 127.0.0.1 --port 3000
