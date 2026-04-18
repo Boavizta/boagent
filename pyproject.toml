@@ -5,7 +5,6 @@ description = "Local API to collect and compute data on used device and running 
 authors = [{name = "Boavizta", email = "open-source@boavizta.org"}]
 license = "Apache-2.0"
 readme = "README.md"
-package-mode = false
 requires-python = ">=3.10,<4.0"
 dependencies = [
 "boaviztapi-sdk>=1.2.4",
@@ -27,3 +26,10 @@ requests = "^2.32.3"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[project.urls]
+Homepage = "https://github.com/boavizta/boagent"
+Issues = "https://github.com/boavizta/boagent/issues"
+
+[project.scripts]
+boagent = "python -m uvicorn api:app --reload"

@@ -145,3 +145,48 @@ Here are the impacts considered so far :
     - manufacturing (LCA) ✔️
     - shipping (LCA) ❌
     - end of life (LCA) ❌
+
+## Packaging
+
+### Dependencies installation for packaging
+
+```
+python3 -m pip install --upgrade build twine
+```
+
+### Building a new package release
+
+Build the package from the root of the repository:
+
+```
+python3 -m build
+```
+
+### Upload to test index first
+
+Upload to test pip package index:
+
+```
+python3 -m twine upload --repository testpypi dist/*
+```
+
+### Testing a new pip package release
+
+Create a virtualenv, then activate it to isolate the package installation and its dependencies:
+
+```
+virtualenv boagent-venv
+source boagent-venv/bin/activate
+```
+
+First install the dependencies from the main pip index:
+
+```
+pip install ...
+```
+
+Install the test package, enabling main index to get dependencies:
+
+```
+pip install -i https://test.pypi.org/simple/ boagent
+```
