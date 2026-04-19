@@ -7,4 +7,5 @@ from .api import (
     compute_average_consumption,
     get_power_data,
     get_metrics,
+    configure_app
 )

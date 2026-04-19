@@ -30,6 +30,3 @@ build-backend = "poetry.core.masonry.api"
 [project.urls]
 Homepage = "https://github.com/boavizta/boagent"
 Issues = "https://github.com/boavizta/boagent/issues"
-
-[project.scripts]
-boagent = "python -m uvicorn api:app --reload"
