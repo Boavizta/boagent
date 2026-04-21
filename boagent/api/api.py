@@ -1,6 +1,7 @@
 import json
 import time
 from typing import Dict, Any, List, Union
+from pathlib import Path
 from fastapi import FastAPI, Response, Body, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
@@ -489,3 +490,14 @@ def generate_machine_configuration(hardware_data) -> Dict[str, Any]:
         # TODO: if cpu is a small one, guess that power supply is light/average weight of a laptops power supply ?
     }
     return config
+
+
+def read_mount_path(mount_path):
+    virtual_machines_metrics = []
+    virtual_machines = Path(f"{mount_path}/volumes")
+    for vm in virtual_machines.iterdir():
+        with open(f"{vm}/metrics.json") as metrics_fp:
+            vm_metrics = json.load(metrics_fp)
+            virtual_machines_metrics.append(vm_metrics)
+
+    return virtual_machines_metrics

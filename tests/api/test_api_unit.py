@@ -3,6 +3,7 @@ import json
 
 from unittest import TestCase, TestSuite, TestLoader
 from unittest.mock import Mock, patch
+from tempfile import TemporaryDirectory
 
 from boagent.api.api import (
     build_hardware_data,
@@ -13,6 +14,7 @@ from boagent.api.api import (
     compute_average_consumption,
     get_power_data,
     get_metrics,
+    read_mount_path,
 )
 from boagent.api.utils import format_prometheus_output
 from tests.mocks.mocks import (
@@ -455,6 +457,36 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
         assert "raw_data" in metrics
         assert "electricity_carbon_intensity" in metrics
         assert "power_data" in metrics["raw_data"]
+
+
+class ReadMountPath(TestCase):
+    def setUp(self):
+        temp_mount_path = self.enterContext(TemporaryDirectory())
+        volumes_path = temp_mount_path + "/volumes"
+        first_vm_path = volumes_path + "/vm1"
+        second_vm_path = volumes_path + "/vm2"
+
+        os.mkdir(volumes_path)
+        os.mkdir(first_vm_path)
+        os.mkdir(second_vm_path)
+
+        # Virtual machine metrics file format is not established yet. This might need to be modified.
+        first_mock_metrics_content = r'{"name": "virtual-machine-1", "processes":[{"exe": "/usr/bin/containerd","cmdline": "/usr/bin/containerd","pid": 685,"resources_usage":{"cpu_usage": "0.025018765","cpu_usage_unit": "%","memory_usage": "51855360","memory_usage_unit": "Bytes","memory_virtual_usage": "0","memory_virtual_usage_unit": "Bytes","disk_usage_write": "0","disk_usage_write_unit": "Bytes","disk_usage_read": "0","disk_usage_read_unit": "Bytes"},"consumption": 1978.3303,"timestamp": 1716977654.2153192,"container": null}]}'
+
+        second_mock_metrics_content = r'{"name": "virtual-machine-2", "processes":[{"exe": "/usr/bin/containerd","cmdline": "/usr/bin/containerd","pid": 685,"resources_usage":{"cpu_usage": "0.025018765","cpu_usage_unit": "%","memory_usage": "51855360","memory_usage_unit": "Bytes","memory_virtual_usage": "0","memory_virtual_usage_unit": "Bytes","disk_usage_write": "0","disk_usage_write_unit": "Bytes","disk_usage_read": "0","disk_usage_read_unit": "Bytes"},"consumption": 1978.3303,"timestamp": 1716977654.2153192,"container": null}]}'
+
+        with open(f"{first_vm_path}/metrics.json", "w") as tmp_metrics_file:
+            tmp_metrics_file.write(first_mock_metrics_content)
+
+        with open(f"{second_vm_path}/metrics.json", "w") as tmp_metrics_file:
+            tmp_metrics_file.write(second_mock_metrics_content)
+
+        self.mount_path = temp_mount_path
+
+    def test_read_mount_path(self):
+        vms_metrics = read_mount_path(self.mount_path)
+
+        assert len(vms_metrics) == 2
 
 
 loader = TestLoader()
