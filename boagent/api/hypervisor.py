@@ -40,15 +40,25 @@ def generate_evaluated_virtual_machine(vm_data, hypervisor_metrics):
     return evaluated_vm
 
 
-def evaluate_virtual_machines(vms_metrics, hypervisor_hardware_data):
-    hypervisor_memory_total_bytes = (
-        sum([ram["capacity"] for ram in hypervisor_hardware_data["rams"]]) * 1073741824
-    )
-    hypervisor_aggregated_metrics = {"total_memory": hypervisor_memory_total_bytes}
-    evaluated_virtual_machines = [
-        generate_evaluated_virtual_machine(vm, hypervisor_aggregated_metrics)
-        for vm in vms_metrics
-    ]
+class Hypervisor:
+    def __init__(self, hardware_data, virtual_machines_metrics):
+        self.hardware_data = hardware_data
+        self.total_memory = self.calculate_total_memory()
+        self.vms_metrics = virtual_machines_metrics
+        self.evaluated_virtual_machines = self.evaluate_virtual_machines()
 
-    evaluation = {"virtual_machines": evaluated_virtual_machines}
-    return evaluation
+    def calculate_total_memory(self) -> int:
+        total_memory_in_bytes = (
+            sum([ram["capacity"] for ram in self.hardware_data["rams"]]) * 1073741824
+        )
+        return total_memory_in_bytes
+
+    def evaluate_virtual_machines(self):
+        hypervisor_aggregated_metrics = {"total_memory": self.total_memory}
+        evaluated_virtual_machines = [
+            generate_evaluated_virtual_machine(vm, hypervisor_aggregated_metrics)
+            for vm in self.vms_metrics
+        ]
+
+        evaluation = {"virtual_machines": evaluated_virtual_machines}
+        return evaluation
