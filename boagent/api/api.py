@@ -492,7 +492,7 @@ def generate_machine_configuration(hardware_data) -> Dict[str, Any]:
     return config
 
 
-def read_mount_path(mount_path):
+def deserialize_virtual_machines_metrics(mount_path):
     virtual_machines_metrics = []
     virtual_machines = Path(f"{mount_path}/volumes")
     for vm in virtual_machines.iterdir():

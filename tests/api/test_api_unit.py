@@ -14,7 +14,7 @@ from boagent.api.api import (
     compute_average_consumption,
     get_power_data,
     get_metrics,
-    read_mount_path,
+    deserialize_virtual_machines_metrics,
 )
 from boagent.api.utils import format_prometheus_output
 from tests.mocks.mocks import (
@@ -483,8 +483,8 @@ class ReadMountPath(TestCase):
 
         self.mount_path = temp_mount_path
 
-    def test_read_mount_path(self):
-        vms_metrics = read_mount_path(self.mount_path)
+    def test_deserialize_virtual_machines_metrics(self):
+        vms_metrics = deserialize_virtual_machines_metrics(self.mount_path)
 
         assert len(vms_metrics) == 2
 
