@@ -1,7 +1,6 @@
-version: '3.2'
+version: "3.2"
 
 services:
-
   boagent:
     build:
       context: .
@@ -38,12 +37,21 @@ services:
         source: /sys/class/powercap
         target: /sys/class/powercap
       - "powerdata:/app/data:rw"
-    command: [ "--no-header", "json", "-s", "10", "--resources", "-f", "/app/data/power_data.json" ]
+    command:
+      [
+        "--no-header",
+        "json",
+        "-s",
+        "10",
+        "--resources",
+        "-f",
+        "/app/data/power_data.json",
+      ]
     networks:
       - boagent-network
 
   boaviztapi:
-    image: ghcr.io/boavizta/boaviztapi:1.2.2
+    image: ghcr.io/boavizta/boaviztapi:2.1.0
     ports:
       - "5000:5000"
     networks:
