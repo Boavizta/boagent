@@ -1,7 +1,7 @@
 from datetime import datetime
 from boaviztapi_sdk import ApiClient, Configuration
 from dateutil import parser
-from .config import Settings
+from config import Settings
 from os import PathLike
 
 settings = Settings()
@@ -82,7 +82,7 @@ def iso8601_or_timestamp_as_timestamp(iso_time: str) -> float:
                 return float(iso_time)
 
 
-def format_prometheus_output(res, verbose: bool):
+def format_prometheus_output(res, verbose: bool, labels: dict = {}):
     response = ""
     for k, v in res.items():
         if "value" in v and "type" in v:
@@ -90,23 +90,25 @@ def format_prometheus_output(res, verbose: bool):
                 v["description"] = "TODO: define me"
             if type(v["value"]) is float:
                 response += format_prometheus_metric(
-                    k,
+                    "boagent_{}".format(k),
                     "{}. {}".format(
                         v["description"],
                         "In {} ({}).".format(v["long_unit"], v["unit"]),
                     ),
                     v["type"],
                     v["value"],
+                    labels
                 )
             if type(v["value"]) is dict:
                 response += format_prometheus_metric(
-                    k,
+                    "boagent_{}".format(k),
                     "{}. {}".format(
                         v["description"],
                         "In {} ({}).".format(v["long_unit"], v["unit"]),
                     ),
                     v["type"],
                     v["value"]["value"],
+                    labels
                 )
 
         else:
@@ -118,13 +120,14 @@ def format_prometheus_output(res, verbose: bool):
                         if "description" not in y:
                             y["description"] = "TODO: define me"
                         response += format_prometheus_metric(
-                            "{}_{}".format(k, x),
+                            "boagent_{}_{}".format(k, x),
                             "{}. {}".format(
                                 y["description"],
                                 "In {} ({}).".format(y["long_unit"], y["unit"]),
                             ),
                             y["type"],
                             y["value"],
+                            labels
                         )
         if verbose:
             if "boaviztapi_data" in v:
@@ -137,13 +140,14 @@ def format_prometheus_output(res, verbose: bool):
                                 pass
                             else:
                                 response += format_prometheus_metric(
-                                    "{}".format(f"{impact_name}_total_impact_{value}"),
+                                    "boaviztapi_{}".format(f"{impact_name}_total_impact_{value}"),
                                     "{}. {}".format(
                                         impact_items["description"],
                                         "In {}".format(impact_items["unit"]),
                                     ),
                                     "{}".format("gauge"),
                                     "{}".format(f"{impact_items['embedded'][value]}"),
+                                    labels
                                 )
 
                 for component_name, component_impacts in v["boaviztapi_data"][
@@ -160,7 +164,7 @@ def format_prometheus_output(res, verbose: bool):
                                 else:
                                     response += format_prometheus_metric(
                                         "{}".format(
-                                            f"{formatted_component_name}_{impact}_embedded_impact_{component_embedded_impact_metric}"
+                                            f"boaviztapi_{formatted_component_name}_{impact}_embedded_impact_{component_embedded_impact_metric}"
                                         ),
                                         "{}. {}".format(
                                             items["description"],
@@ -170,23 +174,30 @@ def format_prometheus_output(res, verbose: bool):
                                         "{}".format(
                                             f"{value}",
                                         ),
+                                        labels
                                     )
 
     return response
 
 
 def format_prometheus_metric(
-    metric_name, metric_description, metric_type, metric_value
+    metric_name, metric_description, metric_type, metric_value, labels: dict = {}
 ):
+
+    labels_str = "{"
+    for k, v in labels.items():
+        labels_str += "{}=\"{}\"".format(k, v)
+    labels_str += "}"
     response = """# HELP {} {}
 # TYPE {} {}
-{} {}
+{}{} {}
 """.format(
         metric_name,
         metric_description,
         metric_name,
         metric_type,
         metric_name,
+        labels_str,
         metric_value,
     )
     return response
