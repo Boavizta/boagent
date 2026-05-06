@@ -1,7 +1,8 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file='/etc/boagent/.env', extra='allow')
     project_name: str = "boagent"
     project_version: str = "0.1.0"
     project_description: str = "Boagent is a local API and monitoring agent to help you estimate the environmental impact of your machine, including software activity and hardware embodied impacts."
