@@ -1,1 +1,0 @@
-{"disks": [{"units": 1, "logicalname": "/dev/nvme0n1", "manufacturer": "samsung", "type": "ssd", "capacity": 476}], "cpus": [{"units": 1, "name": "Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz", "manufacturer": "Intel Corp.", "core_units": "unknown"}], "rams": []}

@@ -156,7 +156,7 @@ class Lshw:
                     "units": +1,
                     "name": obj["product"],
                     "manufacturer": obj["vendor"],
-                    "core_units": int(obj["configuration"]["cores"]) if "cores" in obj["configuration"] else "unknown",
+                    "core_units": int(obj["configuration"]["cores"]),
                 }
             )
 
