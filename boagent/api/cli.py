@@ -1,9 +1,8 @@
 import click
 import requests
 import json
-from pprint import pprint
-from api import get_metrics, DEFAULT_LIFETIME
-from utils import iso8601_or_timestamp_as_timestamp, format_prometheus_metric, format_prometheus_output
+from boagent.api.api import get_metrics, DEFAULT_LIFETIME
+from boagent.api.utils import iso8601_or_timestamp_as_timestamp, format_prometheus_metric, format_prometheus_output
 
 @click.command("prometheus-push")
 @click.option('--push-url', default='http://localhost:9091',  help='Push Gateway URL.')
@@ -30,7 +29,6 @@ def prometheus_push(push_url, push_job, push_suffix,
         lifetime,
         fetch_hardware,
     )
-    #pprint(metrics)
     labels = {
         "hostname": "oden"
     }
@@ -42,14 +40,8 @@ def prometheus_push(push_url, push_job, push_suffix,
         metric_value=lifetime,
         labels=labels
     )
-    if verbose:
-        pprint(metrics["emissions_calculation_data"])
-        pprint(metrics["raw_data"]["boaviztapi_data"])
     url = "{}/{}/job/{}/hostname/{}".format(push_url, push_suffix, push_job, "oden")
-    #print("#### Sending to {}".format(url))
-    #print("##### Body\n{}".format(body))
     p = requests.post(url, data=body, verify=True if not no_certificate_check else False)
-    #print("Response : {} {}".format(p, p.text))
 
 if __name__ == '__main__':
     prometheus_push()

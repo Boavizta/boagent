@@ -6,10 +6,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
 from boaviztapi_sdk.models.server import Server
-from exceptions import InvalidPIDException
+from boagent.api.exceptions import InvalidPIDException
 from boagent.hardware.lshw import Lshw
-from pprint import pprint
-from utils import (
+from boagent.api.utils import (
     iso8601_or_timestamp_as_timestamp,
     format_prometheus_output,
     get_boavizta_api_client,
@@ -17,9 +16,9 @@ from utils import (
     sort_disks,
 )
 
-from config import Settings
-from process import Process
-from models import WorkloadTime, time_workload_example
+from boagent.api.config import Settings
+from boagent.api.process import Process
+from boagent.api.models import WorkloadTime, time_workload_example
 
 settings = Settings()
 

@@ -1,7 +1,7 @@
 from datetime import datetime
 from boaviztapi_sdk import ApiClient, Configuration
 from dateutil import parser
-from config import Settings
+from boagent.api.config import Settings
 from os import PathLike
 
 settings = Settings()
