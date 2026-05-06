@@ -1,19 +1,21 @@
 [project]
 name = "boagent"
-version = "0.1.1"
+version = "0.1.8"
 description = "Local API to collect and compute data on used device and running applications to give insight on their environmental impacts."
 authors = [{name = "Boavizta", email = "open-source@boavizta.org"}]
 license = "Apache-2.0"
 readme = "README.md"
 requires-python = ">=3.10,<4.0"
 dependencies = [
-"boaviztapi-sdk>=1.2.4",
+"boaviztapi-sdk>=2.1.0",
 "fastapi>=0.110.0",
 "pydantic>=2.6.4",
 "pydantic-settings>=2.2.1",
 "click>=8.1.7",
 "python-dateutil>=2.9.0.post0",
-"uvicorn>=0.30.6"
+"uvicorn>=0.30.6",
+"click",
+"requests>=2.32.5"
 ]
 
 [tool.poetry.group.dev.dependencies]

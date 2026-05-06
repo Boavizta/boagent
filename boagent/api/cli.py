@@ -46,10 +46,10 @@ def prometheus_push(push_url, push_job, push_suffix,
         pprint(metrics["emissions_calculation_data"])
         pprint(metrics["raw_data"]["boaviztapi_data"])
     url = "{}/{}/job/{}/hostname/{}".format(push_url, push_suffix, push_job, "oden")
-    print("#### Sending to {}".format(url))
-    print("##### Body\n{}".format(body))
+    #print("#### Sending to {}".format(url))
+    #print("##### Body\n{}".format(body))
     p = requests.post(url, data=body, verify=True if not no_certificate_check else False)
-    print("Response : {} {}".format(p, p.text))
+    #print("Response : {} {}".format(p, p.text))
 
 if __name__ == '__main__':
     prometheus_push()
