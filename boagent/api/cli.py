@@ -1,6 +1,7 @@
 import click
 import requests
 import json
+from os import uname
 from boagent.api.api import get_metrics, DEFAULT_LIFETIME
 from boagent.api.utils import iso8601_or_timestamp_as_timestamp, format_prometheus_metric, format_prometheus_output
 
@@ -30,7 +31,7 @@ def prometheus_push(push_url, push_job, push_suffix,
         fetch_hardware,
     )
     labels = {
-        "hostname": "oden"
+        "hostname": uname().nodename
     }
     body = format_prometheus_output(metrics, verbose, labels=labels)
     body += format_prometheus_metric(
