@@ -1,11 +1,21 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from pyproject_metadata import StandardMetadata
+import tomli
+
+toml_content = ""
+
+with open("./pyproject.toml", 'r') as fd:
+    toml_content = fd.read()
+    fd.close()
+
+metadata = StandardMetadata.from_pyproject(tomli.loads(toml_content), allow_extra_keys=False)
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='/etc/boagent/.env', extra='allow')
-    project_name: str = "boagent"
-    project_version: str = "0.1.0"
-    project_description: str = "Boagent is a local API and monitoring agent to help you estimate the environmental impact of your machine, including software activity and hardware embodied impacts."
+    project_name: str = metadata.name
+    project_version: str = str(metadata.version)
+    project_description: str = str(metadata.description)
     tags_metadata: list = [
         {"name": "info", "description": "Returns runtime configuration of Boagent."},
         {"name": "web", "description": "Web UI to explore Boagent metrics."},
