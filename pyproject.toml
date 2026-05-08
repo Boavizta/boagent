@@ -1,6 +1,6 @@
 [project]
 name = "boagent"
-version = "0.1.15"
+version = "0.1.16"
 description = "Local API to collect and compute data on used device and running applications to give insight on their environmental impacts."
 authors = [{name = "Boavizta", email = "open-source@boavizta.org"}]
 license = "Apache-2.0"
