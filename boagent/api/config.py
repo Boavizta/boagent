@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='/etc/boagent/.env', extra='allow')
     project_name: str = 'boagent'
-    project_version: str = '0.1.14'
+    project_version: str = '0.1.15'
     project_description: str = "Local API to collect and compute data on used device and running applications to give insight on their environmental impacts."
     tags_metadata: list = [
         {"name": "info", "description": "Returns runtime configuration of Boagent."},
