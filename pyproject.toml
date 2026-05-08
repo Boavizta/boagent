@@ -1,6 +1,6 @@
 [project]
 name = "boagent"
-version = "0.1.8"
+version = "0.1.12"
 description = "Local API to collect and compute data on used device and running applications to give insight on their environmental impacts."
 authors = [{name = "Boavizta", email = "open-source@boavizta.org"}]
 license = "Apache-2.0"
@@ -15,10 +15,11 @@ dependencies = [
 "python-dateutil>=2.9.0.post0",
 "uvicorn>=0.30.6",
 "click",
-"requests>=2.32.5",
-"tomli",
-"pyproject_metadata"
+"requests>=2.32.5"
 ]
+
+[tool.setuptools.package-data]
+boagent = ["pyproject.toml"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
