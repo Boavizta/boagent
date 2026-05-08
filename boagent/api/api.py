@@ -387,8 +387,23 @@ def get_power_data(start_time, end_time):
     # Get all items of the json list where start_time <= host.timestamp <= end_time
     power_data = {}
     with open(POWER_DATA_FILE_PATH, "r") as power_data_file:
-        formatted_data = f"{power_data_file.read()}]"
-        data = json.loads(formatted_data)
+        raw_data = power_data_file.read()
+        formatted_data = f"{raw_data}]"
+        try:
+            data = json.loads(formatted_data)
+        except json.decoder.JSONDecodeError as e:
+            print("formatted_data: {}".format(formatted_data))
+            print("Catched JSONDecodeError: '{}'".format(e))
+            print("Retrying reading power_data")
+            try:
+                formatted_data = f"{raw_data[:-1]}]"
+                data = json.loads(formatted_data)
+            except json.decoder.JSONDecodeError as e2:
+                print("formatted_data: {}".format(formatted_data))
+                print("Catched JSONDecodeError: '{}'".format(e2))
+                print("Retrying reading power_data")
+                formatted_data = f"{raw_data[:-2]}]"
+                data = json.loads(formatted_data)
         queried_power_data = [
             e for e in data if start_time <= float(e["host"]["timestamp"]) <= end_time
         ]
