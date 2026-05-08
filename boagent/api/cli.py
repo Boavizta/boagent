@@ -17,15 +17,15 @@ def handler(signum, frame):
 @click.option('--push-url', default='http://localhost:9091',  help='Push Gateway URL.')
 @click.option('--push-job', default='boagent', help='Push Gateway job to attach metrics to.')
 @click.option('--push-suffix', default='metrics', help='Push Gateway job to attach metrics to.')
-@click.option('--start-time', default = "0.0", help='')
-@click.option('--end-time', default="0.0", help='')
+@click.option('--start-time', default = "0.0", help='Timestamp when to start the evaluation. Unused if step is higher than 0.')
+@click.option('--end-time', default="0.0", help='Timestamp when to end the evaluation. Unused if step is higher than 0.')
 @click.option('--verbose', default=False, help='')
 @click.option('--location', default="EEE", help='')
 @click.option('--measure-power', default=True, help='')
 @click.option('--lifetime', default=DEFAULT_LIFETIME, help='')
 @click.option('--fetch-hardware', default=False, help='')
 @click.option('--no-certificate-check', default=False, help='Disables TLS certificate check')
-@click.option('--step', default=15, help='Time step between each push, in seconds.')
+@click.option('--step', default=0, help='Time step between each push, in seconds. If higher than 0, start_time is set to now - step and end_time is set to now. 0 means boagent runs only one iteration, using start_time and end_time as boudaries.')
 def prometheus_push(push_url, push_job, push_suffix,
     start_time, end_time, verbose, location, measure_power, lifetime,
     fetch_hardware, no_certificate_check, step
@@ -37,9 +37,10 @@ def prometheus_push(push_url, push_job, push_suffix,
     if step > 0:
         signal.signal(signal.SIGINT, handler)
         while [ True ]:
+            now = time.time()
             metrics = get_metrics(
-                iso8601_or_timestamp_as_timestamp(start_time),
-                iso8601_or_timestamp_as_timestamp(end_time),
+                iso8601_or_timestamp_as_timestamp(str(now - step)),
+                iso8601_or_timestamp_as_timestamp(str(now)),
                 verbose,
                 location,
                 measure_power,
