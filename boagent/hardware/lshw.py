@@ -151,7 +151,6 @@ class Lshw:
 
     def find_cpus(self, obj):
         if "product" in obj:
-            print(str(obj))
             self.cpus.append(
                 {
                     "units": +1,
@@ -160,8 +159,6 @@ class Lshw:
                     "core_units": int(obj["configuration"]["cores"]),
                 }
             )
-        else:
-            print("NO product in obj")
 
     def find_memories(self, obj):
         if "children" not in obj:

@@ -30,10 +30,11 @@ def prometheus_push(push_url, push_job, push_suffix,
     start_time, end_time, verbose, location, measure_power, lifetime,
     fetch_hardware, no_certificate_check, step
 ):
+    hostname = uname().nodename
     labels = {
-        "hostname": uname().nodename
+        "hostname": hostname
     }
-    url = "{}/{}/job/{}/hostname/{}".format(push_url, push_suffix, push_job, "oden")
+    url = "{}/{}/job/{}/hostname/{}".format(push_url, push_suffix, push_job, hostname)
     if step > 0:
         signal.signal(signal.SIGINT, handler)
         while [ True ]:
