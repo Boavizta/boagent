@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 LABEL org.opencontainers.image.authors="open-source@boavizta.org"
 LABEL org.opencontainers.image.description="Docker image for Boagent, a local API & environmental impact monitoring tool."
@@ -10,9 +10,9 @@ RUN python3 -m pip install --upgrade poetry
 
 RUN apt update && apt install lshw nvme-cli -y
 
-COPY pyproject.toml .
+COPY pyproject.toml poetry.lock ./
 
-RUN poetry install
+RUN poetry install --no-root
 
 COPY . .
 

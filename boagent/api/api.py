@@ -8,7 +8,7 @@ from boaviztapi_sdk.api.server_api import ServerApi
 from boaviztapi_sdk.models.server import Server
 from boagent.api.exceptions import InvalidPIDException
 from boagent.hardware.lshw import Lshw
-from .utils import (
+from boagent.api.utils import (
     iso8601_or_timestamp_as_timestamp,
     format_prometheus_output,
     get_boavizta_api_client,
@@ -16,9 +16,10 @@ from .utils import (
     sort_disks,
 )
 
-from .config import Settings
-from .process import Process
-from .models import WorkloadTime, time_workload_example
+from boagent.api.config import Settings
+from boagent.api.process import Process
+from boagent.api.models import WorkloadTime, time_workload_example
+from boagent.api.utils import configure_logger
 
 settings = Settings()
 
@@ -43,7 +44,6 @@ TAGS_METADATA = settings.tags_metadata
 def configure_static(app):
     app.mount("/assets", StaticFiles(directory=ASSETS_PATH), name="assets")
 
-
 def configure_app():
     app = FastAPI(
         title=PROJECT_NAME,
@@ -56,9 +56,8 @@ def configure_app():
     configure_static(app)
     return app
 
-
 app = configure_app()
-
+logger = configure_logger()
 
 @app.get("/info", tags=["info"])
 async def info():
@@ -261,7 +260,7 @@ def get_metrics(
         model={},
         configuration=hardware_data,
         usage=format_usage_request(
-            start_time, end_time, avg_power, location, time_workload
+            start_time, end_time, avg_power, location, lifetime * SECONDS_IN_ONE_YEAR,time_workload
         ),
     )
 
@@ -370,10 +369,10 @@ def format_usage_request(
     end_time: float,
     avg_power: Union[float, None] = None,
     location: str = "EEE",
+    lifetime: float = DEFAULT_LIFETIME * SECONDS_IN_ONE_YEAR,
     time_workload: Union[dict[str, float], dict[str, List[WorkloadTime]], None] = None,
 ):
-    hours_use_time = (end_time - start_time) / 3600.0
-    kwargs_usage = {"hours_use_time": hours_use_time}
+    kwargs_usage = { "use_time_ratio": (end_time - start_time) / lifetime }
     if location:
         kwargs_usage["usage_location"] = location
     if avg_power:
@@ -387,8 +386,23 @@ def get_power_data(start_time, end_time):
     # Get all items of the json list where start_time <= host.timestamp <= end_time
     power_data = {}
     with open(POWER_DATA_FILE_PATH, "r") as power_data_file:
-        formatted_data = f"{power_data_file.read()}]"
-        data = json.loads(formatted_data)
+        raw_data = power_data_file.read()
+        formatted_data = f"{raw_data}]"
+        try:
+            data = json.loads(formatted_data)
+        except json.decoder.JSONDecodeError as e:
+            logger.debug("formatted_data: {}".format(formatted_data))
+            logger.debug("Catched JSONDecodeError: '{}'".format(e))
+            logger.debug("Retrying reading power_data")
+            try:
+                formatted_data = f"{raw_data[:-1]}]"
+                data = json.loads(formatted_data)
+            except json.decoder.JSONDecodeError as e2:
+                logger.debug("formatted_data: {}".format(formatted_data))
+                logger.debug("Catched JSONDecodeError: '{}'".format(e2))
+                logger.debug("Retrying reading power_data")
+                formatted_data = f"{raw_data[:-2]}]"
+                data = json.loads(formatted_data)
         queried_power_data = [
             e for e in data if start_time <= float(e["host"]["timestamp"]) <= end_time
         ]
@@ -453,10 +467,16 @@ def query_machine_impact_data(
 
     server_impact = None
 
+    with open("boagent_request.log", 'a') as fd:
+        fd.write("{}\n".format(str(usage)))
+        fd.write("{}\n".format(str(configuration)))
+        fd.close()
+
     if configuration:
         server = Server(usage=usage, configuration=configuration)
         server_impact = server_api.server_impact_from_configuration_v1_server_post(
-            server=server
+            server=server#,
+            #duration=(usage["hours_use_time"])
         )
     elif model:
         # server = Server(usage=usage, model=model)
@@ -467,6 +487,10 @@ def query_machine_impact_data(
         server_impact = server_api.server_impact_from_model_v1_server_get(
             archetype="dellR740"
         )
+
+    with open("boagent_answer.log", 'a') as fd:
+        fd.write("{}\n".format(str(server_impact)))
+        fd.close()
 
     return server_impact
 

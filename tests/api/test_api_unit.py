@@ -80,7 +80,7 @@ class FormatUsageRequestTest(TestCase):
         )
 
         assert type(formatted_request) is dict
-        assert "hours_use_time" in formatted_request
+        assert "use_time_ratio" in formatted_request
 
     def test_format_usage_request_with_host_avg_consumption_and_location(
         self,

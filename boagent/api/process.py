@@ -1,5 +1,5 @@
 from collections import defaultdict
-from .exceptions import InvalidPIDException
+from boagent.api.exceptions import InvalidPIDException
 
 
 class Process:
