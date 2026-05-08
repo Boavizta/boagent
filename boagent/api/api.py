@@ -19,6 +19,7 @@ from boagent.api.utils import (
 from boagent.api.config import Settings
 from boagent.api.process import Process
 from boagent.api.models import WorkloadTime, time_workload_example
+from boagent.api.utils import configure_logger
 
 settings = Settings()
 
@@ -43,7 +44,6 @@ TAGS_METADATA = settings.tags_metadata
 def configure_static(app):
     app.mount("/assets", StaticFiles(directory=ASSETS_PATH), name="assets")
 
-
 def configure_app():
     app = FastAPI(
         title=PROJECT_NAME,
@@ -56,9 +56,8 @@ def configure_app():
     configure_static(app)
     return app
 
-
 app = configure_app()
-
+logger = configure_logger()
 
 @app.get("/info", tags=["info"])
 async def info():
@@ -392,16 +391,16 @@ def get_power_data(start_time, end_time):
         try:
             data = json.loads(formatted_data)
         except json.decoder.JSONDecodeError as e:
-            print("formatted_data: {}".format(formatted_data))
-            print("Catched JSONDecodeError: '{}'".format(e))
-            print("Retrying reading power_data")
+            logger.debug("formatted_data: {}".format(formatted_data))
+            logger.debug("Catched JSONDecodeError: '{}'".format(e))
+            logger.debug("Retrying reading power_data")
             try:
                 formatted_data = f"{raw_data[:-1]}]"
                 data = json.loads(formatted_data)
             except json.decoder.JSONDecodeError as e2:
-                print("formatted_data: {}".format(formatted_data))
-                print("Catched JSONDecodeError: '{}'".format(e2))
-                print("Retrying reading power_data")
+                logger.debug("formatted_data: {}".format(formatted_data))
+                logger.debug("Catched JSONDecodeError: '{}'".format(e2))
+                logger.debug("Retrying reading power_data")
                 formatted_data = f"{raw_data[:-2]}]"
                 data = json.loads(formatted_data)
         queried_power_data = [

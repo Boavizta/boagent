@@ -5,12 +5,13 @@ import time
 from os import uname
 from sys import exit
 import signal
-from boagent.api.api import get_metrics, DEFAULT_LIFETIME
+from boagent.api.api import get_metrics, DEFAULT_LIFETIME, configure_logger
 from boagent.api.utils import iso8601_or_timestamp_as_timestamp, format_prometheus_metric, format_prometheus_output
 
+logger = configure_logger()
 
 def handler(signum, frame):
-    print("Signal handler called with signal {}".format(signum))
+    logger.info("Signal handler called with signal {}".format(signum))
     exit(signum)
 
 @click.command("prometheus-push")
@@ -57,6 +58,10 @@ def prometheus_push(push_url, push_job, push_suffix,
                 labels=labels
             )
             p = requests.post(url, data=body, verify=True if not no_certificate_check else False)
+            if p.status_code > 299:
+                logger.error("Pushing data to PushGateway failed: status={} reason={}".format(p.status_code, p.reason))
+            else:
+                logger.info("Pushing data to PushGateway succeeded: status={} reason={}".format(p.status_code, p.reason))
             time.sleep(step)
     else:
         metrics = get_metrics(

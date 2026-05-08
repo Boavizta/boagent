@@ -3,10 +3,23 @@ from boaviztapi_sdk import ApiClient, Configuration
 from dateutil import parser
 from boagent.api.config import Settings
 from os import PathLike
+import logging
+import logging.handlers
 
 settings = Settings()
 BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint
 
+def configure_logger():
+    logger = logging.getLogger("boagent")
+    formatter = logging.Formatter(settings.logging_formatter)
+    logger.setLevel(logging.DEBUG)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+    return logger
+
+logger = configure_logger()
 
 def sort_ram(items: list):
     hash_map = {}
@@ -64,17 +77,17 @@ def iso8601_or_timestamp_as_timestamp(iso_time: str) -> float:
         dt = None
         try:
             dt = parser.parse(iso_time)
-            print("{} is an iso 8601 datetime".format(iso_time))
+            logger.debug("{} is an iso 8601 datetime".format(iso_time))
         except Exception as e:
-            print("{} is not an iso 8601 datetime".format(iso_time))
-            print("Exception : {}".format(e))
+            logger.debug("{} is not an iso 8601 datetime".format(iso_time))
+            logger.debug("Exception : {}".format(e))
             try:
                 dt = datetime.fromtimestamp(int(round(float(iso_time))))
-                print("{} is a timestamp".format(iso_time))
+                logger.debug("{} is a timestamp".format(iso_time))
             except Exception as e:
-                print("{} is not a timestamp".format(iso_time))
-                print("Exception : {}".format(e))
-                print("Parser would give : {}".format(parser.parse(iso_time)))
+                logger.debug("{} is not a timestamp".format(iso_time))
+                logger.debug("Exception : {}".format(e))
+                logger.debug("Parser would give : {}".format(parser.parse(iso_time)))
         finally:
             if dt:
                 return dt.timestamp()

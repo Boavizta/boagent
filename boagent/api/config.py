@@ -33,3 +33,4 @@ class Settings(BaseSettings):
     carbon_aware_api_endpoint: str = "https://carbon-aware-api.azurewebsites.net"
     carbon_aware_api_token: str = "token"
     azure_location: str = "northeurope"
+    logging_formatter: str = '%(asctime)s | %(name)s |  %(levelname)s: %(message)s'
