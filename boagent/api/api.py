@@ -17,6 +17,7 @@ from boagent.api.utils import (
 )
 from boagent.api.types import (
     AveragePower,
+    CriteriaChoice,
     MetricType,
     TimeWorkload,
     impact_criteria,
@@ -229,6 +230,7 @@ def get_metrics(
     lifetime: float,
     fetch_hardware: bool,
     time_workload: TimeWorkload = None,
+    criteria: CriteriaChoice = CriteriaChoice.MainCriteria,
 ):
 
     now: float = time.time()

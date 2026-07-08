@@ -81,3 +81,6 @@ pe = ImpactCriterion(
 impact_criteria = ImpactCriteria(adp, gwp, pe)
 
 MetricType = Enum("Metric", [("Gauge", "gauge"), ("Counter", "counter")])
+CriteriaChoice = Enum(
+    "CriteriaChoice", [("MainCriteria", "main"), ("AllCriteria", "all")]
+)
