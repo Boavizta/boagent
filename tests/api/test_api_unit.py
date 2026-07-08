@@ -14,6 +14,8 @@ from boagent.api.api import (
     get_power_data,
     get_metrics,
 )
+from boagent.api.types import TimeWorkload
+from boagent.api.models import WorkloadTime
 from boagent.api.utils import format_prometheus_output
 from tests.mocks.mocks import (
     MockLshw,
@@ -203,12 +205,16 @@ class GetPowerDataTest(TestCase):
 @patch("boagent.api.api.query_machine_impact_data")
 class GetMetricsNotVerboseNoScaphandreTest(TestCase):
     def setUp(self) -> None:
+        first_workload = WorkloadTime(time_percentage=50.0, load_percentage=0.0)
+        second_workload = WorkloadTime(time_percentage=25.0, load_percentage=60.0)
+        third_workload = WorkloadTime(time_percentage=25.0, load_percentage=100.0)
+
         self.time_workload_as_percentage = {"time_workload": 70.0}
-        self.time_workload_as_list_of_dicts = {
+        self.time_workload_as_list_of_dicts: TimeWorkload = {
             "time_workload": [
-                {"time_percentage": 50.0, "load_percentage": 0.0},
-                {"time_percentage": 25.0, "load_percentage": 60.0},
-                {"time_percentage": 25.0, "load_percentage": 100.0},
+                first_workload,
+                second_workload,
+                third_workload,
             ]
         }
         self.start_time = 1710837858
