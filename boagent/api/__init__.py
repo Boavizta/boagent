@@ -1,2 +1,2 @@
 # Define the __all__ variable
-__all__ = ["api", "config", "exceptions", "models", "process", "utils"]
+__all__ = ["api", "config", "exceptions", "models", "process", "utils", "types"]

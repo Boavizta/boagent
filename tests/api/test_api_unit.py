@@ -206,9 +206,9 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
         self.time_workload_as_percentage = {"time_workload": 70.0}
         self.time_workload_as_list_of_dicts = {
             "time_workload": [
-                {"time_percentage": 50, "load_percentage": 0},
-                {"time_percentage": 25, "load_percentage": 60},
-                {"time_percentage": 25, "load_percentage": 100},
+                {"time_percentage": 50.0, "load_percentage": 0.0},
+                {"time_percentage": 25.0, "load_percentage": 60.0},
+                {"time_percentage": 25.0, "load_percentage": 100.0},
             ]
         }
         self.start_time = 1710837858

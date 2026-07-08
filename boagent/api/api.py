@@ -1,6 +1,6 @@
 import json
 import time
-from typing import Dict, Any, List, Union
+from typing import Dict, Any
 from fastapi import FastAPI, Response, Body, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
@@ -15,10 +15,17 @@ from boagent.api.utils import (
     sort_ram,
     sort_disks,
 )
+from boagent.api.types import (
+    AveragePower,
+    MetricType,
+    TimeWorkload,
+    impact_criteria,
+    units,
+)
 
 from boagent.api.config import Settings
 from boagent.api.process import Process
-from boagent.api.models import WorkloadTime, time_workload_example
+from boagent.api.models import time_workload_example
 from boagent.api.utils import configure_logger
 
 settings = Settings()
@@ -44,6 +51,7 @@ TAGS_METADATA = settings.tags_metadata
 def configure_static(app):
     app.mount("/assets", StaticFiles(directory=ASSETS_PATH), name="assets")
 
+
 def configure_app():
     app = FastAPI(
         title=PROJECT_NAME,
@@ -56,8 +64,10 @@ def configure_app():
     configure_static(app)
     return app
 
+
 app = configure_app()
 logger = configure_logger()
+
 
 @app.get("/info", tags=["info"])
 async def info():
@@ -146,9 +156,7 @@ async def query_with_time_workload(
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
-    time_workload: Union[dict[str, float], dict[str, List[WorkloadTime]]] = Body(
-        None, example=time_workload_example
-    ),
+    time_workload: TimeWorkload = Body(None, example=time_workload_example),
 ):
     """
     start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
@@ -220,7 +228,7 @@ def get_metrics(
     measure_power: bool,
     lifetime: float,
     fetch_hardware: bool,
-    time_workload: Union[dict[str, float], dict[str, List[WorkloadTime]], None] = None,
+    time_workload: TimeWorkload = None,
 ):
 
     now: float = time.time()
@@ -260,52 +268,57 @@ def get_metrics(
         model={},
         configuration=hardware_data,
         usage=format_usage_request(
-            start_time, end_time, avg_power, location, lifetime * SECONDS_IN_ONE_YEAR,time_workload
+            start_time,
+            end_time,
+            avg_power,
+            location,
+            lifetime * SECONDS_IN_ONE_YEAR,
+            time_workload,
         ),
     )
 
     if measure_power:
         res["total_operational_emissions"] = {
             "value": boaviztapi_data["impacts"]["gwp"]["use"],
-            "description": "GHG emissions related to usage, from start_time to end_time.",
-            "type": "gauge",
-            "unit": "kg CO2eq",
-            "long_unit": "kilograms CO2 equivalent",
+            "description": impact_criteria.gwp.use_stage,
+            "type": MetricType.Gauge.value,
+            "unit": units.co2_equivalent.short_form,
+            "long_unit": units.co2_equivalent.long_form,
         }
         res["total_operational_abiotic_resources_depletion"] = {
             "value": boaviztapi_data["impacts"]["adp"]["use"],
-            "description": "Abiotic Resources Depletion (minerals & metals, ADPe) due to the usage phase.",
-            "type": "gauge",
-            "unit": "kgSbeq",
-            "long_unit": "kilograms Antimony equivalent",
+            "description": impact_criteria.adp.use_stage,
+            "type": MetricType.Gauge.value,
+            "unit": units.sb_equivalent.short_form,
+            "long_unit": units.sb_equivalent.long_form,
         }
         res["total_operational_primary_energy_consumed"] = {
             "value": boaviztapi_data["impacts"]["pe"]["use"],
-            "description": "Primary Energy consumed due to the usage phase.",
-            "type": "gauge",
-            "unit": "MJ",
-            "long_unit": "Mega Joules",
+            "description": impact_criteria.pe.use_stage,
+            "type": MetricType.Gauge.value,
+            "unit": units.mega_joules.short_form,
+            "long_unit": units.mega_joules.long_form,
         }
         res["start_time"] = {
             "value": start_time,
             "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
-            "type": "counter",
-            "unit": "s",
-            "long_unit": "seconds",
+            "type": MetricType.Counter.value,
+            "unit": units.seconds.short_form,
+            "long_unit": units.seconds.long_form,
         }
         res["end_time"] = {
             "value": end_time,
             "description": "End time for the evaluation, in timestamp format (seconds since 1970)",
-            "type": "counter",
-            "unit": "s",
-            "long_unit": "seconds",
+            "type": MetricType.Counter.value,
+            "unit": units.seconds.short_form,
+            "long_unit": units.seconds.long_form,
         }
         res["average_power_measured"] = {
             "value": avg_power,
             "description": "Average power measured from start_time to end_time",
-            "type": "gauge",
-            "unit": "W",
-            "long_unit": "Watts",
+            "type": MetricType.Gauge.value,
+            "unit": units.watts.short_form,
+            "long_unit": units.watts.long_form,
         }
 
     """ res["calculated_emissions"] = {
@@ -313,31 +326,31 @@ def get_metrics(
         + boaviztapi_data["impacts"]["gwp"]["use"]["value"],
         "description": "Total Green House Gas emissions calculated for manufacturing and usage phases, between "
         "start_time and end_time",
-        "type": "gauge",
-        "unit": "kg CO2eq",
-        "long_unit": "kilograms CO2 equivalent",
+        "type":  MetricType.Gauge.value,
+        "unit": units.co2_equivalent.short_form,
+        "long_unit": units.co2_equivalent.long_form,
     } """
 
     res["embedded_emissions"] = {
         "value": boaviztapi_data["impacts"]["gwp"]["embedded"]["value"] * ratio,
-        "description": "Embedded carbon emissions (manufacturing phase)",
-        "type": "gauge",
-        "unit": "kg CO2eq",
-        "long_unit": "kilograms CO2 equivalent",
+        "description": impact_criteria.gwp.embedded,
+        "type": MetricType.Gauge.value,
+        "unit": units.co2_equivalent.short_form,
+        "long_unit": units.co2_equivalent.long_form,
     }
     res["embedded_abiotic_resources_depletion"] = {
         "value": boaviztapi_data["impacts"]["adp"]["embedded"]["value"] * ratio,
-        "description": "Embedded abiotic ressources consumed (manufacturing phase)",
-        "type": "gauge",
-        "unit": "kg Sbeq",
-        "long_unit": "kilograms ADP equivalent",
+        "description": impact_criteria.adp.embedded,
+        "type": MetricType.Gauge.value,
+        "unit": units.sb_equivalent.short_form,
+        "long_unit": units.sb_equivalent.long_form,
     }
     res["embedded_primary_energy"] = {
         "value": boaviztapi_data["impacts"]["pe"]["embedded"]["value"] * ratio,
-        "description": "Embedded primary energy consumed (manufacturing phase)",
-        "type": "gauge",
-        "unit": "MJ",
-        "long_unit": "Mega Joules",
+        "description": impact_criteria.pe.embedded,
+        "type": MetricType.Gauge.value,
+        "unit": units.mega_joules.short_form,
+        "long_unit": units.mega_joules.long_form,
     }
 
     if verbose:
@@ -350,12 +363,10 @@ def get_metrics(
         }
         res["electricity_carbon_intensity"] = {
             "value": boaviztapi_data["verbose"]["gwp_factor"]["value"],
-            "description": "Carbon intensity of the electricity mix. Mix considered : {}".format(
-                location
-            ),
-            "type": "gauge",
-            "unit": "kg CO2eq / kWh",
-            "long_unit": "Kilograms CO2 equivalent per KiloWattHour",
+            "description": f"Carbon intensity of the electricity mix. Mix considered : {location}",
+            "type": MetricType.Gauge.value,
+            "unit": units.co2_equivalent_per_khw.short_form,
+            "long_unit": units.co2_equivalent_per_khw.long_form,
         }
 
         if measure_power:
@@ -367,12 +378,12 @@ def get_metrics(
 def format_usage_request(
     start_time: float,
     end_time: float,
-    avg_power: Union[float, None] = None,
+    avg_power: AveragePower = None,
     location: str = "EEE",
     lifetime: float = DEFAULT_LIFETIME * SECONDS_IN_ONE_YEAR,
-    time_workload: Union[dict[str, float], dict[str, List[WorkloadTime]], None] = None,
+    time_workload: TimeWorkload = None,
 ):
-    kwargs_usage = { "use_time_ratio": (end_time - start_time) / lifetime }
+    kwargs_usage = {"use_time_ratio": (end_time - start_time) / lifetime}
     if location:
         kwargs_usage["usage_location"] = location
     if avg_power:
@@ -467,7 +478,7 @@ def query_machine_impact_data(
 
     server_impact = None
 
-    with open("boagent_request.log", 'a') as fd:
+    with open("boagent_request.log", "a") as fd:
         fd.write("{}\n".format(str(usage)))
         fd.write("{}\n".format(str(configuration)))
         fd.close()
@@ -475,8 +486,8 @@ def query_machine_impact_data(
     if configuration:
         server = Server(usage=usage, configuration=configuration)
         server_impact = server_api.server_impact_from_configuration_v1_server_post(
-            server=server#,
-            #duration=(usage["hours_use_time"])
+            server=server  # ,
+            # duration=(usage["hours_use_time"])
         )
     elif model:
         # server = Server(usage=usage, model=model)
@@ -488,7 +499,7 @@ def query_machine_impact_data(
             archetype="dellR740"
         )
 
-    with open("boagent_answer.log", 'a') as fd:
+    with open("boagent_answer.log", "a") as fd:
         fd.write("{}\n".format(str(server_impact)))
         fd.close()
 
