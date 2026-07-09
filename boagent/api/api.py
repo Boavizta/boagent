@@ -12,6 +12,7 @@ from boagent.api.utils import (
     iso8601_or_timestamp_as_timestamp,
     format_prometheus_output,
     get_boavizta_api_client,
+    ratio,
     sort_ram,
     sort_disks,
 )
@@ -235,9 +236,9 @@ def get_metrics(
 
     now: float = time.time()
     if start_time and end_time:
-        ratio = (end_time - start_time) / (lifetime * SECONDS_IN_ONE_YEAR)
+        ratio_value = (end_time - start_time) / (lifetime * SECONDS_IN_ONE_YEAR)
     else:
-        ratio = 1.0
+        ratio_value = 1.0
     if start_time == 0.0:
         start_time = now - 3600
     if end_time == 0.0:
@@ -334,21 +335,27 @@ def get_metrics(
     } """
 
     res["embedded_emissions"] = {
-        "value": boaviztapi_data["impacts"]["gwp"]["embedded"]["value"] * ratio,
+        "value": ratio(
+            boaviztapi_data["impacts"]["gwp"]["embedded"]["value"], ratio_value
+        ),
         "description": impact_criteria.gwp.embedded,
         "type": MetricType.Gauge.value,
         "unit": units.co2_equivalent.short_form,
         "long_unit": units.co2_equivalent.long_form,
     }
     res["embedded_abiotic_resources_depletion"] = {
-        "value": boaviztapi_data["impacts"]["adp"]["embedded"]["value"] * ratio,
+        "value": ratio(
+            boaviztapi_data["impacts"]["adp"]["embedded"]["value"], ratio_value
+        ),
         "description": impact_criteria.adp.embedded,
         "type": MetricType.Gauge.value,
         "unit": units.sb_equivalent.short_form,
         "long_unit": units.sb_equivalent.long_form,
     }
     res["embedded_primary_energy"] = {
-        "value": boaviztapi_data["impacts"]["pe"]["embedded"]["value"] * ratio,
+        "value": ratio(
+            boaviztapi_data["impacts"]["pe"]["embedded"]["value"], ratio_value
+        ),
         "description": impact_criteria.pe.embedded,
         "type": MetricType.Gauge.value,
         "unit": units.mega_joules.short_form,

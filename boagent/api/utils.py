@@ -9,6 +9,7 @@ import logging.handlers
 settings = Settings()
 BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint
 
+
 def configure_logger():
     logger = logging.getLogger("boagent")
     formatter = logging.Formatter(settings.logging_formatter)
@@ -19,7 +20,9 @@ def configure_logger():
     logger.addHandler(stream_handler)
     return logger
 
+
 logger = configure_logger()
+
 
 def sort_ram(items: list):
     hash_map = {}
@@ -110,7 +113,7 @@ def format_prometheus_output(res, verbose: bool, labels: dict = {}):
                     ),
                     v["type"],
                     v["value"],
-                    labels
+                    labels,
                 )
             if type(v["value"]) is dict:
                 response += format_prometheus_metric(
@@ -121,7 +124,7 @@ def format_prometheus_output(res, verbose: bool, labels: dict = {}):
                     ),
                     v["type"],
                     v["value"]["value"],
-                    labels
+                    labels,
                 )
 
         else:
@@ -140,7 +143,7 @@ def format_prometheus_output(res, verbose: bool, labels: dict = {}):
                             ),
                             y["type"],
                             y["value"],
-                            labels
+                            labels,
                         )
         if verbose:
             if "boaviztapi_data" in v:
@@ -153,14 +156,16 @@ def format_prometheus_output(res, verbose: bool, labels: dict = {}):
                                 pass
                             else:
                                 response += format_prometheus_metric(
-                                    "boaviztapi_{}".format(f"{impact_name}_total_impact_{value}"),
+                                    "boaviztapi_{}".format(
+                                        f"{impact_name}_total_impact_{value}"
+                                    ),
                                     "{}. {}".format(
                                         impact_items["description"],
                                         "In {}".format(impact_items["unit"]),
                                     ),
                                     "{}".format("gauge"),
                                     "{}".format(f"{impact_items['embedded'][value]}"),
-                                    labels
+                                    labels,
                                 )
 
                 for component_name, component_impacts in v["boaviztapi_data"][
@@ -187,7 +192,7 @@ def format_prometheus_output(res, verbose: bool, labels: dict = {}):
                                         "{}".format(
                                             f"{value}",
                                         ),
-                                        labels
+                                        labels,
                                     )
 
     return response
@@ -199,7 +204,7 @@ def format_prometheus_metric(
 
     labels_str = "{"
     for k, v in labels.items():
-        labels_str += "{}=\"{}\"".format(k, v)
+        labels_str += '{}="{}"'.format(k, v)
     labels_str += "}"
     response = """# HELP {} {}
 # TYPE {} {}
@@ -239,3 +244,8 @@ def format_scaphandre_json(file: str | PathLike) -> str:
             '{"host"', ',{"host"'
         ).replace(',{"host"', '{"host"', 1)
     return formatted_scaphandre_json
+
+
+def ratio(value: int | float, ratio: int | float):
+    ratioed_value = value * ratio
+    return ratioed_value
