@@ -1,6 +1,7 @@
 import os
 import json
 
+from dataclasses import asdict
 from unittest import TestCase, TestSuite, TestLoader
 from unittest.mock import Mock, patch
 
@@ -14,7 +15,8 @@ from boagent.api.api import (
     get_power_data,
     get_metrics,
 )
-from boagent.api.types import TimeWorkload
+from boagent.api.types import CriteriaChoice, TimeWorkload
+from boagent.api.data import impact_criteria
 from boagent.api.models import WorkloadTime
 from boagent.api.utils import format_prometheus_output
 from tests.mocks.mocks import (
@@ -329,13 +331,12 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
 @patch("boagent.api.api.query_machine_impact_data")
 class GetMetricsVerboseNoScaphandreTest(TestCase):
     def setUp(self) -> None:
+        first_workload = WorkloadTime(time_percentage=50.0, load_percentage=0.0)
+        second_workload = WorkloadTime(time_percentage=25.0, load_percentage=60.0)
+        third_workload = WorkloadTime(time_percentage=25.0, load_percentage=100.0)
         self.time_workload_as_percentage = {"time_workload": 70.0}
-        self.time_workload_as_list_of_dicts = {
-            "time_workload": [
-                {"time_percentage": 50, "load_percentage": 0},
-                {"time_percentage": 25, "load_percentage": 60},
-                {"time_percentage": 25, "load_percentage": 100},
-            ]
+        self.time_workload_as_list_of_dicts: TimeWorkload = {
+            "time_workload": [first_workload, second_workload, third_workload]
         }
 
         self.start_time = 1710837858
@@ -403,6 +404,28 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
         assert "embedded_primary_energy" in metrics
         assert "raw_data" in metrics
         assert "electricity_carbon_intensity" in metrics
+
+    def test_get_metrics_verbose_with_all_criteria_queried(
+        self, mocked_read_hardware_data, mocked_query_machine_impact_data
+    ):
+
+        criteria = CriteriaChoice.AllCriteria
+        metrics = get_metrics(
+            self.start_time,
+            self.end_time,
+            self.verbose,
+            self.location,
+            self.measure_power,
+            self.lifetime,
+            self.fetch_hardware,
+            self.time_workload_as_list_of_dicts,
+            criteria,
+        )
+
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+        for criteria in asdict(impact_criteria).values():
+            assert criteria["boagent_embedded_key"] in metrics
 
 
 class GetMetricsVerboseWithScaphandreTest(TestCase):

@@ -1,3 +1,4 @@
+from dataclasses import asdict
 import json
 import time
 from typing import Dict, Any
@@ -21,6 +22,8 @@ from boagent.api.types import (
     CriteriaChoice,
     MetricType,
     TimeWorkload,
+)
+from boagent.api.data import (
     impact_criteria,
     units,
 )
@@ -263,9 +266,9 @@ def get_metrics(
         power_data = get_power_data(start_time, end_time)
         avg_power = power_data["avg_power"]
         if "warning" in power_data:
-            res["emissions_calculation_data"][
-                "energy_consumption_warning"
-            ] = power_data["warning"]
+            res["emissions_calculation_data"]["energy_consumption_warning"] = (
+                power_data["warning"]
+            )
 
     boaviztapi_data = query_machine_impact_data(
         model={},
@@ -281,22 +284,22 @@ def get_metrics(
     )
 
     if measure_power:
-        res["total_operational_emissions"] = {
-            "value": boaviztapi_data["impacts"]["gwp"]["use"],
+        res[impact_criteria.gwp.boagent_use_key] = {
+            "value": boaviztapi_data["impacts"][impact_criteria.gwp.key]["use"],
             "description": impact_criteria.gwp.use_stage,
             "type": MetricType.Gauge.value,
             "unit": units.co2_equivalent.short_form,
             "long_unit": units.co2_equivalent.long_form,
         }
-        res["total_operational_abiotic_resources_depletion"] = {
-            "value": boaviztapi_data["impacts"]["adp"]["use"],
+        res[impact_criteria.adp.boagent_use_key] = {
+            "value": boaviztapi_data["impacts"][impact_criteria.adp.key]["use"],
             "description": impact_criteria.adp.use_stage,
             "type": MetricType.Gauge.value,
             "unit": units.sb_equivalent.short_form,
             "long_unit": units.sb_equivalent.long_form,
         }
-        res["total_operational_primary_energy_consumed"] = {
-            "value": boaviztapi_data["impacts"]["pe"]["use"],
+        res[impact_criteria.pe.boagent_use_key] = {
+            "value": boaviztapi_data["impacts"][impact_criteria.pe.key]["use"],
             "description": impact_criteria.pe.use_stage,
             "type": MetricType.Gauge.value,
             "unit": units.mega_joules.short_form,
@@ -334,33 +337,53 @@ def get_metrics(
         "long_unit": units.co2_equivalent.long_form,
     } """
 
-    res["embedded_emissions"] = {
-        "value": ratio(
-            boaviztapi_data["impacts"]["gwp"]["embedded"]["value"], ratio_value
-        ),
-        "description": impact_criteria.gwp.embedded,
-        "type": MetricType.Gauge.value,
-        "unit": units.co2_equivalent.short_form,
-        "long_unit": units.co2_equivalent.long_form,
-    }
-    res["embedded_abiotic_resources_depletion"] = {
-        "value": ratio(
-            boaviztapi_data["impacts"]["adp"]["embedded"]["value"], ratio_value
-        ),
-        "description": impact_criteria.adp.embedded,
-        "type": MetricType.Gauge.value,
-        "unit": units.sb_equivalent.short_form,
-        "long_unit": units.sb_equivalent.long_form,
-    }
-    res["embedded_primary_energy"] = {
-        "value": ratio(
-            boaviztapi_data["impacts"]["pe"]["embedded"]["value"], ratio_value
-        ),
-        "description": impact_criteria.pe.embedded,
-        "type": MetricType.Gauge.value,
-        "unit": units.mega_joules.short_form,
-        "long_unit": units.mega_joules.long_form,
-    }
+    if criteria == CriteriaChoice.MainCriteria:
+        res[impact_criteria.gwp.boagent_embedded_key] = {
+            "value": ratio(
+                boaviztapi_data["impacts"][impact_criteria.gwp.key]["embedded"][
+                    "value"
+                ],
+                ratio_value,
+            ),
+            "description": impact_criteria.gwp.embedded,
+            "type": MetricType.Gauge.value,
+            "unit": impact_criteria.gwp.unit.short_form,
+            "long_unit": impact_criteria.gwp.unit.long_form,
+        }
+        res[impact_criteria.adp.boagent_embedded_key] = {
+            "value": ratio(
+                boaviztapi_data["impacts"][impact_criteria.adp.key]["embedded"][
+                    "value"
+                ],
+                ratio_value,
+            ),
+            "description": impact_criteria.adp.embedded,
+            "type": MetricType.Gauge.value,
+            "unit": impact_criteria.adp.unit.short_form,
+            "long_unit": impact_criteria.adp.unit.long_form,
+        }
+        res[impact_criteria.pe.boagent_embedded_key] = {
+            "value": ratio(
+                boaviztapi_data["impacts"][impact_criteria.pe.key]["embedded"]["value"],
+                ratio_value,
+            ),
+            "description": impact_criteria.pe.embedded,
+            "type": MetricType.Gauge.value,
+            "unit": impact_criteria.pe.unit.short_form,
+            "long_unit": impact_criteria.pe.unit.long_form,
+        }
+    elif criteria == CriteriaChoice.AllCriteria:
+        for key, value in asdict(impact_criteria).items():
+            res[value["boagent_embedded_key"]] = {
+                "value": ratio(
+                    boaviztapi_data["impacts"][key]["embedded"]["value"],
+                    ratio_value,
+                ),
+                "description": value["embedded"],
+                "type": MetricType.Gauge.value,
+                "unit": value["unit"]["short_form"],
+                "long_unit": value["unit"]["long_form"],
+            }
 
     if verbose:
         res["raw_data"] = {
