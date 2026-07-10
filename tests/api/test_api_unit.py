@@ -322,7 +322,6 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
         mocked_read_hardware_data.return_value = self.hardware_data
         mocked_query_machine_impact_data.return_value = self.boaviztapi_data
 
-        print(len(empty_location))
         assert type(metrics) is dict
         assert "location_warning" in metrics
 

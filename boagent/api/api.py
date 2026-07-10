@@ -326,63 +326,35 @@ def get_metrics(
         }
 
     if criteria == CriteriaChoice.MainCriteria:
-        res[impact_criteria.gwp.boagent_embedded_key] = {
-            "value": ratio(
-                boaviztapi_data["impacts"][impact_criteria.gwp.key]["embedded"][
-                    "value"
-                ],
-                ratio_value,
-            ),
-            "description": impact_criteria.gwp.embedded,
-            "type": MetricType.Gauge.value,
-            "unit": impact_criteria.gwp.unit.short_form,
-            "long_unit": impact_criteria.gwp.unit.long_form,
-        }
-        res[impact_criteria.adp.boagent_embedded_key] = {
-            "value": ratio(
-                boaviztapi_data["impacts"][impact_criteria.adp.key]["embedded"][
-                    "value"
-                ],
-                ratio_value,
-            ),
-            "description": impact_criteria.adp.embedded,
-            "type": MetricType.Gauge.value,
-            "unit": impact_criteria.adp.unit.short_form,
-            "long_unit": impact_criteria.adp.unit.long_form,
-        }
-        res[impact_criteria.pe.boagent_embedded_key] = {
-            "value": ratio(
-                boaviztapi_data["impacts"][impact_criteria.pe.key]["embedded"]["value"],
-                ratio_value,
-            ),
-            "description": impact_criteria.pe.embedded,
-            "type": MetricType.Gauge.value,
-            "unit": impact_criteria.pe.unit.short_form,
-            "long_unit": impact_criteria.pe.unit.long_form,
-        }
+        main_criteria = filter(
+            lambda c: c["key"] == "gwp" or c["key"] == "adp" or c["key"] == "pe",
+            list(asdict(impact_criteria).values()),
+        )
+
+        for main_criterion in main_criteria:
+            res[main_criterion["boagent_embedded_key"]] = {
+                "value": ratio(
+                    boaviztapi_data["impacts"][main_criterion["key"]]["embedded"][
+                        "value"
+                    ],
+                    ratio_value,
+                ),
+                "description": main_criterion["embedded"],
+                "type": MetricType.Gauge.value,
+                "unit": main_criterion["unit"]["short_form"],
+                "long_unit": main_criterion["unit"]["long_form"],
+            }
+            if measure_power:
+
+                res[main_criterion["boagent_use_key"]] = {
+                    "value": boaviztapi_data["impacts"][main_criterion["key"]]["use"],
+                    "description": main_criterion["use_stage"],
+                    "type": MetricType.Gauge.value,
+                    "unit": main_criterion["unit"]["short_form"],
+                    "long_unit": main_criterion["unit"]["long_form"],
+                }
 
         if measure_power:
-            res[impact_criteria.gwp.boagent_use_key] = {
-                "value": boaviztapi_data["impacts"][impact_criteria.gwp.key]["use"],
-                "description": impact_criteria.gwp.use_stage,
-                "type": MetricType.Gauge.value,
-                "unit": units.co2_equivalent.short_form,
-                "long_unit": units.co2_equivalent.long_form,
-            }
-            res[impact_criteria.adp.boagent_use_key] = {
-                "value": boaviztapi_data["impacts"][impact_criteria.adp.key]["use"],
-                "description": impact_criteria.adp.use_stage,
-                "type": MetricType.Gauge.value,
-                "unit": units.sb_equivalent.short_form,
-                "long_unit": units.sb_equivalent.long_form,
-            }
-            res[impact_criteria.pe.boagent_use_key] = {
-                "value": boaviztapi_data["impacts"][impact_criteria.pe.key]["use"],
-                "description": impact_criteria.pe.use_stage,
-                "type": MetricType.Gauge.value,
-                "unit": units.mega_joules.short_form,
-                "long_unit": units.mega_joules.long_form,
-            }
             res["start_time"] = {
                 "value": start_time,
                 "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
