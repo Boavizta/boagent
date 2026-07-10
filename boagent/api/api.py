@@ -298,8 +298,10 @@ def get_metrics(
 
     if measure_power:
         res["calculated_emissions"] = {
-            "value": boaviztapi_data["impacts"][impact_criteria.gwp.key]["value"]
-            * ratio
+            "value": boaviztapi_data["impacts"][impact_criteria.gwp.key]["embedded"][
+                "value"
+            ]
+            * ratio_value
             + boaviztapi_data["impacts"][impact_criteria.gwp.key]["use"]["value"],
             "description": "Total Green House Gas emissions calculated for manufacturing and usage phases, between "
             "start_time and end_time",

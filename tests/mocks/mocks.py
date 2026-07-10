@@ -9,8 +9,11 @@ mock_boaviztapi_response_not_verbose = os.path.join(
 mock_boaviztapi_response_verbose = os.path.join(
     f"{current_dir}", "../mocks/boaviztapi_response_verbose.json"
 )
+mock_boavizta_response_verbose_all_criteria = os.path.join(
+    f"{current_dir}", "../mocks/boaviztapi_response_verbose_all_criteria.json"
+)
 mock_boavizta_response_not_verbose_all_criteria = os.path.join(
-    f"{current_dir}", "../mocks/boavizta_response_not_verbose_all_criteria.json"
+    f"{current_dir}", "../mocks/boaviztapi_response_not_verbose_all_criteria.json"
 )
 mock_formatted_scaphandre = os.path.join(
     f"{current_dir}", "../mocks/formatted_power_data_one_hour.json"
