@@ -154,21 +154,10 @@
       }
     },
     "fw": {
-      "unit": "kgCO2eq",
-      "description": "Total climate change",
-      "embedded": {
-        "value": 1176,
-        "min": 1112,
-        "max": 1176,
-        "warnings": [
-          "End of life is not included in the calculation"
-        ]
-      },
-      "use": {
-        "value": 10000,
-        "min": 526.5,
-        "max": 34540
-      }
+      "unit": "m3",
+      "description": "Net use of fresh water",
+      "embedded": "not implemented",
+      "use": "not implemented"
     },
     "gwppb": {
       "unit": "kgCO2eq",

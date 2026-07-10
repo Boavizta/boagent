@@ -283,18 +283,33 @@ def get_metrics(
                 power_data["warning"]
             )
 
-    boaviztapi_data = query_machine_impact_data(
-        model={},
-        configuration=hardware_data,
-        usage=format_usage_request(
-            start_time,
-            end_time,
-            avg_power,
-            location,
-            lifetime * SECONDS_IN_ONE_YEAR,
-            time_workload,
-        ),
-    )
+    if criteria == CriteriaChoice.MainCriteria:
+        boaviztapi_data = query_machine_impact_data(
+            model={},
+            configuration=hardware_data,
+            usage=format_usage_request(
+                start_time,
+                end_time,
+                avg_power,
+                location,
+                lifetime * SECONDS_IN_ONE_YEAR,
+                time_workload,
+            ),
+        )
+    elif criteria == CriteriaChoice.AllCriteria:
+        boaviztapi_data = query_machine_impact_data(
+            model={},
+            configuration=hardware_data,
+            usage=format_usage_request(
+                start_time,
+                end_time,
+                avg_power,
+                location,
+                lifetime * SECONDS_IN_ONE_YEAR,
+                time_workload,
+            ),
+            criteria=criteria,
+        )
 
     if measure_power:
         res["calculated_emissions"] = {
@@ -391,11 +406,17 @@ def get_metrics(
             }
     elif criteria == CriteriaChoice.AllCriteria:
         for key, value in asdict(impact_criteria).items():
+            # Embedded and use impacts are not implemented for all impact criteria in BoaviztAPI.
+            # BoaviztAPI returns 'not implemented' in that case.
+            if "value" in boaviztapi_data["impacts"][key]["embedded"]:
+                impact_value = ratio(
+                    boaviztapi_data["impacts"][key]["embedded"]["value"], ratio_value
+                )
+            else:
+                impact_value = boaviztapi_data["impacts"][key]["embedded"]
+
             res[value["boagent_embedded_key"]] = {
-                "value": ratio(
-                    boaviztapi_data["impacts"][key]["embedded"]["value"],
-                    ratio_value,
-                ),
+                "value": impact_value,
                 "description": value["embedded"],
                 "type": MetricType.Gauge.value,
                 "unit": value["unit"]["short_form"],
@@ -403,8 +424,13 @@ def get_metrics(
             }
 
             if measure_power:
+                if "value" in boaviztapi_data["impacts"][key]["use"]:
+                    impact_value = boaviztapi_data["impacts"][key]["use"]["value"]
+                else:
+                    impact_value = boaviztapi_data["impacts"][key]["use"]
+
                 res[value["boagent_use_key"]] = {
-                    "value": boaviztapi_data["impacts"][key]["use"],
+                    "value": impact_value,
                     "description": value["use_stage"],
                     "type": MetricType.Gauge.value,
                     "unit": value["unit"]["short_form"],
@@ -531,6 +557,7 @@ def query_machine_impact_data(
     model: dict[str, str],
     configuration: dict[str, dict[str, int]],
     usage: dict[str, Any],
+    criteria: CriteriaChoice = CriteriaChoice.MainCriteria,
 ) -> dict:
     server_api = ServerApi(get_boavizta_api_client())
 
@@ -543,10 +570,16 @@ def query_machine_impact_data(
 
     if configuration:
         server = Server(usage=usage, configuration=configuration)
-        server_impact = server_api.server_impact_from_configuration_v1_server_post(
-            server=server  # ,
-            # duration=(usage["hours_use_time"])
-        )
+        if criteria == CriteriaChoice.MainCriteria:
+            server_impact = server_api.server_impact_from_configuration_v1_server_post(
+                server=server  # ,
+                # duration=(usage["hours_use_time"])
+            )
+        elif criteria == CriteriaChoice.AllCriteria:
+            criteria_keys = list(asdict(impact_criteria).keys())
+            server_impact = server_api.server_impact_from_configuration_v1_server_post(
+                server=server, criteria=criteria_keys
+            )
     elif model:
         # server = Server(usage=usage, model=model)
         # TO IMPLEMENT
