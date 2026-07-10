@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 LABEL org.opencontainers.image.authors="open-source@boavizta.org"
 LABEL org.opencontainers.image.description="Docker image for Boagent, a local API & environmental impact monitoring tool."
