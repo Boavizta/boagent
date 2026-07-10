@@ -125,6 +125,7 @@ class ImpactCriteria:
     ap: ImpactCriterion
     ctue: ImpactCriterion
     ctuh_c: ImpactCriterion
+    ctuh_nc: ImpactCriterion
     epf: ImpactCriterion
     epm: ImpactCriterion
     ept: ImpactCriterion
@@ -414,6 +415,7 @@ impact_criteria = ImpactCriteria(
     adp,
     adpe,
     adpf,
+    ap,
     ctue,
     ctuh_c,
     ctuh_nc,

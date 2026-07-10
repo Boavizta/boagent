@@ -131,6 +131,7 @@ async def query(
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
+    criteria: str = CriteriaChoice.MainCriteria.value,
 ):
     """
     start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
@@ -141,15 +142,27 @@ async def query(
     lifetime: Full lifetime of the machine to evaluate.\n
     fetch_hardware: Regenerate hardware.json file with current machine hardware or not.\n
     """
-    return get_metrics(
-        iso8601_or_timestamp_as_timestamp(start_time),
-        iso8601_or_timestamp_as_timestamp(end_time),
-        verbose,
-        location,
-        measure_power,
-        lifetime,
-        fetch_hardware,
-    )
+    if criteria == CriteriaChoice.MainCriteria.value:
+        return get_metrics(
+            iso8601_or_timestamp_as_timestamp(start_time),
+            iso8601_or_timestamp_as_timestamp(end_time),
+            verbose,
+            location,
+            measure_power,
+            lifetime,
+            fetch_hardware,
+        )
+    elif criteria == CriteriaChoice.AllCriteria.value:
+        return get_metrics(
+            iso8601_or_timestamp_as_timestamp(start_time),
+            iso8601_or_timestamp_as_timestamp(end_time),
+            verbose,
+            location,
+            measure_power,
+            lifetime,
+            fetch_hardware,
+            criteria=CriteriaChoice.AllCriteria,
+        )
 
 
 @app.post("/query", tags=["query"])
@@ -284,58 +297,16 @@ def get_metrics(
     )
 
     if measure_power:
-        res[impact_criteria.gwp.boagent_use_key] = {
-            "value": boaviztapi_data["impacts"][impact_criteria.gwp.key]["use"],
-            "description": impact_criteria.gwp.use_stage,
+        res["calculated_emissions"] = {
+            "value": boaviztapi_data["impacts"][impact_criteria.gwp.key]["value"]
+            * ratio
+            + boaviztapi_data["impacts"][impact_criteria.gwp.key]["use"]["value"],
+            "description": "Total Green House Gas emissions calculated for manufacturing and usage phases, between "
+            "start_time and end_time",
             "type": MetricType.Gauge.value,
             "unit": units.co2_equivalent.short_form,
             "long_unit": units.co2_equivalent.long_form,
         }
-        res[impact_criteria.adp.boagent_use_key] = {
-            "value": boaviztapi_data["impacts"][impact_criteria.adp.key]["use"],
-            "description": impact_criteria.adp.use_stage,
-            "type": MetricType.Gauge.value,
-            "unit": units.sb_equivalent.short_form,
-            "long_unit": units.sb_equivalent.long_form,
-        }
-        res[impact_criteria.pe.boagent_use_key] = {
-            "value": boaviztapi_data["impacts"][impact_criteria.pe.key]["use"],
-            "description": impact_criteria.pe.use_stage,
-            "type": MetricType.Gauge.value,
-            "unit": units.mega_joules.short_form,
-            "long_unit": units.mega_joules.long_form,
-        }
-        res["start_time"] = {
-            "value": start_time,
-            "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
-            "type": MetricType.Counter.value,
-            "unit": units.seconds.short_form,
-            "long_unit": units.seconds.long_form,
-        }
-        res["end_time"] = {
-            "value": end_time,
-            "description": "End time for the evaluation, in timestamp format (seconds since 1970)",
-            "type": MetricType.Counter.value,
-            "unit": units.seconds.short_form,
-            "long_unit": units.seconds.long_form,
-        }
-        res["average_power_measured"] = {
-            "value": avg_power,
-            "description": "Average power measured from start_time to end_time",
-            "type": MetricType.Gauge.value,
-            "unit": units.watts.short_form,
-            "long_unit": units.watts.long_form,
-        }
-
-    """ res["calculated_emissions"] = {
-        "value": boaviztapi_data["impacts"]["gwp"]["value"] * ratio
-        + boaviztapi_data["impacts"]["gwp"]["use"]["value"],
-        "description": "Total Green House Gas emissions calculated for manufacturing and usage phases, between "
-        "start_time and end_time",
-        "type":  MetricType.Gauge.value,
-        "unit": units.co2_equivalent.short_form,
-        "long_unit": units.co2_equivalent.long_form,
-    } """
 
     if criteria == CriteriaChoice.MainCriteria:
         res[impact_criteria.gwp.boagent_embedded_key] = {
@@ -372,6 +343,50 @@ def get_metrics(
             "unit": impact_criteria.pe.unit.short_form,
             "long_unit": impact_criteria.pe.unit.long_form,
         }
+
+        if measure_power:
+            res[impact_criteria.gwp.boagent_use_key] = {
+                "value": boaviztapi_data["impacts"][impact_criteria.gwp.key]["use"],
+                "description": impact_criteria.gwp.use_stage,
+                "type": MetricType.Gauge.value,
+                "unit": units.co2_equivalent.short_form,
+                "long_unit": units.co2_equivalent.long_form,
+            }
+            res[impact_criteria.adp.boagent_use_key] = {
+                "value": boaviztapi_data["impacts"][impact_criteria.adp.key]["use"],
+                "description": impact_criteria.adp.use_stage,
+                "type": MetricType.Gauge.value,
+                "unit": units.sb_equivalent.short_form,
+                "long_unit": units.sb_equivalent.long_form,
+            }
+            res[impact_criteria.pe.boagent_use_key] = {
+                "value": boaviztapi_data["impacts"][impact_criteria.pe.key]["use"],
+                "description": impact_criteria.pe.use_stage,
+                "type": MetricType.Gauge.value,
+                "unit": units.mega_joules.short_form,
+                "long_unit": units.mega_joules.long_form,
+            }
+            res["start_time"] = {
+                "value": start_time,
+                "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
+                "type": MetricType.Counter.value,
+                "unit": units.seconds.short_form,
+                "long_unit": units.seconds.long_form,
+            }
+            res["end_time"] = {
+                "value": end_time,
+                "description": "End time for the evaluation, in timestamp format (seconds since 1970)",
+                "type": MetricType.Counter.value,
+                "unit": units.seconds.short_form,
+                "long_unit": units.seconds.long_form,
+            }
+            res["average_power_measured"] = {
+                "value": avg_power,
+                "description": "Average power measured from start_time to end_time",
+                "type": MetricType.Gauge.value,
+                "unit": units.watts.short_form,
+                "long_unit": units.watts.long_form,
+            }
     elif criteria == CriteriaChoice.AllCriteria:
         for key, value in asdict(impact_criteria).items():
             res[value["boagent_embedded_key"]] = {
@@ -384,6 +399,15 @@ def get_metrics(
                 "unit": value["unit"]["short_form"],
                 "long_unit": value["unit"]["long_form"],
             }
+
+            if measure_power:
+                res[value["boagent_use_key"]] = {
+                    "value": boaviztapi_data["impacts"][key]["use"],
+                    "description": value["use_stage"],
+                    "type": MetricType.Gauge.value,
+                    "unit": value["unit"]["short_form"],
+                    "long_unit": value["unit"]["long_form"],
+                }
 
     if verbose:
         res["raw_data"] = {

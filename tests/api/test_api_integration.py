@@ -8,8 +8,11 @@ from pytest import mark
 from boagent.api.config import Settings
 from tests.mocks.mocks import (
     mock_boaviztapi_response_not_verbose,
+    mock_boavizta_response_not_verbose_all_criteria,
     mock_get_metrics_verbose,
     mock_get_metrics_not_verbose,
+    mock_get_metrics_not_verbose_all_criteria,
+    mock_hardware_data,
 )
 
 # Mock settings for testing environment
@@ -35,11 +38,24 @@ class ApiEndpointsTest(TestCase):
             mock_boaviztapi_response_not_verbose, "r"
         ) as boaviztapi_response_file:
             self.boaviztapi_response_not_verbose = json.load(boaviztapi_response_file)
-
+        with open(
+            mock_boavizta_response_not_verbose_all_criteria, "r"
+        ) as boaviztapi_response_file:
+            self.boaviztapi_response_not_verbose_all_criteria = json.load(
+                boaviztapi_response_file
+            )
         with open(mock_get_metrics_not_verbose, "r") as get_metrics_not_verbose_file:
             self.get_metrics_not_verbose = json.load(get_metrics_not_verbose_file)
+        with open(
+            mock_get_metrics_not_verbose_all_criteria, "r"
+        ) as get_metrics_not_verbose_all_criteria_file:
+            self.get_metrics_not_verbose_all_criteria = json.load(
+                get_metrics_not_verbose_all_criteria_file
+            )
         with open(mock_get_metrics_verbose, "r") as get_metrics_verbose_file:
             self.get_metrics_verbose = json.load(get_metrics_verbose_file)
+        with open(mock_hardware_data, "r") as hardware_data_file:
+            self.hardware_data = json.load(hardware_data_file)
 
     def test_read_info(self):
         response = client.get("/info")
@@ -105,6 +121,36 @@ class ApiEndpointsTest(TestCase):
 
         response = client.get("/query", params=params)
         assert response.status_code == 200
+
+    @mark.query
+    @patch("boagent.api.api.query_machine_impact_data")
+    @patch("boagent.api.api.read_hardware_data")
+    def test_read_query_without_measure_power_and_fetch_hardware_with_all_criteria_with_success(
+        self, mocked_hardware_data, mocked_boaviztapi_response
+    ):
+
+        mocked_boaviztapi_response.return_value = (
+            self.boaviztapi_response_not_verbose_all_criteria
+        )
+        mocked_hardware_data.return_value = self.hardware_data
+
+        params = {
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
+            "verbose": "false",
+            "location": "FRA",
+            "measure_power": "false",
+            "lifetime": 5,
+            "fetch_hardware": "false",
+            "criteria": "all",
+        }
+
+        response = client.get("/query", params=params)
+        assert response.status_code == 200
+
+        response_data = response.json()
+
+        assert "embedded_abiotic_resources_fossil_depletion" in response_data
 
     @mark.query
     @patch("boagent.api.api.get_metrics")

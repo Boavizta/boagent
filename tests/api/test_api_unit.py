@@ -478,12 +478,44 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
         assert "total_operational_emissions" in metrics
         assert "total_operational_abiotic_resources_depletion" in metrics
         assert "total_operational_primary_energy_consumed" in metrics
+        assert "calculated_emissions" in metrics
         assert "start_time" in metrics
         assert "end_time" in metrics
         assert "average_power_measured" in metrics
         assert "raw_data" in metrics
         assert "electricity_carbon_intensity" in metrics
         assert "power_data" in metrics["raw_data"]
+
+    @patch("boagent.api.api.query_machine_impact_data")
+    @patch("boagent.api.api.get_power_data")
+    @patch("boagent.api.api.read_hardware_data")
+    def test_get_metrics_verbose_with_scaphandre_with_all_criteria(
+        self,
+        mocked_read_hardware_data,
+        mocked_query_machine_impact_data,
+        mocked_power_data,
+    ):
+
+        criteria = CriteriaChoice.AllCriteria
+
+        metrics = get_metrics(
+            self.start_time,
+            self.end_time,
+            self.verbose,
+            self.location,
+            self.measure_power,
+            self.lifetime,
+            self.fetch_hardware,
+            criteria=criteria,
+        )
+
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+        mocked_power_data.return_value = self.power_data
+
+        assert "calculated_emissions" in metrics
+        for criteria in asdict(impact_criteria).values():
+            assert criteria["boagent_use_key"] in metrics
 
 
 loader = TestLoader()
