@@ -14,3 +14,6 @@ curl 127.0.0.1:8000/query?start_time="$DATE_MINUS_ONE_MINUTE"\&end_time="$DATE"\
 
 echo "Querying Boagent, for all impact criteria, measuring power and fetching hardware..."
 curl 127.0.0.1:8000/query?start_time="$DATE_MINUS_ONE_MINUTE"\&end_time="$DATE"\&verbose=false\&measure_power=true\&fetch_hardware=true\&criteria=all > response_all_criteria_power_hardware.json
+
+echo "Querying Boagent, for all impact criteria, measuring power and fetching hardware, in verbose mode..."
+curl 127.0.0.1:8000/query?start_time="$DATE_MINUS_ONE_MINUTE"\&end_time="$DATE"\&verbose=true\&measure_power=true\&fetch_hardware=true\&criteria=all > response_all_criteria_power_hardware_verbose.json
