@@ -401,16 +401,18 @@ def get_metrics(
                 "long_unit": units.watts.long_form,
             }
     elif criteria == CriteriaChoice.AllCriteria:
-        for key, value in asdict(impact_criteria).items():
+        for value in asdict(impact_criteria).values():
             # Embedded and use impacts are not implemented for all impact criteria in BoaviztAPI.
             # BoaviztAPI returns 'not implemented' in that case.
 
-            if "value" in boaviztapi_data["impacts"][key]["embedded"]:
+            boaviztapi_key = value["key"]
+            if "value" in boaviztapi_data["impacts"][boaviztapi_key]["embedded"]:
                 impact_value = ratio(
-                    boaviztapi_data["impacts"][key]["embedded"]["value"], ratio_value
+                    boaviztapi_data["impacts"][boaviztapi_key]["embedded"]["value"],
+                    ratio_value,
                 )
             else:
-                impact_value = boaviztapi_data["impacts"][key]["embedded"]
+                impact_value = boaviztapi_data["impacts"][boaviztapi_key]["embedded"]
 
             res[value["boagent_embedded_key"]] = {
                 "value": impact_value,
@@ -421,10 +423,12 @@ def get_metrics(
             }
 
             if measure_power:
-                if "value" in boaviztapi_data["impacts"][key]["use"]:
-                    impact_value = boaviztapi_data["impacts"][key]["use"]["value"]
+                if "value" in boaviztapi_data["impacts"][boaviztapi_key]["use"]:
+                    impact_value = boaviztapi_data["impacts"][boaviztapi_key]["use"][
+                        "value"
+                    ]
                 else:
-                    impact_value = boaviztapi_data["impacts"][key]["use"]
+                    impact_value = boaviztapi_data["impacts"][boaviztapi_key]["use"]
 
                 res[value["boagent_use_key"]] = {
                     "value": impact_value,

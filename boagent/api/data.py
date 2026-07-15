@@ -121,6 +121,7 @@ class ImpactCriterion:
         return self[key]
 
 
+# Data class for all information commonly used about impact criteria across Boagent.
 @dataclass
 class ImpactCriteria:
     adp: ImpactCriterion
@@ -128,8 +129,8 @@ class ImpactCriteria:
     adpf: ImpactCriterion
     ap: ImpactCriterion
     ctue: ImpactCriterion
-    CTUh_c: ImpactCriterion
-    CTUh_nc: ImpactCriterion
+    ctuh_c: ImpactCriterion
+    ctuh_nc: ImpactCriterion
     epf: ImpactCriterion
     epm: ImpactCriterion
     ept: ImpactCriterion
