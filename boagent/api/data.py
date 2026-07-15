@@ -128,10 +128,8 @@ class ImpactCriteria:
     adpf: ImpactCriterion
     ap: ImpactCriterion
     ctue: ImpactCriterion
-    """
-    ctuh_c: ImpactCriterion
-    ctuh_nc: ImpactCriterion
-    """
+    CTUh_c: ImpactCriterion
+    CTUh_nc: ImpactCriterion
     epf: ImpactCriterion
     epm: ImpactCriterion
     ept: ImpactCriterion
@@ -158,6 +156,11 @@ class ImpactCriteria:
             list(asdict(impact_criteria).values()),
         )
         return list(main_criteria)
+
+    def criteria_keys(self) -> List[str]:
+        impact_criteria_values = list(asdict(self).values())
+        keys_list = [criterion["key"] for criterion in impact_criteria_values]
+        return keys_list
 
 
 adp = ImpactCriterion(
@@ -217,7 +220,7 @@ ctue = ImpactCriterion(
 
 ctuh_c = ImpactCriterion(
     "Comparative Toxicity Units for Humans (Carcinogenic effets)",
-    "ctuh_c",
+    "CTUh_c",
     "CTUH_c",
     "Embedded toxicity impacts for humans (carcinogenic) consumed, from start_time to end_time.",
     "Toxicity impacts for humans (carcinogenic) consumed during the usage stage, from start_time to end_time.",
@@ -228,7 +231,7 @@ ctuh_c = ImpactCriterion(
 
 ctuh_nc = ImpactCriterion(
     "Comparative Toxicity Units for Humans (Non-Carcinogenic effets)",
-    "ctuh_nc",
+    "CTUh_nc",
     "CTUH_nc",
     "Embedded toxicity impacts for humans (non-carcinogenic) consumed, from start_time to end_time.",
     "Toxicity impacts for humans (non-carcinogenic) consumed during the usage stage, from start_time to end_time.",
@@ -432,6 +435,8 @@ impact_criteria = ImpactCriteria(
     adpf,
     ap,
     ctue,
+    ctuh_c,
+    ctuh_nc,
     epf,
     epm,
     ept,

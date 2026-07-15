@@ -51,7 +51,7 @@
         "max": 34540
       }
     },
-    "ctuh_c": {
+    "CTUh_c": {
       "unit": "kgCO2eq",
       "description": "Total climate change",
       "embedded": {
@@ -68,7 +68,7 @@
         "max": 34540
       }
     },
-    "ctuh_nc": {
+    "CTUh_nc": {
       "unit": "kgCO2eq",
       "description": "Total climate change",
       "embedded": {

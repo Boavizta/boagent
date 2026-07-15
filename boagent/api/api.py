@@ -404,6 +404,7 @@ def get_metrics(
         for key, value in asdict(impact_criteria).items():
             # Embedded and use impacts are not implemented for all impact criteria in BoaviztAPI.
             # BoaviztAPI returns 'not implemented' in that case.
+
             if "value" in boaviztapi_data["impacts"][key]["embedded"]:
                 impact_value = ratio(
                     boaviztapi_data["impacts"][key]["embedded"]["value"], ratio_value
@@ -572,7 +573,7 @@ def query_machine_impact_data(
                 # duration=(usage["hours_use_time"])
             )
         elif criteria == CriteriaChoice.AllCriteria:
-            criteria_keys = list(asdict(impact_criteria).keys())
+            criteria_keys = impact_criteria.criteria_keys()
             server_impact = server_api.server_impact_from_configuration_v1_server_post(
                 server=server, criteria=criteria_keys
             )
