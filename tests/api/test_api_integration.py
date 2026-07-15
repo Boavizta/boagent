@@ -8,6 +8,7 @@ from unittest.mock import patch
 from pytest import mark
 from boagent.api.config import Settings
 from boagent.api.data import impact_criteria
+from boagent.api.exceptions import invalid_criteria_choice_error_msg
 from tests.mocks.mocks import (
     mock_boaviztapi_response_not_verbose,
     mock_boavizta_response_not_verbose_all_criteria,
@@ -431,4 +432,23 @@ class ApiEndpointsTest(TestCase):
             "Process_id 1234 has not been found in metrics data. Check the queried PID."
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIs(error_message in response.text, True)
+        self.assertTrue(error_message in response.text)
+
+    def test_get_process_embedded_impacts_with_error_if_invalid_criteria_choice_is_sent_by_the_client(
+        self,
+    ):
+
+        params = {
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
+            "verbose": "true",
+            "location": "FRA",
+            "measure_power": "true",
+            "lifetime": 5,
+            "fetch_hardware": "true",
+            "criteria": "error",
+        }
+
+        response = client.get("/query", params=params)
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(invalid_criteria_choice_error_msg in response.text)

@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+from typing import List
 
 
 @dataclass
@@ -116,6 +117,9 @@ class ImpactCriterion:
     boagent_embedded_key: str
     unit: Unit
 
+    def __getitem__(self, key):
+        return self[key]
+
 
 @dataclass
 class ImpactCriteria:
@@ -143,6 +147,15 @@ class ImpactCriteria:
     pm: ImpactCriterion
     pocp: ImpactCriterion
     wu: ImpactCriterion
+
+    def main_criteria(self) -> List[ImpactCriterion]:
+        main_criteria = filter(
+            lambda c: c["key"] == impact_criteria.gwp.key
+            or c["key"] == impact_criteria.adp.key
+            or c["key"] == impact_criteria.pe.key,
+            list(asdict(impact_criteria).values()),
+        )
+        return list(main_criteria)
 
 
 adp = ImpactCriterion(

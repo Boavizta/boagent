@@ -7,7 +7,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
 from boaviztapi_sdk.models.server import Server
-from boagent.api.exceptions import InvalidPIDException
+from boagent.api.exceptions import (
+    InvalidPIDException,
+    invalid_criteria_choice_error_msg,
+)
 from boagent.hardware.lshw import Lshw
 from boagent.api.utils import (
     iso8601_or_timestamp_as_timestamp,
@@ -142,27 +145,32 @@ async def query(
     lifetime: Full lifetime of the machine to evaluate.\n
     fetch_hardware: Regenerate hardware.json file with current machine hardware or not.\n
     """
-    if criteria == CriteriaChoice.MainCriteria.value:
-        return get_metrics(
-            iso8601_or_timestamp_as_timestamp(start_time),
-            iso8601_or_timestamp_as_timestamp(end_time),
-            verbose,
-            location,
-            measure_power,
-            lifetime,
-            fetch_hardware,
-        )
-    elif criteria == CriteriaChoice.AllCriteria.value:
-        return get_metrics(
-            iso8601_or_timestamp_as_timestamp(start_time),
-            iso8601_or_timestamp_as_timestamp(end_time),
-            verbose,
-            location,
-            measure_power,
-            lifetime,
-            fetch_hardware,
-            criteria=CriteriaChoice.AllCriteria,
-        )
+    match criteria:
+        case CriteriaChoice.MainCriteria.value:
+            return get_metrics(
+                iso8601_or_timestamp_as_timestamp(start_time),
+                iso8601_or_timestamp_as_timestamp(end_time),
+                verbose,
+                location,
+                measure_power,
+                lifetime,
+                fetch_hardware,
+            )
+        case CriteriaChoice.AllCriteria.value:
+            return get_metrics(
+                iso8601_or_timestamp_as_timestamp(start_time),
+                iso8601_or_timestamp_as_timestamp(end_time),
+                verbose,
+                location,
+                measure_power,
+                lifetime,
+                fetch_hardware,
+                criteria=CriteriaChoice.AllCriteria,
+            )
+        case _:
+            raise HTTPException(
+                status_code=400, detail=invalid_criteria_choice_error_msg
+            )
 
 
 @app.post("/query", tags=["query"])
@@ -175,6 +183,7 @@ async def query_with_time_workload(
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
     time_workload: TimeWorkload = Body(None, example=time_workload_example),
+    criteria: str = CriteriaChoice.MainCriteria.value,
 ):
     """
     start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
@@ -187,16 +196,34 @@ async def query_with_time_workload(
     time_workload: Workload percentage for CPU and RAM. Can be a float or a list of dictionaries with format
     {"time_percentage": float, "load_percentage": float}
     """
-    return get_metrics(
-        iso8601_or_timestamp_as_timestamp(start_time),
-        iso8601_or_timestamp_as_timestamp(end_time),
-        verbose,
-        location,
-        measure_power,
-        lifetime,
-        fetch_hardware,
-        time_workload,
-    )
+    match criteria:
+        case CriteriaChoice.MainCriteria.value:
+            return get_metrics(
+                iso8601_or_timestamp_as_timestamp(start_time),
+                iso8601_or_timestamp_as_timestamp(end_time),
+                verbose,
+                location,
+                measure_power,
+                lifetime,
+                fetch_hardware,
+                time_workload,
+            )
+        case CriteriaChoice.AllCriteria.value:
+            return get_metrics(
+                iso8601_or_timestamp_as_timestamp(start_time),
+                iso8601_or_timestamp_as_timestamp(end_time),
+                verbose,
+                location,
+                measure_power,
+                lifetime,
+                fetch_hardware,
+                time_workload,
+                criteria=CriteriaChoice.AllCriteria,
+            )
+        case _:
+            raise HTTPException(
+                status_code=400, detail=invalid_criteria_choice_error_msg
+            )
 
 
 @app.get("/process_embedded_impacts", tags=["process"])
@@ -326,10 +353,7 @@ def get_metrics(
         }
 
     if criteria == CriteriaChoice.MainCriteria:
-        main_criteria = filter(
-            lambda c: c["key"] == "gwp" or c["key"] == "adp" or c["key"] == "pe",
-            list(asdict(impact_criteria).values()),
-        )
+        main_criteria = impact_criteria.main_criteria()
 
         for main_criterion in main_criteria:
             res[main_criterion["boagent_embedded_key"]] = {
