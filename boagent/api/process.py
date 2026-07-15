@@ -1,4 +1,5 @@
 from collections import defaultdict
+from boagent.api.data import impact_criteria
 from boagent.api.exceptions import InvalidPIDException
 
 
@@ -158,6 +159,7 @@ class Process:
         return component_embedded_impact_shares
 
     def get_component_embedded_impact_values(self, queried_component):
+        component_embedded_impact_values = dict()
         if queried_component == "cpu":
             component_impact_shares = self.get_component_embedded_impact_shares(
                 "CPU", self.cpu_load_shares
@@ -177,47 +179,32 @@ class Process:
         else:
             return "Queried component is not available for evaluation."
 
-        gwp_list = defaultdict(list)
-        adp_list = defaultdict(list)
-        pe_list = defaultdict(list)
+        main_criteria = impact_criteria.main_criteria()
 
-        for impact_key, impact_value in component_impact_shares:
-            if impact_key == "gwp_embedded_share":
-                gwp_list[impact_key].append(impact_value)
-            if impact_key == "adp_embedded_share":
-                adp_list[impact_key].append(impact_value)
-            if impact_key == "pe_embedded_share":
-                pe_list[impact_key].append(impact_value)
+        for impact_criterion in main_criteria:
+            impact_list = defaultdict(list)
+            impact_criterion_key = impact_criterion["key"]
+            impact_embedded_share_key = f"{impact_criterion_key}_embedded_share"
+            for impact_key, impact_value in component_impact_shares:
+                if impact_key == impact_embedded_share_key:
+                    impact_list[impact_key].append(impact_value)
 
-        gwp_average = sum(gwp_list["gwp_embedded_share"]) / len(
-            gwp_list["gwp_embedded_share"]
-        )
-        adp_average = sum(adp_list["adp_embedded_share"]) / len(
-            adp_list["adp_embedded_share"]
-        )
-        pe_average = sum(pe_list["pe_embedded_share"]) / len(
-            pe_list["pe_embedded_share"]
-        )
+            impact_average = sum(impact_list[impact_embedded_share_key]) / len(
+                impact_list[impact_embedded_share_key]
+            )
+            impact_max = max(impact_list[impact_embedded_share_key])
+            impact_min = min(impact_list[impact_embedded_share_key])
 
-        gwp_max = max(gwp_list["gwp_embedded_share"])
-        adp_max = max(adp_list["adp_embedded_share"])
-        pe_max = max(pe_list["pe_embedded_share"])
+            component_embedded_impact_values[
+                f"{impact_criterion_key}_{queried_component}_average_impact"
+            ] = impact_average
+            component_embedded_impact_values[
+                f"{impact_criterion_key}_{queried_component}_max_impact"
+            ] = impact_max
+            component_embedded_impact_values[
+                f"{impact_criterion_key}_{queried_component}_min_impact"
+            ] = impact_min
 
-        gwp_min = min(gwp_list["gwp_embedded_share"])
-        adp_min = min(adp_list["adp_embedded_share"])
-        pe_min = min(pe_list["pe_embedded_share"])
-
-        component_embedded_impact_values = {
-            f"gwp_{queried_component}_average_impact": gwp_average,
-            f"adp_{queried_component}_average_impact": adp_average,
-            f"pe_{queried_component}_average_impact": pe_average,
-            f"gwp_{queried_component}_max_impact": gwp_max,
-            f"adp_{queried_component}_max_impact": adp_max,
-            f"pe_{queried_component}_max_impact": pe_max,
-            f"gwp_{queried_component}_min_impact": gwp_min,
-            f"adp_{queried_component}_min_impact": adp_min,
-            f"pe_{queried_component}_min_impact": pe_min,
-        }
         return component_embedded_impact_values
 
     @property
