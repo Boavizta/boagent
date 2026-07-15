@@ -33,6 +33,9 @@ mock_get_metrics_verbose = os.path.join(
 mock_get_metrics_verbose_no_hdd = os.path.join(
     f"{current_dir}", "../mocks/get_metrics_verbose_no_hdd.json"
 )
+mock_get_metrics_all_criteria_verbose = os.path.join(
+    f"{current_dir}", "../mocks/get_metrics_all_criteria_verbose.json"
+)
 mock_lshw_data = os.path.join(f"{current_dir}", "../mocks/lshw_data.json")
 mock_lshw_data_disks = os.path.join(
     f"{current_dir}", "../mocks/sudo_lshw_data_disks.json"
