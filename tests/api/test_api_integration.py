@@ -117,6 +117,141 @@ class ApiEndpointsTest(TestCase):
         response = client.get("/metrics", params=params)
         assert response.status_code == 200
 
+    @patch("boagent.api.api.query_machine_impact_data")
+    @patch("boagent.api.api.read_hardware_data")
+    def test_read_metrics_without_measure_power_fetch_hardware_and_all_criteria_with_success(
+        self, mocked_hardware_data, mocked_boaviztapi_response
+    ):
+        mocked_boaviztapi_response.return_value = (
+            self.boaviztapi_response_not_verbose_all_criteria
+        )
+        mocked_hardware_data.return_value = self.hardware_data
+
+        params = {
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
+            "verbose": "false",
+            "location": "FRA",
+            "measure_power": "false",
+            "lifetime": 5,
+            "fetch_hardware": "false",
+            "criteria": "all",
+        }
+
+        response = client.get("/metrics", params=params)
+        response_prometheus_output = response.text
+
+        for value in asdict(impact_criteria).values():
+            embedded_value = f"boagent_{value['boagent_embedded_key']}"
+            assert embedded_value in response_prometheus_output
+
+        assert response.status_code == 200
+
+    @patch("boagent.api.api.query_machine_impact_data")
+    @patch("boagent.api.api.read_hardware_data")
+    @patch("boagent.api.api.get_power_data")
+    def test_read_metrics_with_measure_power_and_all_criteria_with_success(
+        self, mocked_power_data, mocked_hardware_data, mocked_boaviztapi_response
+    ):
+
+        mocked_boaviztapi_response.return_value = (
+            self.boaviztapi_response_not_verbose_all_criteria
+        )
+        mocked_hardware_data.return_value = self.hardware_data
+        mocked_power_data.return_value = self.power_data
+
+        params = {
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
+            "verbose": "false",
+            "location": "FRA",
+            "measure_power": "true",
+            "lifetime": 5,
+            "fetch_hardware": "false",
+            "criteria": "all",
+        }
+
+        response = client.get("/metrics", params=params)
+        response_prometheus_output = response.text
+
+        for value in asdict(impact_criteria).values():
+            embedded_value = f"boagent_{value['boagent_embedded_key']}"
+            assert embedded_value in response_prometheus_output
+            use_value = f"boagent_{value['boagent_use_key']}"
+            assert use_value in response_prometheus_output
+
+        assert response.status_code == 200
+
+    @patch("boagent.api.api.query_machine_impact_data")
+    @patch("boagent.api.api.get_hardware_data")
+    @patch("boagent.api.api.get_power_data")
+    def test_read_metrics_with_measure_power_fetch_hardware_and_all_criteria_with_success(
+        self, mocked_power_data, mocked_hardware_data, mocked_boaviztapi_response
+    ):
+
+        mocked_boaviztapi_response.return_value = (
+            self.boaviztapi_response_not_verbose_all_criteria
+        )
+        mocked_hardware_data.return_value = self.hardware_data
+        mocked_power_data.return_value = self.power_data
+
+        params = {
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
+            "verbose": "false",
+            "location": "FRA",
+            "measure_power": "true",
+            "lifetime": 5,
+            "fetch_hardware": "true",
+            "criteria": "all",
+        }
+
+        response = client.get("/metrics", params=params)
+        response_prometheus_output = response.text
+
+        for value in asdict(impact_criteria).values():
+            embedded_value = f"boagent_{value['boagent_embedded_key']}"
+            assert embedded_value in response_prometheus_output
+            use_value = f"boagent_{value['boagent_use_key']}"
+            assert use_value in response_prometheus_output
+
+        assert response.status_code == 200
+
+    @patch("boagent.api.api.query_machine_impact_data")
+    @patch("boagent.api.api.get_hardware_data")
+    @patch("boagent.api.api.get_power_data")
+    def test_read_metrics_with_measure_power_fetch_hardware_and_all_criteria_verbose_with_success(
+        self, mocked_power_data, mocked_hardware_data, mocked_boaviztapi_response
+    ):
+
+        mocked_boaviztapi_response.return_value = (
+            self.boaviztapi_response_verbose_all_criteria
+        )
+        mocked_hardware_data.return_value = self.hardware_data
+        mocked_power_data.return_value = self.power_data
+
+        params = {
+            "start_time": f"{NOW_ISO8601_MINUS_ONE_MINUTE}",
+            "end_time": f"{NOW_ISO8601}",
+            "verbose": "true",
+            "location": "FRA",
+            "measure_power": "true",
+            "lifetime": 5,
+            "fetch_hardware": "true",
+            "criteria": "all",
+        }
+
+        response = client.get("/metrics", params=params)
+        response_prometheus_output = response.text
+
+        for value in asdict(impact_criteria).values():
+            embedded_value = f"boagent_{value['boagent_embedded_key']}"
+            assert embedded_value in response_prometheus_output
+            use_value = f"boagent_{value['boagent_use_key']}"
+            assert use_value in response_prometheus_output
+
+        assert response.status_code == 200
+
     @mark.query
     @patch("boagent.api.api.get_metrics")
     def test_read_query_without_measure_power_and_fetch_hardware_with_success(

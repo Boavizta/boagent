@@ -107,22 +107,42 @@ async def metrics(
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
+    criteria: str = CriteriaChoice.MainCriteria.value,
 ):
-    return Response(
-        content=format_prometheus_output(
-            get_metrics(
-                iso8601_or_timestamp_as_timestamp(start_time),
-                iso8601_or_timestamp_as_timestamp(end_time),
-                verbose,
-                location,
-                measure_power,
-                lifetime,
-                fetch_hardware,
-            ),
-            verbose,
-        ),
-        media_type="plain-text",
-    )
+    match criteria:
+        case CriteriaChoice.MainCriteria.value:
+            return Response(
+                content=format_prometheus_output(
+                    get_metrics(
+                        iso8601_or_timestamp_as_timestamp(start_time),
+                        iso8601_or_timestamp_as_timestamp(end_time),
+                        verbose,
+                        location,
+                        measure_power,
+                        lifetime,
+                        fetch_hardware,
+                    ),
+                    verbose,
+                ),
+                media_type="plain-text",
+            )
+        case CriteriaChoice.AllCriteria.value:
+            return Response(
+                content=format_prometheus_output(
+                    get_metrics(
+                        iso8601_or_timestamp_as_timestamp(start_time),
+                        iso8601_or_timestamp_as_timestamp(end_time),
+                        verbose,
+                        location,
+                        measure_power,
+                        lifetime,
+                        fetch_hardware,
+                        criteria=CriteriaChoice.AllCriteria,
+                    ),
+                    verbose,
+                ),
+                media_type="plain-text",
+            )
 
 
 @app.get("/query", tags=["query"])
@@ -403,7 +423,8 @@ def get_metrics(
     elif criteria == CriteriaChoice.AllCriteria:
         for value in asdict(impact_criteria).values():
             # Embedded and use impacts are not implemented for all impact criteria in BoaviztAPI.
-            # BoaviztAPI returns 'not implemented' in that case.
+            # BoaviztAPI returns no 'value' attribute to the 'embedded' or 'use' object,
+            # and returns 'not implemented' in that case.
 
             boaviztapi_key = value["key"]
             if "value" in boaviztapi_data["impacts"][boaviztapi_key]["embedded"]:
