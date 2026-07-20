@@ -113,7 +113,7 @@ def format_prometheus_output(res, verbose: bool, labels: dict = {}):
                     v["value"],
                     labels,
                 )
-            if type(v["value"]) is dict:
+            if value_type is dict:
                 response += format_prometheus_metric(
                     f"boagent_{k}",
                     f"{v['description']}. In {v['long_unit']} ({v['unit']})",
