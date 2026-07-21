@@ -344,13 +344,11 @@ def get_metrics(
 
     if criteria == CriteriaChoice.MainCriteria:
         boaviztapi_data = query_machine_impact_data(
-            model={},
             configuration=configuration_server,
             usage=usage_server,
         )
     elif criteria == CriteriaChoice.AllCriteria:
         boaviztapi_data = query_machine_impact_data(
-            model={},
             configuration=configuration_server,
             usage=usage_server,
             criteria=criteria,
@@ -575,44 +573,30 @@ def build_hardware_data():
 
 
 def query_machine_impact_data(
-    model: dict[str, str],
     configuration: ConfigurationServer,
     usage: UsageServer,
     criteria: CriteriaChoice = CriteriaChoice.MainCriteria,
 ) -> dict:
     server_api = ServerApi(get_boavizta_api_client())
 
-    server_impact = None
-
     with open("boagent_request.log", "a") as fd:
         fd.write(f"{str(usage)}\n")
         fd.write(f"{str(configuration)}\n".format(str(configuration)))
         fd.close()
 
-    if configuration:
-        server = Server(usage=usage, configuration=configuration)
-        if criteria == CriteriaChoice.MainCriteria:
-            server_impact = server_api.server_impact_from_configuration_v1_server_post(
-                server=server  # ,
-                # duration=(usage["hours_use_time"])
-            )
-        elif criteria == CriteriaChoice.AllCriteria:
-            criteria_keys = impact_criteria.criteria_keys()
-            server_impact = server_api.server_impact_from_configuration_v1_server_post(
-                server=server, criteria=criteria_keys
-            )
-    elif model:
-        # server = Server(usage=usage, model=model)
-        # TO IMPLEMENT
-        # This conditional was based on a previous version of BoaviztAPI, where a server model could
-        # be sent to /v1/server through a GET method. BoaviztAPI now expects an archetype string to
-        # return a prerecorded impact from an asset.
-        server_impact = server_api.server_impact_from_model_v1_server_get(
-            archetype="dellR740"
+    server = Server(usage=usage, configuration=configuration)
+    if criteria == CriteriaChoice.MainCriteria:
+        server_impact = server_api.server_impact_from_configuration_v1_server_post(
+            server=server
+        )
+    elif criteria == CriteriaChoice.AllCriteria:
+        criteria_keys = impact_criteria.criteria_keys()
+        server_impact = server_api.server_impact_from_configuration_v1_server_post(
+            server=server, criteria=criteria_keys
         )
 
     with open("boagent_answer.log", "a") as fd:
-        fd.write("{}\n".format(str(server_impact)))
+        fd.write(f"{str(server_impact)}\n")
         fd.close()
 
     return server_impact
