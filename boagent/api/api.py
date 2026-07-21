@@ -333,32 +333,26 @@ def get_metrics(
             )
 
     configuration_server = ConfigurationServer.model_validate(hardware_data)
+    usage_server = format_usage_request(
+        start_time,
+        end_time,
+        avg_power,
+        location,
+        lifetime * SECONDS_IN_ONE_YEAR,
+        time_workload,
+    )
 
     if criteria == CriteriaChoice.MainCriteria:
         boaviztapi_data = query_machine_impact_data(
             model={},
             configuration=configuration_server,
-            usage=format_usage_request(
-                start_time,
-                end_time,
-                avg_power,
-                location,
-                lifetime * SECONDS_IN_ONE_YEAR,
-                time_workload,
-            ),
+            usage=usage_server,
         )
     elif criteria == CriteriaChoice.AllCriteria:
         boaviztapi_data = query_machine_impact_data(
             model={},
             configuration=configuration_server,
-            usage=format_usage_request(
-                start_time,
-                end_time,
-                avg_power,
-                location,
-                lifetime * SECONDS_IN_ONE_YEAR,
-                time_workload,
-            ),
+            usage=usage_server,
             criteria=criteria,
         )
 
@@ -492,7 +486,7 @@ def format_usage_request(
     location: str = "EEE",
     lifetime: float = DEFAULT_LIFETIME * SECONDS_IN_ONE_YEAR,
     time_workload: TimeWorkload = None,
-):
+) -> UsageServer:
     kwargs_usage = {"use_time_ratio": (end_time - start_time) / lifetime}
     if location:
         kwargs_usage["usage_location"] = location
@@ -585,7 +579,7 @@ def query_machine_impact_data(
     configuration: ConfigurationServer,
     usage: UsageServer,
     criteria: CriteriaChoice = CriteriaChoice.MainCriteria,
-):
+) -> dict:
     server_api = ServerApi(get_boavizta_api_client())
 
     server_impact = None

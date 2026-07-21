@@ -46,7 +46,7 @@ class Lshw:
         self.hw_info = serialized_lshw_output()
         self.info = {}
         self.memories = []
-        self.cpu = None
+        self.cpu = {}
         self.power = []
         self.disks = []
         self.gpus = []
@@ -79,41 +79,10 @@ class Lshw:
             return self.cpu
         if hwclass == "gpu":
             return self.gpus
-        """ if hwclass == "network":
-            return self.interfaces """
         if hwclass == "storage":
             return self.disks
         if hwclass == "memory":
             return self.memories
-
-    """
-    def find_network(self, obj):
-        # Some interfaces do not have device (logical) name (eth0, for
-        # instance), such as not connected network mezzanine cards in blade
-        # servers. In such situations, the card will be named `unknown[0-9]`.
-        unkn_intfs = []
-        for i in self.interfaces:
-            # newer versions of lshw can return a list of names, see issue #227
-            if not isinstance(i["name"], list):
-                if i["name"].startswith("unknown"):
-                    unkn_intfs.push(i)
-            else:
-                for j in i["name"]:
-                    if j.startswith("unknown"):
-                        unkn_intfs.push(j)
-
-        unkn_name = "unknown{}".format(len(unkn_intfs))
-        self.interfaces.append(
-            {
-                "name": obj.get("logicalname", unkn_name),
-                "macaddress": obj.get("serial", ""),
-                "serial": obj.get("serial", ""),
-                "product": obj["product"],
-                "vendor": obj["vendor"],
-                "description": obj["description"],
-            }
-        )
-    """
 
     def find_storage(self, obj):
         if "children" in obj:

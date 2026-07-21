@@ -40,24 +40,26 @@ def sort_ram(items: list):
                 "units": 1,
                 "capacity": r["capacity"],
             }
-    return [v for k, v in hash_map.items()]
+    return [v for v in hash_map.values()]
 
 
 def sort_disks(items: list):
     hash_map = {}
     for r in items:
-        if "{}:{}:{}".format(r["capacity"], r["manufacturer"], r["type"]) in hash_map:
-            hash_map["{}:{}:{}".format(r["capacity"], r["manufacturer"], r["type"])][
-                "units"
-            ] += 1
+        capacity = r["capacity"]
+        manufacturer = r["manufacturer"]
+        disk_type = r["type"]
+        disk = f"{capacity}:{manufacturer}:{disk_type}"
+        if disk in hash_map:
+            hash_map[disk]["units"] += 1
         else:
-            hash_map["{}:{}:{}".format(r["capacity"], r["manufacturer"], r["type"])] = {
+            hash_map[disk] = {
                 "units": 1,
                 "manufacturer": r["manufacturer"],
                 "capacity": r["capacity"],
                 "type": r["type"],
             }
-    return [v for k, v in hash_map.items()]
+    return [v for v in hash_map.values()]
 
 
 def get_boavizta_api_client():
@@ -79,17 +81,17 @@ def iso8601_or_timestamp_as_timestamp(iso_time: str) -> float:
         dt = None
         try:
             dt = parser.parse(iso_time)
-            logger.debug("{} is an iso 8601 datetime".format(iso_time))
+            logger.debug(f"{iso_time} is an iso 8601 datetime")
         except Exception as e:
-            logger.debug("{} is not an iso 8601 datetime".format(iso_time))
-            logger.debug("Exception : {}".format(e))
+            logger.debug(f"{iso_time} is not an iso 8601 datetime")
+            logger.debug(f"Exception : {e}")
             try:
                 dt = datetime.fromtimestamp(int(round(float(iso_time))))
-                logger.debug("{} is a timestamp".format(iso_time))
+                logger.debug(f"{iso_time} is a timestamp")
             except Exception as e:
-                logger.debug("{} is not a timestamp".format(iso_time))
-                logger.debug("Exception : {}".format(e))
-                logger.debug("Parser would give : {}".format(parser.parse(iso_time)))
+                logger.debug(f"{iso_time} is not a timestamp")
+                logger.debug(f"Exception : {e}")
+                logger.debug(f"Parser would give : {parser.parse(iso_time)}")
         finally:
             if dt:
                 return dt.timestamp()
