@@ -2,6 +2,8 @@ from dataclasses import asdict
 import json
 import time
 from typing import Dict, Any
+from boaviztapi_sdk.models.configuration_server import ConfigurationServer
+from boaviztapi_sdk.models.usage_server import UsageServer
 from fastapi import FastAPI, Response, Body, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
@@ -92,7 +94,7 @@ async def info():
 @app.get("/web", tags=["web"], response_class=HTMLResponse)
 async def web():
     res = ""
-    with open("{}/index.html".format(PUBLIC_PATH), "r") as fd:
+    with open(f"{PUBLIC_PATH}/index.html", "r") as fd:
         res = fd.read()
     fd.close()
     return res
@@ -330,10 +332,12 @@ def get_metrics(
                 power_data["warning"]
             )
 
+    configuration_server = ConfigurationServer.model_validate(hardware_data)
+
     if criteria == CriteriaChoice.MainCriteria:
         boaviztapi_data = query_machine_impact_data(
             model={},
-            configuration=hardware_data,
+            configuration=configuration_server,
             usage=format_usage_request(
                 start_time,
                 end_time,
@@ -346,7 +350,7 @@ def get_metrics(
     elif criteria == CriteriaChoice.AllCriteria:
         boaviztapi_data = query_machine_impact_data(
             model={},
-            configuration=hardware_data,
+            configuration=configuration_server,
             usage=format_usage_request(
                 start_time,
                 end_time,
@@ -496,7 +500,8 @@ def format_usage_request(
         kwargs_usage["avg_power"] = avg_power
     if time_workload:
         kwargs_usage["time_workload"] = time_workload
-    return kwargs_usage
+    usage_server = UsageServer.model_validate(kwargs_usage)
+    return usage_server
 
 
 def get_power_data(start_time, end_time):
@@ -508,15 +513,15 @@ def get_power_data(start_time, end_time):
         try:
             data = json.loads(formatted_data)
         except json.decoder.JSONDecodeError as e:
-            logger.debug("formatted_data: {}".format(formatted_data))
-            logger.debug("Catched JSONDecodeError: '{}'".format(e))
+            logger.debug(f"formatted_data: {formatted_data}")
+            logger.debug(f"Catched JSONDecodeError: '{e}'")
             logger.debug("Retrying reading power_data")
             try:
                 formatted_data = f"{raw_data[:-1]}]"
                 data = json.loads(formatted_data)
             except json.decoder.JSONDecodeError as e2:
-                logger.debug("formatted_data: {}".format(formatted_data))
-                logger.debug("Catched JSONDecodeError: '{}'".format(e2))
+                logger.debug(f"formatted_data: {formatted_data}")
+                logger.debug(f"Catched JSONDecodeError: '{e2}'")
                 logger.debug("Retrying reading power_data")
                 formatted_data = f"{raw_data[:-2]}]"
                 data = json.loads(formatted_data)
@@ -569,25 +574,25 @@ def build_hardware_data():
     lshw = Lshw()
     with open(HARDWARE_FILE_PATH, "w") as hardware_file:
         hardware_data = {}
-        hardware_data["disks"] = lshw.disks
-        hardware_data["cpus"] = lshw.cpus
-        hardware_data["rams"] = lshw.memories
+        hardware_data["disk"] = lshw.disks
+        hardware_data["cpu"] = lshw.cpu
+        hardware_data["ram"] = lshw.memories
         json.dump(hardware_data, hardware_file)
 
 
 def query_machine_impact_data(
     model: dict[str, str],
-    configuration: dict[str, dict[str, int]],
-    usage: dict[str, Any],
+    configuration: ConfigurationServer,
+    usage: UsageServer,
     criteria: CriteriaChoice = CriteriaChoice.MainCriteria,
-) -> dict:
+):
     server_api = ServerApi(get_boavizta_api_client())
 
     server_impact = None
 
     with open("boagent_request.log", "a") as fd:
-        fd.write("{}\n".format(str(usage)))
-        fd.write("{}\n".format(str(configuration)))
+        fd.write(f"{str(usage)}\n")
+        fd.write(f"{str(configuration)}\n".format(str(configuration)))
         fd.close()
 
     if configuration:

@@ -9,7 +9,7 @@ mock_boaviztapi_response_not_verbose = os.path.join(
 mock_boaviztapi_response_verbose = os.path.join(
     f"{current_dir}", "../mocks/boaviztapi_response_verbose.json"
 )
-mock_boavizta_response_verbose_all_criteria = os.path.join(
+mock_boaviztapi_response_verbose_all_criteria = os.path.join(
     f"{current_dir}", "../mocks/boaviztapi_response_verbose_all_criteria.json"
 )
 mock_boavizta_response_not_verbose_all_criteria = os.path.join(
@@ -48,15 +48,13 @@ hardware_data = os.path.join(f"{current_dir}", "../../boagent/api/hardware_data.
 
 class MockLshw:
     def __init__(self):
-        self.cpus = {
-            "cpus": [
-                {
-                    "units": 1,
-                    "name": "AMD Ryzen 5 5600H with Radeon Graphics",
-                    "manufacturer": "Advanced Micro Devices [AMD]",
-                    "core_units": 6,
-                }
-            ]
+        self.cpu = {
+            "cpu": {
+                "name": "AMD Ryzen 5 5600H with Radeon Graphics",
+                "manufacturer": "Advanced Micro Devices [AMD]",
+                "core_units": 6,
+                "threads": 8,
+            }
         }
         self.memories = {
             "rams": [

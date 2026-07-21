@@ -4,7 +4,6 @@ from dateutil import parser
 from boagent.api.config import Settings
 from os import PathLike
 import logging
-import logging.handlers
 
 settings = Settings()
 BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint

@@ -46,7 +46,7 @@ class Lshw:
         self.hw_info = serialized_lshw_output()
         self.info = {}
         self.memories = []
-        self.cpus = []
+        self.cpu = None
         self.power = []
         self.disks = []
         self.gpus = []
@@ -76,7 +76,7 @@ class Lshw:
 
     def get_hw_linux(self, hwclass):
         if hwclass == "cpu":
-            return self.cpus
+            return self.cpu
         if hwclass == "gpu":
             return self.gpus
         """ if hwclass == "network":
@@ -151,14 +151,12 @@ class Lshw:
 
     def find_cpus(self, obj):
         if "product" in obj:
-            self.cpus.append(
-                {
-                    "units": +1,
-                    "name": obj["product"],
-                    "manufacturer": obj["vendor"],
-                    "core_units": int(obj["configuration"]["cores"]),
-                }
-            )
+            self.cpu = {
+                "name": obj["product"],
+                "manufacturer": obj["vendor"],
+                "core_units": int(obj["configuration"]["cores"]),
+                "threads": int(obj["configuration"]["threads"]),
+            }
 
     def find_memories(self, obj):
         if "children" not in obj:

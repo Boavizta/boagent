@@ -5,6 +5,8 @@ from dataclasses import asdict
 from unittest import TestCase, TestSuite, TestLoader
 from unittest.mock import Mock, patch
 
+from boaviztapi_sdk.models.usage_server import UsageServer
+
 from boagent.api.api import (
     build_hardware_data,
     read_hardware_data,
@@ -26,6 +28,7 @@ from tests.mocks.mocks import (
     mock_hardware_data,
     mock_boaviztapi_response_not_verbose,
     mock_boaviztapi_response_verbose,
+    mock_boaviztapi_response_verbose_all_criteria,
     mock_formatted_scaphandre,
     mock_get_metrics_verbose,
     mock_get_metrics_not_verbose,
@@ -47,9 +50,9 @@ class ReadHardwareDataTest(TestCase):
 
         build_hardware_data()
         data = read_hardware_data()
-        assert type(data["cpus"]) is dict
-        assert type(data["rams"]) is dict
-        assert type(data["disks"]) is dict
+        assert type(data["cpu"]) is dict
+        assert type(data["ram"]) is dict
+        assert type(data["disk"]) is dict
 
     @patch("boagent.api.api.build_hardware_data")
     def test_get_hardware_data_with_fetch_hardware_false(self, mocked_build_hardware):
@@ -83,8 +86,7 @@ class FormatUsageRequestTest(TestCase):
             end_time=self.end_time,
         )
 
-        assert type(formatted_request) is dict
-        assert "use_time_ratio" in formatted_request
+        assert type(formatted_request) is UsageServer
 
     def test_format_usage_request_with_host_avg_consumption_and_location(
         self,
@@ -99,9 +101,7 @@ class FormatUsageRequestTest(TestCase):
             location=location,
             avg_power=avg_power,
         )
-        assert type(formatted_request) is dict
-        assert "avg_power" in formatted_request
-        assert "usage_location" in formatted_request
+        assert type(formatted_request) is UsageServer
 
     def test_format_usage_request_with_time_workload_as_percentage(self):
 
@@ -113,8 +113,7 @@ class FormatUsageRequestTest(TestCase):
             time_workload=time_workload,
         )
 
-        assert type(formatted_request) is dict
-        assert "time_workload" in formatted_request
+        assert type(formatted_request) is UsageServer
 
 
 class ComputeAvgConsumptionTest(TestCase):
@@ -203,8 +202,8 @@ class GetPowerDataTest(TestCase):
         assert "warning" in power_data
 
 
-@patch("boagent.api.api.read_hardware_data")
 @patch("boagent.api.api.query_machine_impact_data")
+@patch("boagent.api.api.read_hardware_data")
 class GetMetricsNotVerboseNoScaphandreTest(TestCase):
     def setUp(self) -> None:
         first_workload = WorkloadTime(time_percentage=50.0, load_percentage=0.0)
@@ -237,6 +236,9 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
         self, mocked_read_hardware_data, mocked_query_machine_impact_data
     ):
 
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+
         metrics = get_metrics(
             self.start_time,
             self.end_time,
@@ -248,9 +250,6 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
             self.time_workload_as_percentage,
         )
 
-        mocked_read_hardware_data.return_value = self.hardware_data
-        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
-
         assert type(metrics) is dict
         assert "emissions_calculation_data" in metrics
         assert "embedded_emissions" in metrics
@@ -260,6 +259,9 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
     def test_get_metrics_with_time_workload_as_list_of_dicts(
         self, mocked_read_hardware_data, mocked_query_machine_impact_data
     ):
+
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
 
         metrics = get_metrics(
             self.start_time,
@@ -272,9 +274,6 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
             self.time_workload_as_list_of_dicts,
         )
 
-        mocked_read_hardware_data.return_value = self.hardware_data
-        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
-
         assert type(metrics) is dict
         assert "emissions_calculation_data" in metrics
         assert "embedded_emissions" in metrics
@@ -284,6 +283,9 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
     def test_get_metrics_with_default_location(
         self, mocked_read_hardware_data, mocked_query_machine_impact_data
     ):
+
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
 
         metrics = get_metrics(
             self.start_time,
@@ -296,9 +298,6 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
             self.time_workload_as_list_of_dicts,
         )
 
-        mocked_read_hardware_data.return_value = self.hardware_data
-        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
-
         assert type(metrics) is dict
         assert "location_warning" in metrics
 
@@ -307,6 +306,9 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
     ):
 
         empty_location = ""
+
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
 
         metrics = get_metrics(
             self.start_time,
@@ -319,15 +321,12 @@ class GetMetricsNotVerboseNoScaphandreTest(TestCase):
             self.time_workload_as_list_of_dicts,
         )
 
-        mocked_read_hardware_data.return_value = self.hardware_data
-        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
-
         assert type(metrics) is dict
         assert "location_warning" in metrics
 
 
-@patch("boagent.api.api.read_hardware_data")
 @patch("boagent.api.api.query_machine_impact_data")
+@patch("boagent.api.api.read_hardware_data")
 class GetMetricsVerboseNoScaphandreTest(TestCase):
     def setUp(self) -> None:
         first_workload = WorkloadTime(time_percentage=50.0, load_percentage=0.0)
@@ -349,12 +348,18 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
         with open(mock_boaviztapi_response_verbose, "r") as file:
             self.boaviztapi_data = json.load(file)
 
+        with open(mock_boaviztapi_response_verbose_all_criteria, "r") as file:
+            self.boaviztapi_data_all_criteria = json.load(file)
+
         with open(mock_hardware_data, "r") as file:
             self.hardware_data = json.load(file)
 
     def test_get_metrics_verbose_with_time_workload_percentage(
         self, mocked_read_hardware_data, mocked_query_machine_impact_data
     ):
+
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
 
         metrics = get_metrics(
             self.start_time,
@@ -366,9 +371,6 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
             self.fetch_hardware,
             self.time_workload_as_percentage,
         )
-
-        mocked_read_hardware_data.return_value = self.hardware_data
-        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
 
         assert type(metrics) is dict
         assert "emissions_calculation_data" in metrics
@@ -382,6 +384,9 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
         self, mocked_read_hardware_data, mocked_query_machine_impact_data
     ):
 
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
+
         metrics = get_metrics(
             self.start_time,
             self.end_time,
@@ -392,9 +397,6 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
             self.fetch_hardware,
             self.time_workload_as_list_of_dicts,
         )
-
-        mocked_read_hardware_data.return_value = self.hardware_data
-        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
 
         assert type(metrics) is dict
         assert "emissions_calculation_data" in metrics
@@ -409,6 +411,12 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
     ):
 
         criteria = CriteriaChoice.AllCriteria
+
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = (
+            self.boaviztapi_data_all_criteria
+        )
+
         metrics = get_metrics(
             self.start_time,
             self.end_time,
@@ -421,8 +429,6 @@ class GetMetricsVerboseNoScaphandreTest(TestCase):
             criteria,
         )
 
-        mocked_read_hardware_data.return_value = self.hardware_data
-        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
         for criteria in asdict(impact_criteria).values():
             assert criteria["boagent_embedded_key"] in metrics
 
@@ -440,6 +446,9 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
         with open(mock_boaviztapi_response_verbose, "r") as file:
             self.boaviztapi_data = json.load(file)
 
+        with open(mock_boaviztapi_response_verbose_all_criteria, "r") as file:
+            self.boaviztapi_data_all_criteria = json.load(file)
+
         with open(mock_formatted_scaphandre, "r") as file:
             power_data = {}
             power_data["raw_data"] = file.read()
@@ -449,8 +458,8 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
         with open(mock_hardware_data, "r") as file:
             self.hardware_data = json.load(file)
 
-    @patch("boagent.api.api.query_machine_impact_data")
     @patch("boagent.api.api.get_power_data")
+    @patch("boagent.api.api.query_machine_impact_data")
     @patch("boagent.api.api.read_hardware_data")
     def test_get_metrics_verbose_with_scaphandre(
         self,
@@ -458,6 +467,12 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
         mocked_query_machine_impact_data,
         mocked_power_data,
     ):
+
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = (
+            self.boaviztapi_data_all_criteria
+        )
+        mocked_power_data.return_value = self.power_data
 
         metrics = get_metrics(
             self.start_time,
@@ -468,10 +483,6 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
             self.lifetime,
             self.fetch_hardware,
         )
-
-        mocked_read_hardware_data.return_value = self.hardware_data
-        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
-        mocked_power_data.return_value = self.power_data
 
         assert type(metrics) is dict
         assert "total_operational_emissions" in metrics
@@ -485,8 +496,8 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
         assert "electricity_carbon_intensity" in metrics
         assert "power_data" in metrics["raw_data"]
 
-    @patch("boagent.api.api.query_machine_impact_data")
     @patch("boagent.api.api.get_power_data")
+    @patch("boagent.api.api.query_machine_impact_data")
     @patch("boagent.api.api.read_hardware_data")
     def test_get_metrics_verbose_with_scaphandre_with_all_criteria(
         self,
@@ -496,6 +507,12 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
     ):
 
         criteria = CriteriaChoice.AllCriteria
+
+        mocked_read_hardware_data.return_value = self.hardware_data
+        mocked_query_machine_impact_data.return_value = (
+            self.boaviztapi_data_all_criteria
+        )
+        mocked_power_data.return_value = self.power_data
 
         metrics = get_metrics(
             self.start_time,
@@ -507,10 +524,6 @@ class GetMetricsVerboseWithScaphandreTest(TestCase):
             self.fetch_hardware,
             criteria=criteria,
         )
-
-        mocked_read_hardware_data.return_value = self.hardware_data
-        mocked_query_machine_impact_data.return_value = self.boaviztapi_data
-        mocked_power_data.return_value = self.power_data
 
         assert "calculated_emissions" in metrics
         for criteria in asdict(impact_criteria).values():

@@ -12,7 +12,7 @@ from boagent.api.exceptions import invalid_criteria_choice_error_msg
 from tests.mocks.mocks import (
     mock_boaviztapi_response_not_verbose,
     mock_boavizta_response_not_verbose_all_criteria,
-    mock_boavizta_response_verbose_all_criteria,
+    mock_boaviztapi_response_verbose_all_criteria,
     mock_get_metrics_verbose,
     mock_get_metrics_not_verbose,
     mock_get_metrics_not_verbose_all_criteria,
@@ -50,7 +50,7 @@ class ApiEndpointsTest(TestCase):
                 boaviztapi_response_file
             )
         with open(
-            mock_boavizta_response_verbose_all_criteria, "r"
+            mock_boaviztapi_response_verbose_all_criteria, "r"
         ) as boaviztapi_response_file:
             self.boaviztapi_response_verbose_all_criteria = json.load(
                 boaviztapi_response_file
