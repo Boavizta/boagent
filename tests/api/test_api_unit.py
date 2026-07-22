@@ -24,6 +24,7 @@ from boagent.api.models import WorkloadTime
 from boagent.api.utils import format_prometheus_output
 from tests.mocks.mocks import (
     MockLshw,
+    generate_configuration_server,
     hardware_data,
     mock_power_data,
     mock_hardware_data,
@@ -158,6 +159,9 @@ class FormatPrometheusOutput(TestCase):
 
         with open(mock_get_metrics_verbose, "r") as json_response:
             response_to_format = json.load(json_response)
+            response_to_format["raw_data"][
+                "hardware_data"
+            ] = generate_configuration_server()
 
         prometheus_output = format_prometheus_output(response_to_format, verbose=True)
 

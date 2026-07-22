@@ -1,5 +1,7 @@
 import os
 
+from boaviztapi_sdk.models.configuration_server import ConfigurationServer
+
 current_dir = os.path.dirname(__file__)
 mock_power_data = os.path.join(f"{current_dir}", "../mocks/power_data.json")
 mock_hardware_data = os.path.join(f"{current_dir}", "../mocks/hardware_data.json")
@@ -44,6 +46,32 @@ mock_sudo_lshw_data = os.path.join(f"{current_dir}", "../mocks/sudo_lshw_data.js
 mock_nvme_data = os.path.join(f"{current_dir}", "../mocks/nvme_data_sudo.json")
 hardware_cli = os.path.join(f"{current_dir}", "../../boagent/hardware/hardware_cli.py")
 hardware_data = os.path.join(f"{current_dir}", "../../boagent/api/hardware_data.json")
+
+
+def generate_configuration_server() -> ConfigurationServer:
+    hardware_data = {
+        "disk": [
+            {
+                "units": 1,
+                "logicalname": "/dev/nvme0n1",
+                "manufacturer": "toshiba",
+                "type": "ssd",
+                "capacity": 238,
+            }
+        ],
+        "cpu": {
+            "units": 1,
+            "name": "Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz",
+            "vendor": "Intel Corp.",
+            "core_units": 4,
+        },
+        "ram": [
+            {"units": 1, "manufacturer": "Micron", "capacity": 4},
+            {"units": 1, "manufacturer": "Micron", "capacity": 4},
+        ],
+    }
+    configuration_server = ConfigurationServer.model_validate(hardware_data)
+    return configuration_server
 
 
 class MockLshw:

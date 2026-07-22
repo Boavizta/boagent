@@ -82,7 +82,7 @@
   },
   "raw_data": {
     "hardware_data": {
-      "disks": [
+      "disk": [
         {
           "units": 1,
           "logicalname": "/dev/nvme0n1",
@@ -91,15 +91,13 @@
           "capacity": 238
         }
       ],
-      "cpus": [
-        {
+      "cpu": {
           "units": 1,
           "name": "Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz",
           "vendor": "Intel Corp.",
           "core_units": "4"
-        }
-      ],
-      "rams": [
+      },
+      "ram": [
         {
           "units": 1,
           "manufacturer": "Micron",
