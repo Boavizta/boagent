@@ -1,7 +1,7 @@
 from dataclasses import asdict
 import json
 import time
-from typing import Dict, Any
+from typing import Dict
 from boaviztapi_sdk.models.configuration_server import ConfigurationServer
 from boaviztapi_sdk.models.usage_server import UsageServer
 from fastapi import FastAPI, Response, Body, HTTPException
@@ -19,8 +19,6 @@ from boagent.api.utils import (
     format_prometheus_output,
     get_boavizta_api_client,
     ratio,
-    sort_ram,
-    sort_disks,
 )
 from boagent.api.types import (
     AveragePower,
@@ -299,7 +297,9 @@ def get_metrics(
     criteria: CriteriaChoice = CriteriaChoice.MainCriteria,
 ):
 
+    avg_power = None
     now: float = time.time()
+
     if start_time and end_time:
         ratio_value = (end_time - start_time) / (lifetime * SECONDS_IN_ONE_YEAR)
     else:
@@ -311,11 +311,9 @@ def get_metrics(
     if end_time - start_time >= lifetime * SECONDS_IN_ONE_YEAR:
         lifetime = (end_time - start_time) / float(SECONDS_IN_ONE_YEAR)
 
-    hardware_data = get_hardware_data(fetch_hardware)
+    configuration_server = get_hardware_data(fetch_hardware)
 
     res = {"emissions_calculation_data": {}}
-
-    avg_power = None
 
     if len(location) < 3 or location == "EEE":
         res["location_warning"] = {
@@ -332,7 +330,6 @@ def get_metrics(
                 power_data["warning"]
             )
 
-    configuration_server = ConfigurationServer.model_validate(hardware_data)
     usage_server = format_usage_request(
         start_time,
         end_time,
@@ -457,7 +454,7 @@ def get_metrics(
 
     if verbose:
         res["raw_data"] = {
-            "hardware_data": hardware_data,
+            "hardware_data": configuration_server,
             "resources_data": "not implemented yet",
             "boaviztapi_data": boaviztapi_data,
             "start_time": start_time,
@@ -485,7 +482,8 @@ def format_usage_request(
     lifetime: float = DEFAULT_LIFETIME * SECONDS_IN_ONE_YEAR,
     time_workload: TimeWorkload = None,
 ) -> UsageServer:
-    kwargs_usage = {"use_time_ratio": (end_time - start_time) / lifetime}
+    kwargs_usage = {}
+    kwargs_usage["use_time_ratio"] = (end_time - start_time) / lifetime
     if location:
         kwargs_usage["usage_location"] = location
     if avg_power:
@@ -544,7 +542,7 @@ def compute_average_consumption(power_data) -> float:
     return avg_host
 
 
-def get_hardware_data(fetch_hardware: bool):
+def get_hardware_data(fetch_hardware: bool) -> ConfigurationServer:
     data = {}
     if fetch_hardware:
         build_hardware_data()
@@ -553,7 +551,8 @@ def get_hardware_data(fetch_hardware: bool):
     except Exception:
         build_hardware_data()
         data = read_hardware_data()
-    return data
+    configuration_server = ConfigurationServer.model_validate(data)
+    return configuration_server
 
 
 def read_hardware_data() -> Dict:
@@ -600,23 +599,3 @@ def query_machine_impact_data(
         fd.close()
 
     return server_impact
-
-
-def generate_machine_configuration(hardware_data) -> Dict[str, Any]:
-    # Either delete or transfer this logic to hardware_cli / lshw
-    config = {
-        "cpu": {
-            "units": len(hardware_data["cpus"]),
-            "core_units": hardware_data["cpus"][1]["core_units"],
-            # "family": hardware_data['cpus'][1]['family']
-        },
-        "ram": sort_ram(hardware_data["rams"]),
-        "disk": sort_disks(hardware_data["disks"]),
-        "power_supply": (
-            hardware_data["power_supply"]
-            if "power_supply" in hardware_data
-            else {"units": 1}
-        ),
-        # TODO: if cpu is a small one, guess that power supply is light/average weight of a laptops power supply ?
-    }
-    return config

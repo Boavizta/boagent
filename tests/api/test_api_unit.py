@@ -5,6 +5,7 @@ from dataclasses import asdict
 from unittest import TestCase, TestSuite, TestLoader
 from unittest.mock import Mock, patch
 
+from boaviztapi_sdk.models.configuration_server import ConfigurationServer
 from boaviztapi_sdk.models.usage_server import UsageServer
 
 from boagent.api.api import (
@@ -51,8 +52,8 @@ class ReadHardwareDataTest(TestCase):
         build_hardware_data()
         data = read_hardware_data()
         assert type(data["cpu"]) is dict
-        assert type(data["ram"]) is dict
-        assert type(data["disk"]) is dict
+        assert type(data["ram"]) is list
+        assert type(data["disk"]) is list
 
     @patch("boagent.api.api.build_hardware_data")
     def test_get_hardware_data_with_fetch_hardware_false(self, mocked_build_hardware):
@@ -62,13 +63,13 @@ class ReadHardwareDataTest(TestCase):
 
         build_hardware_data()
         data = get_hardware_data(fetch_hardware=False)
-        assert type(data) is dict
+        assert type(data) is ConfigurationServer
         mocked_build_hardware.assert_not_called()
 
     def test_get_hardware_data_with_fetch_hardware_true(self):
 
         data = get_hardware_data(fetch_hardware=True)
-        assert type(data) is dict
+        assert type(data) is ConfigurationServer
 
     def tearDown(self) -> None:
         os.remove(hardware_data)

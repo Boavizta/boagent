@@ -56,20 +56,17 @@ class MockLshw:
                 "threads": 8,
             }
         }
-        self.memories = {
-            "rams": [
-                {"units": 1, "manufacturer": "Samsung", "capacity": 8},
-                {"units": 1, "manufacturer": "Kingston", "capacity": 16},
-            ]
-        }
-        self.disks = {
-            "disks": [
-                {
-                    "units": 1,
-                    "logicalname": "/dev/nvme0n1",
-                    "manufacturer": "samsung",
-                    "type": "ssd",
-                    "capacity": 476,
-                }
-            ],
-        }
+        self.memories = [
+            {"units": 1, "manufacturer": "Samsung", "capacity": 8},
+            {"units": 1, "manufacturer": "Kingston", "capacity": 16},
+        ]
+
+        self.disks = [
+            {
+                "units": 1,
+                "logicalname": "/dev/nvme0n1",
+                "manufacturer": "samsung",
+                "type": "ssd",
+                "capacity": 476,
+            }
+        ]
