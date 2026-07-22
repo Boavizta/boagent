@@ -9,6 +9,8 @@ class Process:
         self.validate_pid(pid)
         self._pid = pid
         self.process_info = self.get_process_info()
+        # ConfigurationServer from BoaviztAPI needs to be deserialized to a dictionary
+        self.hardware_data = dict(self.metrics_data["raw_data"]["hardware_data"])
 
     def validate_pid(self, value):
 
@@ -59,9 +61,9 @@ class Process:
 
     def get_total_ram_in_bytes(self):
 
-        ram_data = self.metrics_data["raw_data"]["hardware_data"]["rams"]
+        ram_data = list(self.hardware_data["ram"])
         total_ram_in_bytes = (
-            sum(ram_unit["capacity"] for ram_unit in ram_data) * 1073741824
+            sum(dict(ram_unit)["capacity"] for ram_unit in ram_data) * 1073741824
         )
 
         return total_ram_in_bytes
