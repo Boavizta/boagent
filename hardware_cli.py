@@ -13,7 +13,7 @@ def main(output_file):
     try:
         lshw = Lshw()
 
-        lshw_cpus = lshw.cpus
+        lshw_cpus = lshw.cpu
         lshw_ram = lshw.memories
         lshw_disks = lshw.disks
     except KeyError:

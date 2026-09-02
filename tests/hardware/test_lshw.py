@@ -28,14 +28,14 @@ class LshwTest(TestCase):
     )
     def setUp(self):
         self.lshw = Lshw()
-        self.cpu_data = self.lshw.cpus
+        self.cpu_data = self.lshw.cpu
         self.storage_data = self.lshw.disks
         self.ram_data = self.lshw.memories
 
     def test_read_get_hw_linux_cpu(self):
         cpu_data = self.lshw.get_hw_linux("cpu")
 
-        assert type(cpu_data) is list
+        assert type(cpu_data) is dict
 
     def test_read_get_hw_linux_storage(self):
         storage_data = self.lshw.get_hw_linux("storage")
@@ -49,31 +49,27 @@ class LshwTest(TestCase):
 
     def test_read_cpus_vendor(self):
 
-        for cpu in self.cpu_data:
-            assert "manufacturer" in cpu
-            assert type(cpu["manufacturer"]) is str
-            assert cpu["manufacturer"] == "Advanced Micro Devices [AMD]"
+        assert "manufacturer" in self.cpu_data
+        assert type(self.cpu_data["manufacturer"]) is str
+        assert self.cpu_data["manufacturer"] == "Advanced Micro Devices [AMD]"
 
     def test_read_cpus_name(self):
 
-        for cpu in self.cpu_data:
-            assert "name" in cpu
-            assert type(cpu["name"]) is str
-            assert cpu["name"] == "AMD Ryzen 5 5600H with Radeon Graphics"
+        assert "name" in self.cpu_data
+        assert type(self.cpu_data["name"]) is str
+        assert self.cpu_data["name"] == "AMD Ryzen 5 5600H with Radeon Graphics"
 
     def test_read_cpus_core_units(self):
 
-        for cpu in self.cpu_data:
-            assert "core_units" in cpu
-            assert type(cpu["core_units"]) is int
-            assert cpu["core_units"] == 6
+        assert "core_units" in self.cpu_data
+        assert type(self.cpu_data["core_units"]) is int
+        assert self.cpu_data["core_units"] == 6
 
-    def test_read_cpus_units(self):
+    def test_read_cpus_threads(self):
 
-        for cpu in self.cpu_data:
-            assert "units" in cpu
-            assert type(cpu["units"]) is int
-            assert cpu["units"] == 1
+        assert "threads" in self.cpu_data
+        assert type(self.cpu_data["threads"]) is int
+        assert self.cpu_data["threads"] == 12
 
     def test_read_check_disk_vendor_with_correct_model(self):
 
@@ -169,9 +165,10 @@ class LshwTest(TestCase):
     ):
         mocked_is_tool.return_value = False
 
-        with open(mock_lshw_data_disks, "r") as file, self.assertRaises(
-            Exception
-        ) as nvme_cli_exception:
+        with (
+            open(mock_lshw_data_disks, "r") as file,
+            self.assertRaises(Exception) as nvme_cli_exception,
+        ):
             data = load(file)
             self.lshw.find_storage(data)
 

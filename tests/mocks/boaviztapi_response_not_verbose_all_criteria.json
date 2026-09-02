@@ -1,0 +1,421 @@
+{
+  "impacts": {
+    "gwp": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "ap": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "ctue": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "CTUh_c": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "CTUh_nc": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "epf": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "epm": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "ept": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "fe": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "fw": {
+      "unit": "m3",
+      "description": "Net use of fresh water",
+      "embedded": "not implemented",
+      "use": "not implemented"
+    },
+    "gwppb": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "gwppf": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "gwpplu": {
+      "unit": "kgCO2eq",
+      "description": "Total climate change",
+      "embedded": {
+        "value": 1176,
+        "min": 1112,
+        "max": 1176,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 10000,
+        "min": 526.5,
+        "max": 34540
+      }
+    },
+    "ir": {
+      "unit": "kgSbeq",
+      "description": "Use of minerals and fossil ressources",
+      "embedded": {
+        "value": 0.1492,
+        "min": 0.1492,
+        "max": 0.1567,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 0.0016,
+        "min": 0.0003031,
+        "max": 0.008107
+      }
+    },
+    "lu": {
+      "unit": "kgSbeq",
+      "description": "Use of minerals and fossil ressources",
+      "embedded": {
+        "value": 0.1492,
+        "min": 0.1492,
+        "max": 0.1567,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 0.0016,
+        "min": 0.0003031,
+        "max": 0.008107
+      }
+    },
+    "mips": {
+      "unit": "kgSbeq",
+      "description": "Use of minerals and fossil ressources",
+      "embedded": {
+        "value": 0.1492,
+        "min": 0.1492,
+        "max": 0.1567,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 0.0016,
+        "min": 0.0003031,
+        "max": 0.008107
+      }
+    },
+    "odp": {
+      "unit": "kgSbeq",
+      "description": "Use of minerals and fossil ressources",
+      "embedded": {
+        "value": 0.1492,
+        "min": 0.1492,
+        "max": 0.1567,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 0.0016,
+        "min": 0.0003031,
+        "max": 0.008107
+      }
+    },
+    "pe": {
+      "unit": "kgSbeq",
+      "description": "Use of minerals and fossil ressources",
+      "embedded": {
+        "value": 0.1492,
+        "min": 0.1492,
+        "max": 0.1567,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 0.0016,
+        "min": 0.0003031,
+        "max": 0.008107
+      }
+    },
+    "pm": {
+      "unit": "kgSbeq",
+      "description": "Use of minerals and fossil ressources",
+      "embedded": {
+        "value": 0.1492,
+        "min": 0.1492,
+        "max": 0.1567,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 0.0016,
+        "min": 0.0003031,
+        "max": 0.008107
+      }
+    },
+    "pocp": {
+      "unit": "kgSbeq",
+      "description": "Use of minerals and fossil ressources",
+      "embedded": {
+        "value": 0.1492,
+        "min": 0.1492,
+        "max": 0.1567,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 0.0016,
+        "min": 0.0003031,
+        "max": 0.008107
+      }
+    },
+    "wu": {
+      "unit": "kgSbeq",
+      "description": "Use of minerals and fossil ressources",
+      "embedded": {
+        "value": 0.1492,
+        "min": 0.1492,
+        "max": 0.1567,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 0.0016,
+        "min": 0.0003031,
+        "max": 0.008107
+      }
+    },
+    "adp": {
+      "unit": "kgSbeq",
+      "description": "Use of minerals and fossil ressources",
+      "embedded": {
+        "value": 0.1492,
+        "min": 0.1492,
+        "max": 0.1567,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 0.0016,
+        "min": 0.0003031,
+        "max": 0.008107
+      }
+    },
+    "adpe": {
+      "unit": "kgSbeq",
+      "description": "Use of mineral ressources",
+      "embedded": {
+        "value": 0.1492,
+        "min": 0.1492,
+        "max": 0.1567,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 0.0016,
+        "min": 0.0003031,
+        "max": 0.008107
+      }
+    },
+    "adpf": {
+      "unit": "kgSbeq",
+      "description": "Use of fossil ressources",
+      "embedded": {
+        "value": 0.1492,
+        "min": 0.1492,
+        "max": 0.1567,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 0.0016,
+        "min": 0.0003031,
+        "max": 0.008107
+      }
+    },
+    "pe": {
+      "unit": "MJ",
+      "description": "Consumption of primary energy",
+      "embedded": {
+        "value": 15680,
+        "min": 14700,
+        "max": 15680,
+        "warnings": [
+          "End of life is not included in the calculation"
+        ]
+      },
+      "use": {
+        "value": 300000,
+        "min": 297.6,
+        "max": 14290000,
+        "warnings": [
+          "Uncertainty from technical characteristics is very important. Results should be interpreted with caution (see min and max values)"
+        ]
+      }
+    }
+  }
+}
