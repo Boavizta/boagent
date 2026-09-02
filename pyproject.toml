@@ -5,7 +5,7 @@ description = "Local API to collect and compute data on used device and running 
 authors = [{name = "Boavizta", email = "open-source@boavizta.org"}]
 license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.13,<4.0"
 dependencies = [
 "boaviztapi-sdk>=2.1.0",
 "fastapi>=0.110.0",

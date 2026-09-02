@@ -6,11 +6,14 @@ from boagent.api.api import (
 )
 from boagent.api.process import Process, InvalidPIDException
 from tests.mocks.mocks import (
+    generate_configuration_server,
     mock_hardware_data,
     mock_boaviztapi_response_not_verbose,
     mock_get_metrics_verbose,
     mock_get_metrics_verbose_no_hdd,
 )
+
+mock_configuration_server = generate_configuration_server()
 
 
 @patch("boagent.api.api.HARDWARE_FILE_PATH", mock_hardware_data)
@@ -31,6 +34,9 @@ class AllocateEmbeddedImpactForProcess(TestCase):
 
         with open(mock_get_metrics_verbose, "r") as get_metrics_verbose:
             self.get_metrics_verbose = json.load(get_metrics_verbose)
+            self.get_metrics_verbose["raw_data"][
+                "hardware_data"
+            ] = mock_configuration_server
 
         with open(mock_get_metrics_verbose_no_hdd, "r") as get_metrics_verbose_no_hdd:
             self.get_metrics_verbose_no_hdd = json.load(get_metrics_verbose_no_hdd)

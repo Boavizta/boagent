@@ -1,24 +1,39 @@
+from dataclasses import asdict
 import json
 import time
-from typing import Dict, Any, List, Union
+from typing import Dict
+from boaviztapi_sdk.models.configuration_server import ConfigurationServer
+from boaviztapi_sdk.models.usage_server import UsageServer
 from fastapi import FastAPI, Response, Body, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from boaviztapi_sdk.api.server_api import ServerApi
 from boaviztapi_sdk.models.server import Server
-from boagent.api.exceptions import InvalidPIDException
+from boagent.api.exceptions import (
+    InvalidPIDException,
+    invalid_criteria_choice_error_msg,
+)
 from boagent.hardware.lshw import Lshw
 from boagent.api.utils import (
     iso8601_or_timestamp_as_timestamp,
     format_prometheus_output,
     get_boavizta_api_client,
-    sort_ram,
-    sort_disks,
+    ratio,
+)
+from boagent.api.types import (
+    AveragePower,
+    CriteriaChoice,
+    MetricType,
+    TimeWorkload,
+)
+from boagent.api.data import (
+    impact_criteria,
+    units,
 )
 
 from boagent.api.config import Settings
 from boagent.api.process import Process
-from boagent.api.models import WorkloadTime, time_workload_example
+from boagent.api.models import time_workload_example
 from boagent.api.utils import configure_logger
 
 settings = Settings()
@@ -44,6 +59,7 @@ TAGS_METADATA = settings.tags_metadata
 def configure_static(app):
     app.mount("/assets", StaticFiles(directory=ASSETS_PATH), name="assets")
 
+
 def configure_app():
     app = FastAPI(
         title=PROJECT_NAME,
@@ -56,8 +72,10 @@ def configure_app():
     configure_static(app)
     return app
 
+
 app = configure_app()
 logger = configure_logger()
+
 
 @app.get("/info", tags=["info"])
 async def info():
@@ -74,7 +92,7 @@ async def info():
 @app.get("/web", tags=["web"], response_class=HTMLResponse)
 async def web():
     res = ""
-    with open("{}/index.html".format(PUBLIC_PATH), "r") as fd:
+    with open(f"{PUBLIC_PATH}/index.html", "r") as fd:
         res = fd.read()
     fd.close()
     return res
@@ -89,22 +107,42 @@ async def metrics(
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
+    criteria: str = CriteriaChoice.MainCriteria.value,
 ):
-    return Response(
-        content=format_prometheus_output(
-            get_metrics(
-                iso8601_or_timestamp_as_timestamp(start_time),
-                iso8601_or_timestamp_as_timestamp(end_time),
-                verbose,
-                location,
-                measure_power,
-                lifetime,
-                fetch_hardware,
-            ),
-            verbose,
-        ),
-        media_type="plain-text",
-    )
+    match criteria:
+        case CriteriaChoice.MainCriteria.value:
+            return Response(
+                content=format_prometheus_output(
+                    get_metrics(
+                        iso8601_or_timestamp_as_timestamp(start_time),
+                        iso8601_or_timestamp_as_timestamp(end_time),
+                        verbose,
+                        location,
+                        measure_power,
+                        lifetime,
+                        fetch_hardware,
+                    ),
+                    verbose,
+                ),
+                media_type="plain-text",
+            )
+        case CriteriaChoice.AllCriteria.value:
+            return Response(
+                content=format_prometheus_output(
+                    get_metrics(
+                        iso8601_or_timestamp_as_timestamp(start_time),
+                        iso8601_or_timestamp_as_timestamp(end_time),
+                        verbose,
+                        location,
+                        measure_power,
+                        lifetime,
+                        fetch_hardware,
+                        criteria=CriteriaChoice.AllCriteria,
+                    ),
+                    verbose,
+                ),
+                media_type="plain-text",
+            )
 
 
 @app.get("/query", tags=["query"])
@@ -116,6 +154,7 @@ async def query(
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
+    criteria: str = CriteriaChoice.MainCriteria.value,
 ):
     """
     start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
@@ -126,15 +165,32 @@ async def query(
     lifetime: Full lifetime of the machine to evaluate.\n
     fetch_hardware: Regenerate hardware.json file with current machine hardware or not.\n
     """
-    return get_metrics(
-        iso8601_or_timestamp_as_timestamp(start_time),
-        iso8601_or_timestamp_as_timestamp(end_time),
-        verbose,
-        location,
-        measure_power,
-        lifetime,
-        fetch_hardware,
-    )
+    match criteria:
+        case CriteriaChoice.MainCriteria.value:
+            return get_metrics(
+                iso8601_or_timestamp_as_timestamp(start_time),
+                iso8601_or_timestamp_as_timestamp(end_time),
+                verbose,
+                location,
+                measure_power,
+                lifetime,
+                fetch_hardware,
+            )
+        case CriteriaChoice.AllCriteria.value:
+            return get_metrics(
+                iso8601_or_timestamp_as_timestamp(start_time),
+                iso8601_or_timestamp_as_timestamp(end_time),
+                verbose,
+                location,
+                measure_power,
+                lifetime,
+                fetch_hardware,
+                criteria=CriteriaChoice.AllCriteria,
+            )
+        case _:
+            raise HTTPException(
+                status_code=400, detail=invalid_criteria_choice_error_msg
+            )
 
 
 @app.post("/query", tags=["query"])
@@ -146,9 +202,8 @@ async def query_with_time_workload(
     measure_power: bool = True,
     lifetime: float = DEFAULT_LIFETIME,
     fetch_hardware: bool = False,
-    time_workload: Union[dict[str, float], dict[str, List[WorkloadTime]]] = Body(
-        None, example=time_workload_example
-    ),
+    time_workload: TimeWorkload = Body(None, example=time_workload_example),
+    criteria: str = CriteriaChoice.MainCriteria.value,
 ):
     """
     start_time: Start time for evaluation. Accepts either UNIX Timestamp or ISO8601 date format. \n
@@ -161,16 +216,34 @@ async def query_with_time_workload(
     time_workload: Workload percentage for CPU and RAM. Can be a float or a list of dictionaries with format
     {"time_percentage": float, "load_percentage": float}
     """
-    return get_metrics(
-        iso8601_or_timestamp_as_timestamp(start_time),
-        iso8601_or_timestamp_as_timestamp(end_time),
-        verbose,
-        location,
-        measure_power,
-        lifetime,
-        fetch_hardware,
-        time_workload,
-    )
+    match criteria:
+        case CriteriaChoice.MainCriteria.value:
+            return get_metrics(
+                iso8601_or_timestamp_as_timestamp(start_time),
+                iso8601_or_timestamp_as_timestamp(end_time),
+                verbose,
+                location,
+                measure_power,
+                lifetime,
+                fetch_hardware,
+                time_workload,
+            )
+        case CriteriaChoice.AllCriteria.value:
+            return get_metrics(
+                iso8601_or_timestamp_as_timestamp(start_time),
+                iso8601_or_timestamp_as_timestamp(end_time),
+                verbose,
+                location,
+                measure_power,
+                lifetime,
+                fetch_hardware,
+                time_workload,
+                criteria=CriteriaChoice.AllCriteria,
+            )
+        case _:
+            raise HTTPException(
+                status_code=400, detail=invalid_criteria_choice_error_msg
+            )
 
 
 @app.get("/process_embedded_impacts", tags=["process"])
@@ -220,14 +293,17 @@ def get_metrics(
     measure_power: bool,
     lifetime: float,
     fetch_hardware: bool,
-    time_workload: Union[dict[str, float], dict[str, List[WorkloadTime]], None] = None,
+    time_workload: TimeWorkload = None,
+    criteria: CriteriaChoice = CriteriaChoice.MainCriteria,
 ):
 
+    avg_power = None
     now: float = time.time()
+
     if start_time and end_time:
-        ratio = (end_time - start_time) / (lifetime * SECONDS_IN_ONE_YEAR)
+        ratio_value = (end_time - start_time) / (lifetime * SECONDS_IN_ONE_YEAR)
     else:
-        ratio = 1.0
+        ratio_value = 1.0
     if start_time == 0.0:
         start_time = now - 3600
     if end_time == 0.0:
@@ -235,11 +311,9 @@ def get_metrics(
     if end_time - start_time >= lifetime * SECONDS_IN_ONE_YEAR:
         lifetime = (end_time - start_time) / float(SECONDS_IN_ONE_YEAR)
 
-    hardware_data = get_hardware_data(fetch_hardware)
+    configuration_server = get_hardware_data(fetch_hardware)
 
     res = {"emissions_calculation_data": {}}
-
-    avg_power = None
 
     if len(location) < 3 or location == "EEE":
         res["location_warning"] = {
@@ -252,97 +326,135 @@ def get_metrics(
         power_data = get_power_data(start_time, end_time)
         avg_power = power_data["avg_power"]
         if "warning" in power_data:
-            res["emissions_calculation_data"][
-                "energy_consumption_warning"
-            ] = power_data["warning"]
+            res["emissions_calculation_data"]["energy_consumption_warning"] = (
+                power_data["warning"]
+            )
 
-    boaviztapi_data = query_machine_impact_data(
-        model={},
-        configuration=hardware_data,
-        usage=format_usage_request(
-            start_time, end_time, avg_power, location, lifetime * SECONDS_IN_ONE_YEAR,time_workload
-        ),
+    usage_server = format_usage_request(
+        start_time,
+        end_time,
+        avg_power,
+        location,
+        lifetime * SECONDS_IN_ONE_YEAR,
+        time_workload,
     )
 
+    if criteria == CriteriaChoice.MainCriteria:
+        boaviztapi_data = query_machine_impact_data(
+            configuration=configuration_server,
+            usage=usage_server,
+        )
+    elif criteria == CriteriaChoice.AllCriteria:
+        boaviztapi_data = query_machine_impact_data(
+            configuration=configuration_server,
+            usage=usage_server,
+            criteria=criteria,
+        )
+
     if measure_power:
-        res["total_operational_emissions"] = {
-            "value": boaviztapi_data["impacts"]["gwp"]["use"],
-            "description": "GHG emissions related to usage, from start_time to end_time.",
-            "type": "gauge",
-            "unit": "kg CO2eq",
-            "long_unit": "kilograms CO2 equivalent",
-        }
-        res["total_operational_abiotic_resources_depletion"] = {
-            "value": boaviztapi_data["impacts"]["adp"]["use"],
-            "description": "Abiotic Resources Depletion (minerals & metals, ADPe) due to the usage phase.",
-            "type": "gauge",
-            "unit": "kgSbeq",
-            "long_unit": "kilograms Antimony equivalent",
-        }
-        res["total_operational_primary_energy_consumed"] = {
-            "value": boaviztapi_data["impacts"]["pe"]["use"],
-            "description": "Primary Energy consumed due to the usage phase.",
-            "type": "gauge",
-            "unit": "MJ",
-            "long_unit": "Mega Joules",
-        }
-        res["start_time"] = {
-            "value": start_time,
-            "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
-            "type": "counter",
-            "unit": "s",
-            "long_unit": "seconds",
-        }
-        res["end_time"] = {
-            "value": end_time,
-            "description": "End time for the evaluation, in timestamp format (seconds since 1970)",
-            "type": "counter",
-            "unit": "s",
-            "long_unit": "seconds",
-        }
-        res["average_power_measured"] = {
-            "value": avg_power,
-            "description": "Average power measured from start_time to end_time",
-            "type": "gauge",
-            "unit": "W",
-            "long_unit": "Watts",
+        res["calculated_emissions"] = {
+            "value": boaviztapi_data["impacts"][impact_criteria.gwp.key]["embedded"][
+                "value"
+            ]
+            * ratio_value
+            + boaviztapi_data["impacts"][impact_criteria.gwp.key]["use"]["value"],
+            "description": "Total Green House Gas emissions calculated for manufacturing and usage phases, between "
+            "start_time and end_time",
+            "type": MetricType.Gauge.value,
+            "unit": units.co2_equivalent.short_form,
+            "long_unit": units.co2_equivalent.long_form,
         }
 
-    """ res["calculated_emissions"] = {
-        "value": boaviztapi_data["impacts"]["gwp"]["value"] * ratio
-        + boaviztapi_data["impacts"]["gwp"]["use"]["value"],
-        "description": "Total Green House Gas emissions calculated for manufacturing and usage phases, between "
-        "start_time and end_time",
-        "type": "gauge",
-        "unit": "kg CO2eq",
-        "long_unit": "kilograms CO2 equivalent",
-    } """
+    if criteria == CriteriaChoice.MainCriteria:
+        main_criteria = impact_criteria.main_criteria()
 
-    res["embedded_emissions"] = {
-        "value": boaviztapi_data["impacts"]["gwp"]["embedded"]["value"] * ratio,
-        "description": "Embedded carbon emissions (manufacturing phase)",
-        "type": "gauge",
-        "unit": "kg CO2eq",
-        "long_unit": "kilograms CO2 equivalent",
-    }
-    res["embedded_abiotic_resources_depletion"] = {
-        "value": boaviztapi_data["impacts"]["adp"]["embedded"]["value"] * ratio,
-        "description": "Embedded abiotic ressources consumed (manufacturing phase)",
-        "type": "gauge",
-        "unit": "kg Sbeq",
-        "long_unit": "kilograms ADP equivalent",
-    }
-    res["embedded_primary_energy"] = {
-        "value": boaviztapi_data["impacts"]["pe"]["embedded"]["value"] * ratio,
-        "description": "Embedded primary energy consumed (manufacturing phase)",
-        "type": "gauge",
-        "unit": "MJ",
-        "long_unit": "Mega Joules",
-    }
+        for main_criterion in main_criteria:
+            res[main_criterion["boagent_embedded_key"]] = {
+                "value": ratio(
+                    boaviztapi_data["impacts"][main_criterion["key"]]["embedded"][
+                        "value"
+                    ],
+                    ratio_value,
+                ),
+                "description": main_criterion["embedded"],
+                "type": MetricType.Gauge.value,
+                "unit": main_criterion["unit"]["short_form"],
+                "long_unit": main_criterion["unit"]["long_form"],
+            }
+            if measure_power:
+
+                res[main_criterion["boagent_use_key"]] = {
+                    "value": boaviztapi_data["impacts"][main_criterion["key"]]["use"],
+                    "description": main_criterion["use_stage"],
+                    "type": MetricType.Gauge.value,
+                    "unit": main_criterion["unit"]["short_form"],
+                    "long_unit": main_criterion["unit"]["long_form"],
+                }
+
+        if measure_power:
+            res["start_time"] = {
+                "value": start_time,
+                "description": "Start time for the evaluation, in timestamp format (seconds since 1970)",
+                "type": MetricType.Counter.value,
+                "unit": units.seconds.short_form,
+                "long_unit": units.seconds.long_form,
+            }
+            res["end_time"] = {
+                "value": end_time,
+                "description": "End time for the evaluation, in timestamp format (seconds since 1970)",
+                "type": MetricType.Counter.value,
+                "unit": units.seconds.short_form,
+                "long_unit": units.seconds.long_form,
+            }
+            res["average_power_measured"] = {
+                "value": avg_power,
+                "description": "Average power measured from start_time to end_time",
+                "type": MetricType.Gauge.value,
+                "unit": units.watts.short_form,
+                "long_unit": units.watts.long_form,
+            }
+    elif criteria == CriteriaChoice.AllCriteria:
+        for value in asdict(impact_criteria).values():
+            # Embedded and use impacts are not implemented for all impact criteria in BoaviztAPI.
+            # BoaviztAPI returns no 'value' attribute to the 'embedded' or 'use' object,
+            # and returns 'not implemented' in that case.
+
+            boaviztapi_key = value["key"]
+            if "value" in boaviztapi_data["impacts"][boaviztapi_key]["embedded"]:
+                impact_value = ratio(
+                    boaviztapi_data["impacts"][boaviztapi_key]["embedded"]["value"],
+                    ratio_value,
+                )
+            else:
+                impact_value = boaviztapi_data["impacts"][boaviztapi_key]["embedded"]
+
+            res[value["boagent_embedded_key"]] = {
+                "value": impact_value,
+                "description": value["embedded"],
+                "type": MetricType.Gauge.value,
+                "unit": value["unit"]["short_form"],
+                "long_unit": value["unit"]["long_form"],
+            }
+
+            if measure_power:
+                if "value" in boaviztapi_data["impacts"][boaviztapi_key]["use"]:
+                    impact_value = boaviztapi_data["impacts"][boaviztapi_key]["use"][
+                        "value"
+                    ]
+                else:
+                    impact_value = boaviztapi_data["impacts"][boaviztapi_key]["use"]
+
+                res[value["boagent_use_key"]] = {
+                    "value": impact_value,
+                    "description": value["use_stage"],
+                    "type": MetricType.Gauge.value,
+                    "unit": value["unit"]["short_form"],
+                    "long_unit": value["unit"]["long_form"],
+                }
 
     if verbose:
         res["raw_data"] = {
-            "hardware_data": hardware_data,
+            "hardware_data": configuration_server,
             "resources_data": "not implemented yet",
             "boaviztapi_data": boaviztapi_data,
             "start_time": start_time,
@@ -350,12 +462,10 @@ def get_metrics(
         }
         res["electricity_carbon_intensity"] = {
             "value": boaviztapi_data["verbose"]["gwp_factor"]["value"],
-            "description": "Carbon intensity of the electricity mix. Mix considered : {}".format(
-                location
-            ),
-            "type": "gauge",
-            "unit": "kg CO2eq / kWh",
-            "long_unit": "Kilograms CO2 equivalent per KiloWattHour",
+            "description": f"Carbon intensity of the electricity mix. Mix considered : {location}",
+            "type": MetricType.Gauge.value,
+            "unit": units.co2_equivalent_per_khw.short_form,
+            "long_unit": units.co2_equivalent_per_khw.long_form,
         }
 
         if measure_power:
@@ -367,19 +477,21 @@ def get_metrics(
 def format_usage_request(
     start_time: float,
     end_time: float,
-    avg_power: Union[float, None] = None,
+    avg_power: AveragePower = None,
     location: str = "EEE",
     lifetime: float = DEFAULT_LIFETIME * SECONDS_IN_ONE_YEAR,
-    time_workload: Union[dict[str, float], dict[str, List[WorkloadTime]], None] = None,
-):
-    kwargs_usage = { "use_time_ratio": (end_time - start_time) / lifetime }
+    time_workload: TimeWorkload = None,
+) -> UsageServer:
+    kwargs_usage = {}
+    kwargs_usage["use_time_ratio"] = (end_time - start_time) / lifetime
     if location:
         kwargs_usage["usage_location"] = location
     if avg_power:
         kwargs_usage["avg_power"] = avg_power
     if time_workload:
         kwargs_usage["time_workload"] = time_workload
-    return kwargs_usage
+    usage_server = UsageServer.model_validate(kwargs_usage)
+    return usage_server
 
 
 def get_power_data(start_time, end_time):
@@ -391,15 +503,15 @@ def get_power_data(start_time, end_time):
         try:
             data = json.loads(formatted_data)
         except json.decoder.JSONDecodeError as e:
-            logger.debug("formatted_data: {}".format(formatted_data))
-            logger.debug("Catched JSONDecodeError: '{}'".format(e))
+            logger.debug(f"formatted_data: {formatted_data}")
+            logger.debug(f"Catched JSONDecodeError: '{e}'")
             logger.debug("Retrying reading power_data")
             try:
                 formatted_data = f"{raw_data[:-1]}]"
                 data = json.loads(formatted_data)
             except json.decoder.JSONDecodeError as e2:
-                logger.debug("formatted_data: {}".format(formatted_data))
-                logger.debug("Catched JSONDecodeError: '{}'".format(e2))
+                logger.debug(f"formatted_data: {formatted_data}")
+                logger.debug(f"Catched JSONDecodeError: '{e2}'")
                 logger.debug("Retrying reading power_data")
                 formatted_data = f"{raw_data[:-2]}]"
                 data = json.loads(formatted_data)
@@ -430,7 +542,7 @@ def compute_average_consumption(power_data) -> float:
     return avg_host
 
 
-def get_hardware_data(fetch_hardware: bool):
+def get_hardware_data(fetch_hardware: bool) -> ConfigurationServer:
     data = {}
     if fetch_hardware:
         build_hardware_data()
@@ -439,7 +551,8 @@ def get_hardware_data(fetch_hardware: bool):
     except Exception:
         build_hardware_data()
         data = read_hardware_data()
-    return data
+    configuration_server = ConfigurationServer.model_validate(data)
+    return configuration_server
 
 
 def read_hardware_data() -> Dict:
@@ -452,64 +565,37 @@ def build_hardware_data():
     lshw = Lshw()
     with open(HARDWARE_FILE_PATH, "w") as hardware_file:
         hardware_data = {}
-        hardware_data["disks"] = lshw.disks
-        hardware_data["cpus"] = lshw.cpus
-        hardware_data["rams"] = lshw.memories
+        hardware_data["disk"] = lshw.disks
+        hardware_data["cpu"] = lshw.cpu
+        hardware_data["ram"] = lshw.memories
         json.dump(hardware_data, hardware_file)
 
 
 def query_machine_impact_data(
-    model: dict[str, str],
-    configuration: dict[str, dict[str, int]],
-    usage: dict[str, Any],
+    configuration: ConfigurationServer,
+    usage: UsageServer,
+    criteria: CriteriaChoice = CriteriaChoice.MainCriteria,
 ) -> dict:
     server_api = ServerApi(get_boavizta_api_client())
 
-    server_impact = None
-
-    with open("boagent_request.log", 'a') as fd:
-        fd.write("{}\n".format(str(usage)))
-        fd.write("{}\n".format(str(configuration)))
+    with open("boagent_request.log", "a") as fd:
+        fd.write(f"{str(usage)}\n")
+        fd.write(f"{str(configuration)}\n".format(str(configuration)))
         fd.close()
 
-    if configuration:
-        server = Server(usage=usage, configuration=configuration)
+    server = Server(usage=usage, configuration=configuration)
+    if criteria == CriteriaChoice.MainCriteria:
         server_impact = server_api.server_impact_from_configuration_v1_server_post(
-            server=server#,
-            #duration=(usage["hours_use_time"])
+            server=server
         )
-    elif model:
-        # server = Server(usage=usage, model=model)
-        # TO IMPLEMENT
-        # This conditional was based on a previous version of BoaviztAPI, where a server model could
-        # be sent to /v1/server through a GET method. BoaviztAPI now expects an archetype string to
-        # return a prerecorded impact from an asset.
-        server_impact = server_api.server_impact_from_model_v1_server_get(
-            archetype="dellR740"
+    elif criteria == CriteriaChoice.AllCriteria:
+        criteria_keys = impact_criteria.criteria_keys()
+        server_impact = server_api.server_impact_from_configuration_v1_server_post(
+            server=server, criteria=criteria_keys
         )
 
-    with open("boagent_answer.log", 'a') as fd:
-        fd.write("{}\n".format(str(server_impact)))
+    with open("boagent_answer.log", "a") as fd:
+        fd.write(f"{str(server_impact)}\n")
         fd.close()
 
     return server_impact
-
-
-def generate_machine_configuration(hardware_data) -> Dict[str, Any]:
-    # Either delete or transfer this logic to hardware_cli / lshw
-    config = {
-        "cpu": {
-            "units": len(hardware_data["cpus"]),
-            "core_units": hardware_data["cpus"][1]["core_units"],
-            # "family": hardware_data['cpus'][1]['family']
-        },
-        "ram": sort_ram(hardware_data["rams"]),
-        "disk": sort_disks(hardware_data["disks"]),
-        "power_supply": (
-            hardware_data["power_supply"]
-            if "power_supply" in hardware_data
-            else {"units": 1}
-        ),
-        # TODO: if cpu is a small one, guess that power supply is light/average weight of a laptops power supply ?
-    }
-    return config

@@ -4,10 +4,10 @@ from dateutil import parser
 from boagent.api.config import Settings
 from os import PathLike
 import logging
-import logging.handlers
 
 settings = Settings()
 BOAVIZTAPI_ENDPOINT = settings.boaviztapi_endpoint
+
 
 def configure_logger():
     logger = logging.getLogger("boagent")
@@ -19,7 +19,9 @@ def configure_logger():
     logger.addHandler(stream_handler)
     return logger
 
+
 logger = configure_logger()
+
 
 def sort_ram(items: list):
     hash_map = {}
@@ -38,24 +40,26 @@ def sort_ram(items: list):
                 "units": 1,
                 "capacity": r["capacity"],
             }
-    return [v for k, v in hash_map.items()]
+    return [v for v in hash_map.values()]
 
 
 def sort_disks(items: list):
     hash_map = {}
     for r in items:
-        if "{}:{}:{}".format(r["capacity"], r["manufacturer"], r["type"]) in hash_map:
-            hash_map["{}:{}:{}".format(r["capacity"], r["manufacturer"], r["type"])][
-                "units"
-            ] += 1
+        capacity = r["capacity"]
+        manufacturer = r["manufacturer"]
+        disk_type = r["type"]
+        disk = f"{capacity}:{manufacturer}:{disk_type}"
+        if disk in hash_map:
+            hash_map[disk]["units"] += 1
         else:
-            hash_map["{}:{}:{}".format(r["capacity"], r["manufacturer"], r["type"])] = {
+            hash_map[disk] = {
                 "units": 1,
                 "manufacturer": r["manufacturer"],
                 "capacity": r["capacity"],
                 "type": r["type"],
             }
-    return [v for k, v in hash_map.items()]
+    return [v for v in hash_map.values()]
 
 
 def get_boavizta_api_client():
@@ -77,17 +81,17 @@ def iso8601_or_timestamp_as_timestamp(iso_time: str) -> float:
         dt = None
         try:
             dt = parser.parse(iso_time)
-            logger.debug("{} is an iso 8601 datetime".format(iso_time))
+            logger.debug(f"{iso_time} is an iso 8601 datetime")
         except Exception as e:
-            logger.debug("{} is not an iso 8601 datetime".format(iso_time))
-            logger.debug("Exception : {}".format(e))
+            logger.debug(f"{iso_time} is not an iso 8601 datetime")
+            logger.debug(f"Exception : {e}")
             try:
                 dt = datetime.fromtimestamp(int(round(float(iso_time))))
-                logger.debug("{} is a timestamp".format(iso_time))
+                logger.debug(f"{iso_time} is a timestamp")
             except Exception as e:
-                logger.debug("{} is not a timestamp".format(iso_time))
-                logger.debug("Exception : {}".format(e))
-                logger.debug("Parser would give : {}".format(parser.parse(iso_time)))
+                logger.debug(f"{iso_time} is not a timestamp")
+                logger.debug(f"Exception : {e}")
+                logger.debug(f"Parser would give : {parser.parse(iso_time)}")
         finally:
             if dt:
                 return dt.timestamp()
@@ -101,27 +105,22 @@ def format_prometheus_output(res, verbose: bool, labels: dict = {}):
         if "value" in v and "type" in v:
             if "description" not in v:
                 v["description"] = "TODO: define me"
-            if type(v["value"]) is float:
+            value_type = type(v["value"])
+            if value_type is float or value_type is int or value_type is str:
                 response += format_prometheus_metric(
-                    "boagent_{}".format(k),
-                    "{}. {}".format(
-                        v["description"],
-                        "In {} ({}).".format(v["long_unit"], v["unit"]),
-                    ),
+                    f"boagent_{k}",
+                    f"{v['description']}. In {v['long_unit']} ({v['unit']})",
                     v["type"],
                     v["value"],
-                    labels
+                    labels,
                 )
-            if type(v["value"]) is dict:
+            if value_type is dict:
                 response += format_prometheus_metric(
-                    "boagent_{}".format(k),
-                    "{}. {}".format(
-                        v["description"],
-                        "In {} ({}).".format(v["long_unit"], v["unit"]),
-                    ),
+                    f"boagent_{k}",
+                    f"{v['description']}. In {v['long_unit']} ({v['unit']})",
                     v["type"],
                     v["value"]["value"],
-                    labels
+                    labels,
                 )
 
         else:
@@ -133,14 +132,11 @@ def format_prometheus_output(res, verbose: bool, labels: dict = {}):
                         if "description" not in y:
                             y["description"] = "TODO: define me"
                         response += format_prometheus_metric(
-                            "boagent_{}_{}".format(k, x),
-                            "{}. {}".format(
-                                y["description"],
-                                "In {} ({}).".format(y["long_unit"], y["unit"]),
-                            ),
+                            f"boagent_{k}_{x}",
+                            f"{y['description']}. In {y['long_unit']} ({y['unit']})",
                             y["type"],
                             y["value"],
-                            labels
+                            labels,
                         )
         if verbose:
             if "boaviztapi_data" in v:
@@ -152,16 +148,23 @@ def format_prometheus_output(res, verbose: bool, labels: dict = {}):
                             if value == "warnings":
                                 pass
                             else:
-                                response += format_prometheus_metric(
-                                    "boaviztapi_{}".format(f"{impact_name}_total_impact_{value}"),
-                                    "{}. {}".format(
-                                        impact_items["description"],
-                                        "In {}".format(impact_items["unit"]),
-                                    ),
-                                    "{}".format("gauge"),
-                                    "{}".format(f"{impact_items['embedded'][value]}"),
-                                    labels
-                                )
+                                # Embedded impact might not be implemented in BoaviztAPI for an impact criterion.
+                                if "value" in impact_items["embedded"]:
+                                    response += format_prometheus_metric(
+                                        f"boaviztapi_{impact_name}_total_impact_{value}",
+                                        f"{impact_items['description']}. In {impact_items['unit']}",
+                                        "gauge",
+                                        f"{impact_items['embedded']['value']}",
+                                        labels,
+                                    )
+                                else:
+                                    response += format_prometheus_metric(
+                                        f"boaviztapi_{impact_name}_total_impact_{value}",
+                                        f"{impact_items['description']}. In {impact_items['unit']}",
+                                        "gauge",
+                                        f"{impact_items['embedded']}",
+                                        labels,
+                                    )
 
                 for component_name, component_impacts in v["boaviztapi_data"][
                     "verbose"
@@ -169,26 +172,20 @@ def format_prometheus_output(res, verbose: bool, labels: dict = {}):
                     formatted_component_name = component_name.lower().replace("-", "_")
                     if "impacts" in component_impacts:
                         for impact, items in component_impacts["impacts"].items():
-                            for component_embedded_impact_metric, value in items[
-                                "embedded"
-                            ].items():
-                                if component_embedded_impact_metric == "warnings":
-                                    pass
-                                else:
-                                    response += format_prometheus_metric(
-                                        "{}".format(
+                            if "value" in items["embedded"]:
+                                for component_embedded_impact_metric, value in items[
+                                    "embedded"
+                                ].items():
+                                    if component_embedded_impact_metric == "warnings":
+                                        pass
+                                    else:
+                                        response += format_prometheus_metric(
                                             f"boaviztapi_{formatted_component_name}_{impact}_embedded_impact_{component_embedded_impact_metric}"
-                                        ),
-                                        "{}. {}".format(
-                                            items["description"],
-                                            "In {}".format(items["unit"]),
-                                        ),
-                                        "{}".format("gauge"),
-                                        "{}".format(
+                                            f"{items['description']}. In {items['unit']}",
+                                            "gauge",
                                             f"{value}",
-                                        ),
-                                        labels
-                                    )
+                                            labels,
+                                        )
 
     return response
 
@@ -199,20 +196,12 @@ def format_prometheus_metric(
 
     labels_str = "{"
     for k, v in labels.items():
-        labels_str += "{}=\"{}\"".format(k, v)
+        labels_str += f'{k}="{v}"'
     labels_str += "}"
-    response = """# HELP {} {}
-# TYPE {} {}
-{}{} {}
-""".format(
-        metric_name,
-        metric_description,
-        metric_name,
-        metric_type,
-        metric_name,
-        labels_str,
-        metric_value,
-    )
+    response = f"""# HELP {metric_name} {metric_description}
+               # TYPE {metric_name} {metric_type}
+               {metric_name}{labels_str} {metric_value}
+               """
     return response
 
 
@@ -239,3 +228,8 @@ def format_scaphandre_json(file: str | PathLike) -> str:
             '{"host"', ',{"host"'
         ).replace(',{"host"', '{"host"', 1)
     return formatted_scaphandre_json
+
+
+def ratio(value: int | float, ratio: int | float):
+    ratioed_value = value * ratio
+    return ratioed_value
